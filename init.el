@@ -115,7 +115,8 @@ even if it does not countain a vcs subdir.")
 	  ("e" . "eval")
 	  ("w" . "windows")
 	  ("h" . "help")
-	  ("i" . "ivy")))
+	  ("i" . "ivy")
+	  ("g" . "git")))
 
   ;; Defines general definers for each prefix in mars-general-prefixes.
   (eval `(progn
@@ -157,9 +158,10 @@ even if it does not countain a vcs subdir.")
 ;; Remaps common emacs functions
 (use-package counsel
   :demand t
-  :straight (:host github :repo "abo-abo/swiper"
-		   :fork (:repo "qleguennec/swiper")
-		   :files ("counsel.el"))
+  :straight
+  (:host github :repo "abo-abo/swiper"
+	 :fork (:repo "qleguennec/swiper")
+	 :files ("counsel.el"))
 
   :config
   (counsel-mode 1)
@@ -203,7 +205,9 @@ even if it does not countain a vcs subdir.")
   (setq magit-display-buffer-function 'magit-display-buffer-same-window-except-diff-v1)
 
   :general
-  (mars-map/projects "g" 'magit-status)
+  (mars-map/git
+    "g" 'magit-status
+    "s" 'magit-stage)
   (:keymaps 'magit-mode-map
 	    "SPC" nil))
 
@@ -219,22 +223,24 @@ even if it does not countain a vcs subdir.")
 		   :fork (:repo "qleguennec/counsel-projectile"))
 
   :config
-  (add-to-list 'projectile-globally-ignored-directories "straight/")
+  (add-to-list 'projectile-globally-ignored-directories '("straight/" "node_modules/"))
 
   (defun mars-projectile-refresh-projects ()
     "Clear projectile known projects and add to known projects directories in mars-workspace
 (even if they are not under vcs), any vcs directory in HOME, and straight repos"
     (interactive)
     (projectile-clear-known-projects)
-    (setq projectile-known-projects)
-    (append
-     (directory-files mars-workspace t directory-files-no-dot-files-regexp t)
-     (cl-remove-if
-      (lambda (dir)
-	(eq 'none (projectile-project-vcs dir)))
-      (directory-files "~/" t directory-files-no-dot-files-regexp t))
-     (directory-files (concat user-emacs-directory "/straight/repos") t directory-files-no-dot-files-regexp t)
-     (projectile-save-known-projects)))
+    (setq projectile-known-projects
+	  (append
+	   (directory-files mars-workspace t directory-files-no-dot-files-regexp t)
+	   (cl-remove-if
+	    (lambda (dir)
+	      (eq 'none (projectile-project-vcs dir)))
+	    (directory-files "~/" t directory-files-no-dot-files-regexp t))
+	   (directory-files (concat user-emacs-directory "/straight/repos") t directory-files-no-dot-files-regexp t)))
+    (projectile-save-known-projects))
+
+  (unless projectile-known-projects (mars-projectile-refresh-projects))
 
   ;; Open magit when switching project
   (setq counsel-projectile-switch-project-action #'counsel-projectile-switch-project-action-vc)
@@ -294,11 +300,15 @@ even if it does not countain a vcs subdir.")
 
 ;; Simpler lisp editing
 
+(use-package lispy
+  :hook (emacs-lisp-mode . lispy-mode))
+
 (use-package lispyville
   :hook (emacs-lisp-mode . lispyville-mode)
   :config (lispyville-set-key-theme '(slurp/barf-lispy)))
 
 (use-package parinfer
+  :disabled
   :config (setq parinfer-extensions '(defaults pretty-parens evil lispy))
   :hook (emacs-lisp-mode . parinfer-mode))
 
@@ -321,6 +331,12 @@ even if it does not countain a vcs subdir.")
   (evil-snipe-override-mode 1)
   (setq evil-snipe-scope 'buffer)
   (setq evil-snipe-repeat-scope 'buffer))
+
+;; Language packages
+
+;; javascript
+(use-package rjsx-mode
+  :init (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode)))
 
 ;; UI
 
