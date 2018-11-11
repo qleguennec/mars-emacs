@@ -115,18 +115,18 @@ even if it does not countain a vcs subdir.")
 	  ("e" . "eval")
 	  ("w" . "windows")
 	  ("h" . "help")
-	  ("i" . "ivy")
-	  ("s" . "snipe")))
+	  ("i" . "ivy")))
 
   ;; Defines general definers for each prefix in mars-general-prefixes.
-  (eval
-   `(progn ,@(mapcar (lambda (prefix)
-		       (let* ((section (cdr prefix))
-			      (definer (intern (concat "mars-map/" section))))
-			 `(general-create-definer ,definer
-			    :states '(normal motion emacs)
-			    :prefix ,(concat "SPC " (car prefix)))))
-		     mars-general-prefixes)))
+  (eval `(progn
+	   ,@(mapcar
+	      (lambda (prefix)
+		(let* ((section (cdr prefix))
+		       (definer (intern (concat "mars-map/" section))))
+		  `(general-create-definer ,definer
+		     :states '(normal motion emacs)
+		     :prefix ,(concat "SPC " (car prefix)))))
+	      mars-general-prefixes)))
 
   (mars-map/buffers
     "s" 'save-buffer
@@ -160,6 +160,7 @@ even if it does not countain a vcs subdir.")
   :straight (:host github :repo "abo-abo/swiper"
 		   :fork (:repo "qleguennec/swiper")
 		   :files ("counsel.el"))
+
   :config
   (counsel-mode 1)
 
@@ -188,8 +189,8 @@ even if it does not countain a vcs subdir.")
   :demand t
   :after counsel
   :config
-  (setq counsel-describe-function-function #'helpful-function
-	counsel-describe-variable-function #'helpful-variable)
+  (setq counsel-describe-function-function #'helpful-function)
+  counsel-describe-variable-function #'helpful-variable
 
   :general
   (mars-map/help
@@ -230,8 +231,8 @@ even if it does not countain a vcs subdir.")
      (directory-files mars-workspace t directory-files-no-dot-files-regexp t)
      (cl-remove-if
       (lambda (dir)
-	(eq 'none (projectile-project-vcs dir)
-	    (directory-files "~/" t directory-files-no-dot-files-regexp t))))
+	(eq 'none (projectile-project-vcs dir)))
+      (directory-files "~/" t directory-files-no-dot-files-regexp t))
      (directory-files (concat user-emacs-directory "/straight/repos") t directory-files-no-dot-files-regexp t)
      (projectile-save-known-projects)))
 
@@ -292,16 +293,14 @@ even if it does not countain a vcs subdir.")
 	    "V" 'er/contract-region))
 
 ;; Simpler lisp editing
-(use-package lispy
-  :hook (emacs-lisp-mode . lispy-mode))
 
 (use-package lispyville
-  :hook (lispy-mode . lispyville-mode)
-  :config (lispyville-set-key-theme '(operators slurp/barf-lispy)))
+  :hook (emacs-lisp-mode . lispyville-mode)
+  :config (lispyville-set-key-theme '(slurp/barf-lispy)))
 
-;; Format code before save
-(use-package format-all
-  :hook (emacs-lisp-mode . format-all-mode))
+(use-package parinfer
+  :config (setq parinfer-extensions '(defaults pretty-parens evil lispy))
+  :hook (emacs-lisp-mode . parinfer-mode))
 
 ;; Completion
 (use-package company
@@ -317,7 +316,18 @@ even if it does not countain a vcs subdir.")
     "J" 'avy-goto-line-below
     "K" 'avy-goto-line-above))
 
+(use-package evil-snipe
+  :config
+  (evil-snipe-override-mode 1)
+  (setq evil-snipe-scope 'buffer)
+  (setq evil-snipe-repeat-scope 'buffer))
+
 ;; UI
+
+;; Highlight lisp expressions
+(show-paren-mode 1)
+(setq show-paren-style 'expression)
+
 (use-package doom-themes
   :demand t
   :config (load-theme 'doom-city-lights 'confirm))
@@ -333,6 +343,10 @@ even if it does not countain a vcs subdir.")
 (use-package solaire-mode
   :demand t
   :config (add-hook 'minibuffer-setup-hook #'solaire-mode-in-minibuffer))
+
+(use-package rainbow-delimiters
+  :demand t
+  :hook (emacs-lisp-mode . rainbow-delimiters-mode))
 
 ;; Font
 (setq mars-font "Hack")
