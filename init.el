@@ -139,7 +139,11 @@ mars-map/ function")
     "b" 'counsel-ibuffer)
 
   (mars-map/eval
-    "b" 'eval-buffer))
+    "b" 'eval-buffer
+    "r" 'eval-region
+    "f" 'eval-defun
+    "e" 'eval-expression
+    "s" 'eval-last-sexp))
 
 ;; Manipulating emacs process
 
@@ -308,7 +312,7 @@ mars-map/ function")
 
 (use-package lispyville
   :hook (emacs-lisp-mode . lispyville-mode)
-  :config (lispyville-set-key-theme '(slurp/barf-lispy)))
+  :config (lispyville-set-key-theme '(slurp/barf-lispy text-objects)))
 
 (use-package parinfer
   :disabled
@@ -332,6 +336,7 @@ mars-map/ function")
 (use-package evil-snipe
   :config
   (evil-snipe-override-mode 1)
+  (evil-snipe-mode 1)
   (setq evil-snipe-scope 'buffer)
   (setq evil-snipe-repeat-scope 'buffer))
 
