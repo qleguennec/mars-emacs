@@ -340,6 +340,15 @@ mars-map/ function")
 (use-package rjsx-mode
   :init (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode)))
 
+;; lsp
+(use-package lsp-mode)
+
+(use-package lsp-ui)
+
+(use-package company-lsp)
+
+(use-package lsp-intellij)
+
 ;; UI
 
 ;; Highlight lisp expressions
