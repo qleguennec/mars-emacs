@@ -225,7 +225,8 @@ mars-map/ function")
 		   :fork (:repo "qleguennec/counsel-projectile"))
 
   :config
-  (add-to-list 'projectile-globally-ignored-directories '("straight/" "node_modules/"))
+  (setq projectile-globally-ignored-directories
+	(append projectile-globally-unignored-directories '("straight" "node_modules")))
 
   (defun mars-projectile-refresh-projects ()
     "Clear projectile known projects and add to known projects directories in mars-workspace
