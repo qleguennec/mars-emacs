@@ -11,10 +11,6 @@ even if it does not countain a vcs subdir.")
 (defvar mars-ivy-use-preview t
   "If non-nil, counsel-projectile command will preview the selected buffer/file in the window where counsel-projectile was executed.")
 
-;; TODO Needed for development, remove this when this repo becomes the default config
-(setq user-init-file (or load-file-name (buffer-file-name))
-      user-emacs-directory (file-name-directory user-init-file))
-
 ;; Do not load package.el
 (setq package-enable-at-startup nil)
 
@@ -37,9 +33,10 @@ even if it does not countain a vcs subdir.")
   (load bootstrap-file nil 'nomessage))
 
 (straight-use-package 'use-package)
-(setq straight-use-package-by-default t)
-(setq use-package-always-defer t)
-(setq straight-default-vc 'git)
+
+(setq straight-use-package-by-default t
+      use-package-always-defer t
+      straight-default-vc 'git)
 
 ;; Provies better defaults for emacs cache files
 (use-package no-littering :demand t)
@@ -112,12 +109,14 @@ even if it does not countain a vcs subdir.")
     "Defines prefixes for each section")
 
   (setq mars-general-prefixes
-  	'(("b" . "buffers")
-  	  ("f" . "files")
-  	  ("p" . "projects")
-  	  ("e" . "eval")
+	'(("b" . "buffers")
+	  ("f" . "files")
+	  ("p" . "projects")
+	  ("e" . "eval")
 	  ("w" . "windows")
-	  ("h" . "help")))
+	  ("h" . "help")
+	  ("i" . "ivy")
+	  ("s" . "snipe")))
 
   ;; Defines general definers for each prefix in mars-general-prefixes.
   (eval
@@ -147,20 +146,32 @@ even if it does not countain a vcs subdir.")
 ;; Candidate selection
 
 ;; Select things in the minibuffer
-(use-package ivy)
+(use-package swiper
+  :straight (:host github :repo "abo-abo/swiper"
+		   :files (:defaults (:exclude "counsel.el"))
+		   :fork (:repo "qleguennec/swiper"))
+
+  :config (ivy-mode 1)
+  (mars-map "'" 'ivy-resume))
 
 ;; Remaps common emacs functions
 (use-package counsel
   :demand t
-
+  :straight (:host github :repo "abo-abo/swiper"
+		   :fork (:repo "qleguennec/swiper")
+		   :files ("counsel.el"))
   :config
   (counsel-mode 1)
 
   :general
   (mars-map/help
-   "f" 'counsel-describe-function
-   "v" 'counsel-describe-variable
-   "k" 'counsel-descbinds))
+    "f" 'counsel-describe-function
+    "v" 'counsel-describe-variable
+    "k" 'counsel-descbinds)
+
+  (mars-map/ivy
+    "y" 'counsel-yank-pop
+    "c" 'counsel-command-history))
 
 ;; Provide statistics for sorting/filtering
 (use-package prescient
@@ -177,8 +188,8 @@ even if it does not countain a vcs subdir.")
   :demand t
   :after counsel
   :config
-  (setq counsel-describe-function-function #'helpful-function)
-  (setq counsel-describe-variable-function #'helpful-variable)
+  (setq counsel-describe-function-function #'helpful-function
+	counsel-describe-variable-function #'helpful-variable)
 
   :general
   (mars-map/help
@@ -201,13 +212,7 @@ even if it does not countain a vcs subdir.")
 
 (use-package projectile :config (projectile-mode 1))
 
-(use-package ivy
-  :straight (:host github :repo "abo-abo/swiper"
-		   :fork (:repo "qleguennec/swiper"))
-  :config (ivy-mode 1))
-
-(use-package counsel :config (counsel-mode 1))
-
+;; Editor features
 (use-package counsel-projectile
   :straight (:host github :repo "ericdanan/counsel-projectile"
 		   :fork (:repo "qleguennec/counsel-projectile"))
@@ -220,15 +225,17 @@ even if it does not countain a vcs subdir.")
 (even if they are not under vcs), any vcs directory in HOME, and straight repos"
     (interactive)
     (projectile-clear-known-projects)
-    (setq projectile-known-projects
-	  (append
-	   (directory-files mars-workspace t directory-files-no-dot-files-regexp t)
-	   (cl-remove-if (lambda (dir)
-			   (eq 'none (projectile-project-vcs dir)))
-			 (directory-files "~/" t directory-files-no-dot-files-regexp t))
-	   (directory-files (concat user-emacs-directory "/straight/repos") t directory-files-no-dot-files-regexp t)))
-    (projectile-save-known-projects))
+    (setq projectile-known-projects)
+    (append
+     (directory-files mars-workspace t directory-files-no-dot-files-regexp t)
+     (cl-remove-if
+      (lambda (dir)
+	(eq 'none (projectile-project-vcs dir)
+	    (directory-files "~/" t directory-files-no-dot-files-regexp t))))
+     (directory-files (concat user-emacs-directory "/straight/repos") t directory-files-no-dot-files-regexp t)
+     (projectile-save-known-projects)))
 
+  ;; Open magit when switching project
   (setq counsel-projectile-switch-project-action #'counsel-projectile-switch-project-action-vc)
 
   :general
@@ -237,10 +244,6 @@ even if it does not countain a vcs subdir.")
     "?" 'counsel-projectile-ag)
   (mars-map/projects
     "p" 'counsel-projectile-switch-project))
-
-;;  
-
-;; Editor features
 
 ;; Vim-like keybindings.
 (use-package evil
@@ -253,10 +256,9 @@ even if it does not countain a vcs subdir.")
   (define-key evil-motion-state-map " " nil)
 
   :general
-
   ;; Remaps evil-search-forward to swiper
   (mars-map
-   [remap evil-search-forward] 'swiper)
+    [remap evil-search-forward] 'swiper)
 
   (mars-map
     ;; Window motion
@@ -282,31 +284,38 @@ even if it does not countain a vcs subdir.")
   :demand t
   :config (global-evil-surround-mode 1))
 
-;; Auto-pairs parens and other things.
-(use-package smartparens
-  :demand t
+;; Expand selected region at point.
+(use-package expand-region
+  :general
+  (:keymaps 'evil-visual-state-map
+	    "v" 'er/expand-region
+	    "V" 'er/contract-region))
 
-  :config
-  (require 'smartparens-config)
-  (smartparens-global-mode +1)
-  (show-smartparens-global-mode +1))
+;; Simpler lisp editing
+(use-package lispy
+  :hook (emacs-lisp-mode . lispy-mode))
+
+(use-package lispyville
+  :hook (lispy-mode . lispyville-mode)
+  :config (lispyville-set-key-theme '(operators slurp/barf-lispy)))
+
+;; Format code before save
+(use-package format-all
+  :hook (emacs-lisp-mode . format-all-mode))
 
 ;; Completion
 (use-package company
   :demand t
-  :config (global-company-mode 1)
+  :config (global-company-mode 1))
 
-  (defun mars-company-select-with-ivy ()
-    "Select a candidate for autocompletion with ivy."
-    (interactive)
-    (ivy-read "Select candidate: " company-candidates
-	      :action (lambda (selection)
-			(company-set-selection selection)
-			(company-complete-selection))))
+;; Jump on things
+(use-package avy
+  :config (avy-setup-default)
+
   :general
-  (:keymaps 'company-active-map
-	    ;; Disabled for now, will be mars-company-select-with-ivy in the future
-   "SPC" nil))
+  (mars-map
+    "J" 'avy-goto-line-below
+    "K" 'avy-goto-line-above))
 
 ;; UI
 (use-package doom-themes
@@ -316,6 +325,14 @@ even if it does not countain a vcs subdir.")
 (use-package doom-modeline
   :demand t
   :config (doom-modeline-init))
+
+(use-package centered-cursor-mode
+  :demand t
+  :config (global-centered-cursor-mode 1))
+
+(use-package solaire-mode
+  :demand t
+  :config (add-hook 'minibuffer-setup-hook #'solaire-mode-in-minibuffer))
 
 ;; Font
 (setq mars-font "Hack")
