@@ -108,15 +108,17 @@ even if it does not countain a vcs subdir.")
   (defvar mars-general-prefixes nil
     "Defines prefixes for each section")
 
-  (setq mars-general-prefixes
-	'(("b" . "buffers")
-	  ("f" . "files")
-	  ("p" . "projects")
-	  ("e" . "eval")
-	  ("w" . "windows")
-	  ("h" . "help")
-	  ("i" . "ivy")
-	  ("g" . "git")))
+  (defvar mars-general-prefixes
+    '(("b" . "buffers")
+      ("f" . "files")
+      ("p" . "projects")
+      ("e" . "eval")
+      ("w" . "windows")
+      ("h" . "help")
+      ("i" . "ivy")
+      ("g" . "git"))
+    "Each car in the alist is the prefix key and the cdr defines the suffix of
+mars-map/ function")
 
   ;; Defines general definers for each prefix in mars-general-prefixes.
   (eval `(progn
