@@ -250,6 +250,7 @@ mars-map/ function")
     (projectile-save-known-projects))
 
   (unless projectile-known-projects (mars-projectile-refresh-projects))
+  (projectile-add-known-project "~/ratp/dev/pit/")
 
   ;; Open magit when switching project
   (setq counsel-projectile-switch-project-action #'counsel-projectile-switch-project-action-vc)
@@ -349,18 +350,31 @@ mars-map/ function")
   :init (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode)))
 
 (use-package prettier
-  :straight '(:host github :repo "jscheid/prettier.el" :branch "v0.2.3")
+  :straight (:host github :repo "jscheid/prettier.el" :branch "v0.2.3")
   :config
   (add-hook '(rjsx-mode . prettier-mode)))
 
 ;; lsp
 (use-package lsp-mode)
 
-(use-package lsp-ui)
+(use-package lsp-ui
+  :init
+  (add-hook 'lsp-mode-hook #'lsp-ui-mode))
 
 (use-package company-lsp)
 
-(use-package lsp-intellij)
+(use-package lsp-intellij
+  :demand t
+  :init
+  (add-hook 'java-mode-hook #'lsp-intellij-enable)
+  (add-hook 'java-mode-hook #'flycheck-mode)
+  (add-hook 'java-mode-hook #'electric-pair-mode)
+  (add-hook 'before-save-hook #'lsp-format-buffer)
+  :config
+  (setq lsp-intellij-server-port 4224)
+  (setq company-lsp-enable-snippet t
+      company-lsp-cache-candidates t)
+  (push 'company-lsp company-backends))
 
 ;; UI
 
