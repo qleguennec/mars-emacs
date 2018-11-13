@@ -106,9 +106,6 @@ even if it does not countain a vcs subdir.")
     (mars-map :keymaps 'dired-mode-map "SPC" nil))
 
   (defvar mars-general-prefixes nil
-    "Defines prefixes for each section")
-
-  (defvar mars-general-prefixes nil
     "Each car in the alist is the prefix key and the cdr defines the suffix of
 mars-map/ function")
 
@@ -144,8 +141,7 @@ mars-map/ function")
    "b" 'eval-buffer
    "r" 'eval-region
    "f" 'eval-defun
-   "e" 'eval-expression
-   "s" 'eval-last-sexp))
+   "e" 'eval-expression))
 
 ;; Manipulating emacs process
 
@@ -296,6 +292,11 @@ mars-map/ function")
     "s" (lambda () (interactive) (evil-window-split) (other-window 1))
     "q" 'evil-window-delete))
 
+(use-package flycheck
+  :demand t
+  :init
+  (global-flycheck-mode 1))
+
 ;; Surround things.
 (use-package evil-surround
   :demand t
@@ -344,16 +345,33 @@ mars-map/ function")
   (setq evil-snipe-scope 'buffer)
   (setq evil-snipe-repeat-scope 'buffer))
 
+(use-package smartparens
+  :demand t
+  :init
+  (smartparens-global-strict-mode 1)
+  (add-hook 'emacs-lisp-mode 'turn-off-smartparens-mode)
+  (add-hook 'emacs-lisp-mode 'turn-off-smartparens-strict-mode)
+  :config
+  (require 'smartparens-config))
+
+(use-package evil-smartparens
+  :init (add-hook 'smartparens-enabled-hook #'evil-smartparens-mode))
+
 ;; Language packages
 
 ;; javascript
 (use-package rjsx-mode
-  :init (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode)))
-
-(use-package prettier
-  :straight (:host github :repo "jscheid/prettier.el" :branch "v0.2.3")
+  :init
+  (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode))
   :config
-  (add-hook '(rjsx-mode . prettier-mode)))
+  (setq js-indent-level 2)
+  (flycheck-select-checker 'javascript-eslint))
+
+(use-package prettier-js
+  :init (add-hook 'rjsx-mode-hook 'prettier-js-mode)
+  :config
+  (setq prettier-js-args '("--single-quote" "--print-width" "120" "--trailing-comma" "es5"))
+  (setq prettier-js-command "prettier_d"))
 
 ;; lsp
 (use-package lsp-mode)
@@ -370,7 +388,6 @@ mars-map/ function")
   (add-hook 'java-mode-hook #'lsp-intellij-enable)
   (add-hook 'java-mode-hook #'flycheck-mode)
   (add-hook 'java-mode-hook #'electric-pair-mode)
-  (add-hook 'before-save-hook #'lsp-format-buffer)
   :config
   (setq lsp-intellij-server-port 4224)
   (setq company-lsp-enable-snippet t
