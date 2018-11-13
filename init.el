@@ -108,17 +108,19 @@ even if it does not countain a vcs subdir.")
   (defvar mars-general-prefixes nil
     "Defines prefixes for each section")
 
-  (defvar mars-general-prefixes
-    '(("b" . "buffers")
-      ("f" . "files")
-      ("p" . "projects")
-      ("e" . "eval")
-      ("w" . "windows")
-      ("h" . "help")
-      ("i" . "ivy")
-      ("g" . "git"))
+  (defvar mars-general-prefixes nil
     "Each car in the alist is the prefix key and the cdr defines the suffix of
 mars-map/ function")
+
+  (setq mars-general-prefixes
+	'(("b" . "buffers")
+	  ("f" . "files")
+	  ("p" . "projects")
+	  ("e" . "eval")
+	  ("w" . "windows")
+	  ("h" . "help")
+	  ("i" . "ivy")
+	  ("g" . "git")))
 
   ;; Defines general definers for each prefix in mars-general-prefixes.
   (eval `(progn
@@ -132,18 +134,18 @@ mars-map/ function")
 	      mars-general-prefixes)))
 
   (mars-map/buffers
-    "s" 'save-buffer
-    "p" 'previous-buffer
-    "n" 'next-buffer
-    "k" 'kill-buffer
-    "b" 'counsel-ibuffer)
+   "s" 'save-buffer
+   "p" 'previous-buffer
+   "n" 'next-buffer
+   "k" 'kill-buffer
+   "b" 'counsel-ibuffer)
 
   (mars-map/eval
-    "b" 'eval-buffer
-    "r" 'eval-region
-    "f" 'eval-defun
-    "e" 'eval-expression
-    "s" 'eval-last-sexp))
+   "b" 'eval-buffer
+   "r" 'eval-region
+   "f" 'eval-defun
+   "e" 'eval-expression
+   "s" 'eval-last-sexp))
 
 ;; Manipulating emacs process
 
@@ -346,6 +348,11 @@ mars-map/ function")
 (use-package rjsx-mode
   :init (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode)))
 
+(use-package prettier
+  :straight '(:host github :repo "jscheid/prettier.el" :branch "v0.2.3")
+  :config
+  (add-hook '(rjsx-mode . prettier-mode)))
+
 ;; lsp
 (use-package lsp-mode)
 
@@ -385,3 +392,6 @@ mars-map/ function")
 (setq mars-font "Hack")
 (setq mars-font-height 105)
 (set-face-attribute 'default nil :family mars-font :height mars-font-height)
+
+;; Open init.el on startup
+(find-file user-init-file)
