@@ -369,7 +369,7 @@ mars-map/ function")
 (use-package prettier-js
   :init (add-hook 'rjsx-mode-hook 'prettier-js-mode)
   :config
-  (setq prettier-js-args '("--single-quote" "--print-width" "120" "--trailing-comma" "es5"))
+  ;; (setq prettier-js-args '("--single-quote" "--print-width" "120" "--trailing-comma" "es5"))
   (setq prettier-js-command "prettier_d"))
 
 ;; lsp
