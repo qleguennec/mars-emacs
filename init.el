@@ -246,7 +246,6 @@ mars-map/ function")
     (projectile-save-known-projects))
 
   (unless projectile-known-projects (mars-projectile-refresh-projects))
-  (projectile-add-known-project "~/ratp/dev/pit/")
 
   ;; Open magit when switching project
   (setq counsel-projectile-switch-project-action #'counsel-projectile-switch-project-action-vc)
@@ -383,11 +382,8 @@ mars-map/ function")
 (use-package company-lsp)
 
 (use-package lsp-intellij
-  :demand t
   :init
   (add-hook 'java-mode-hook #'lsp-intellij-enable)
-  (add-hook 'java-mode-hook #'flycheck-mode)
-  (add-hook 'java-mode-hook #'electric-pair-mode)
   :config
   (setq lsp-intellij-server-port 4224)
   (setq company-lsp-enable-snippet t
