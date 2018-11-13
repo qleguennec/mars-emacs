@@ -337,7 +337,8 @@ mars-map/ function")
     "K" 'avy-goto-line-above))
 
 (use-package evil-snipe
-  :config
+  :demand t
+  :init
   (evil-snipe-override-mode 1)
   (evil-snipe-mode 1)
   (setq evil-snipe-scope 'buffer)
