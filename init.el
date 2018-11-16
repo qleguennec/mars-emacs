@@ -38,6 +38,25 @@ even if it does not countain a vcs subdir.")
       use-package-always-defer t
       straight-default-vc 'git)
 
+;; Custom org install
+(require 'subr-x)
+
+;; Requires the git package
+(use-package git
+  :demand t)
+
+(defun org-git-version ()
+  "The Git version of org-mode.
+Inserted by installing org-mode or when a release is made."
+  (require 'git)
+  (let ((git-repo (expand-file-name
+                   "straight/repos/org/" user-emacs-directory)))
+    (string-trim
+     (git-run "describe"
+              "--match=release\*"
+              "--abbrev=6"
+              "HEAD"))))
+
 ;; Provies better defaults for emacs cache files
 (use-package no-littering :demand t)
 
@@ -293,7 +312,9 @@ mars-map/ function")
 
 (use-package flycheck
   :init
-  (global-flycheck-mode 1))
+  (global-flycheck-mode 1)
+  :config
+  (setq-default flycheck-disabled-checkers '(emacs-lisp emacs-lisp-checkdoc)))
 
 ;; Surround things.
 (use-package evil-surround
