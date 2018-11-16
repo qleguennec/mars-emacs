@@ -279,6 +279,11 @@ mars-map/ function")
 ;; Vim-like keybindings.
 (use-package evil
   :demand t
+  :init
+  ;; Required for evil-collection
+  (setq evil-want-integration t
+	evil-want-keybinding nil)
+
   :config
   (evil-mode 1)
 
@@ -309,6 +314,10 @@ mars-map/ function")
     "v" (lambda () (interactive) (evil-window-vsplit) (other-window 1))
     "s" (lambda () (interactive) (evil-window-split) (other-window 1))
     "q" 'evil-window-delete))
+
+(use-package evil-collection
+  :demand t
+  :config (evil-collection-init))
 
 (use-package flycheck
   :init
@@ -414,6 +423,9 @@ mars-map/ function")
   (add-hook 'before-save-hook #'lsp-format-buffer))
 
 ;; UI
+
+;; Use ediff on the same window
+(setq ediff-window-setup-function 'ediff-setup-windows-plain)
 
 ;; Highlight lisp expressions
 (show-paren-mode 1)
