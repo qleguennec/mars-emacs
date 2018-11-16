@@ -292,7 +292,6 @@ mars-map/ function")
     "q" 'evil-window-delete))
 
 (use-package flycheck
-  :demand t
   :init
   (global-flycheck-mode 1))
 
@@ -311,10 +310,13 @@ mars-map/ function")
 ;; Simpler lisp editing
 
 (use-package lispy
-  :hook (emacs-lisp-mode . lispy-mode))
+  :hook (emacs-lisp-mode . lispy-mode)
+  :config
+  (add-hook 'lispy-mode #'turn-off-smartparens-mode)
+  (add-hook 'lispy-mode #'turn-off-smartparens-strict-mode))
 
 (use-package lispyville
-  :hook (emacs-lisp-mode . lispyville-mode)
+  :hook (lispy-mode . lispyville-mode)
   :config (lispyville-set-key-theme '(slurp/barf-lispy text-objects)))
 
 (use-package parinfer
@@ -348,13 +350,8 @@ mars-map/ function")
   :demand t
   :init
   (smartparens-global-strict-mode 1)
-  (add-hook 'emacs-lisp-mode 'turn-off-smartparens-mode)
-  (add-hook 'emacs-lisp-mode 'turn-off-smartparens-strict-mode)
   :config
   (require 'smartparens-config))
-
-(use-package evil-smartparens
-  :init (add-hook 'smartparens-enabled-hook #'evil-smartparens-mode))
 
 ;; Language packages
 
@@ -369,11 +366,14 @@ mars-map/ function")
 (use-package prettier-js
   :init (add-hook 'rjsx-mode-hook 'prettier-js-mode)
   :config
-  ;; (setq prettier-js-args '("--single-quote" "--print-width" "120" "--trailing-comma" "es5"))
-  (setq prettier-js-command "prettier_d"))
+  (setq prettier-js-command "prettier_d")
+  (setq prettier-js-args '("--single-quote" "--print-width" "120" "--trailing-comma" "es5")))
 
 ;; lsp
-(use-package lsp-mode)
+(use-package lsp-mode
+  :config
+  (add-hook 'before-save-hook (lambda () (when (eq major-mode 'lsp-mode)
+					   (lsp-format-buffer)))))
 
 (use-package lsp-ui
   :init
@@ -382,13 +382,15 @@ mars-map/ function")
 (use-package company-lsp)
 
 (use-package lsp-intellij
+  :demand t
   :init
   (add-hook 'java-mode-hook #'lsp-intellij-enable)
   :config
   (setq lsp-intellij-server-port 4224)
   (setq company-lsp-enable-snippet t
-      company-lsp-cache-candidates t)
-  (push 'company-lsp company-backends))
+	company-lsp-cache-candidates t)
+  (push 'company-lsp company-backends)
+  (add-hook 'before-save-hook #'lsp-format-buffer))
 
 ;; UI
 
@@ -415,6 +417,10 @@ mars-map/ function")
 (use-package rainbow-delimiters
   :demand t
   :hook (emacs-lisp-mode . rainbow-delimiters-mode))
+
+(use-package origami
+  :disabled
+  :init (global-origami-mode 1))
 
 ;; Font
 (setq mars-font "Hack")
