@@ -36,6 +36,7 @@ even if it does not countain a vcs subdir.")
 
 (setq straight-use-package-by-default t
       use-package-always-defer t
+      use-package-verbose t
       straight-default-vc 'git)
 
 ;; Custom org install
@@ -57,6 +58,22 @@ Inserted by installing org-mode or when a release is made."
               "--abbrev=6"
               "HEAD"))))
 
+(defun org-release ()
+  "The release version of org-mode.
+Inserted by installing org-mode or when a release is made."
+  (require 'git)
+  (let ((git-repo (expand-file-name
+                   "straight/repos/org/" user-emacs-directory)))
+    (string-trim
+     (string-remove-prefix
+      "release_"
+      (git-run "describe"
+               "--match=release\*"
+               "--abbrev=0"
+               "HEAD")))))
+
+(provide 'org-version)
+
 ;; Provies better defaults for emacs cache files
 (use-package no-littering :demand t)
 
@@ -67,14 +84,16 @@ Inserted by installing org-mode or when a release is made."
 
 ;; Appearance
 
+(setq
+
 ;; Turn off the alarm bell
-(setq ring-bell-function #'ignore)
+ ring-bell-function #'ignore
 
-;; Display keystrokes in the echo area immediately
-(setq echo-keystrokes 1e-6)
+ ;; Display keystrokes in the echo area immediately
+ echo-keystrokes 1e-6
 
-;; Don't blink the cursor on the opening paren when you insert a closing paren
-(setq blink-matching-paren nil)
+ ;; Don't blink the cursor on the opening paren when you insert a closing paren
+ blink-matching-paren nil)
 
 ;; Disable the scroll bars
 (scroll-bar-mode -1)
@@ -88,11 +107,12 @@ Inserted by installing org-mode or when a release is made."
 ;; Disable menu bar
 (menu-bar-mode -1)
 
+(setq
 ;; Disable startup screen
-(setq inhibit-startup-screen t)
+ inhibit-startup-screen t
 
-;; Disable scratch buffer message
-(setq initial-scratch-message nil)
+ ;; Disable scratch buffer message
+ initial-scratch-message nil)
 
 ;; el-patch
 
@@ -136,7 +156,8 @@ mars-map/ function")
 	  ("w" . "windows")
 	  ("h" . "help")
 	  ("i" . "ivy")
-	  ("g" . "git")))
+	  ("g" . "git")
+	  ("o" . "org")))
 
   ;; Defines general definers for each prefix in mars-general-prefixes.
   (eval `(progn
@@ -150,19 +171,37 @@ mars-map/ function")
 	      mars-general-prefixes)))
 
   (mars-map/buffers
-   "s" 'save-buffer
-   "p" 'previous-buffer
-   "n" 'next-buffer
-   "k" 'kill-buffer
-   "b" 'counsel-ibuffer)
+    "s" 'save-buffer
+    "p" 'previous-buffer
+    "n" 'next-buffer
+    "k" 'kill-buffer
+    "b" 'counsel-ibuffer)
 
   (mars-map/eval
-   "b" 'eval-buffer
-   "r" 'eval-region
-   "f" 'eval-defun
-   "e" 'eval-expression))
+    "b" 'eval-buffer
+    "r" 'eval-region
+    "f" 'eval-defun
+    "e" 'eval-expression))
 
-;; Manipulating emacs process
+;; Org mode
+(use-package org
+  :config
+  (setq org-directory "~/org")
+  :general
+  (mars-map/org
+    "c" 'org-capture))
+
+;; Per-project org things
+(use-package org-projectile
+  :config
+  (org-projectile-per-project)
+  (setq org-agenda-files (append org-agenda-files (org-projectile-todo-files)))
+  (push (org-projectile-project-todo-entry) org-capture-templates))
+
+;; Prettier org
+(use-package org-bullets
+  :demand t
+  :config (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 
 ;; Restart emacs
 (use-package restart-emacs :demand t)
@@ -234,7 +273,9 @@ mars-map/ function")
   (:keymaps 'magit-mode-map
 	    "SPC" nil))
 
-(use-package evil-magit :demand t)
+(use-package evil-magit
+  :demand t
+  :after evil)
 
 ;; File management
 
@@ -316,8 +357,10 @@ mars-map/ function")
     "q" 'evil-window-delete))
 
 (use-package evil-collection
+  :after evil
   :demand t
-  :config (evil-collection-init))
+  :config
+  (evil-collection-init))
 
 (use-package flycheck
   :init
@@ -342,12 +385,15 @@ mars-map/ function")
 (use-package lispy
   :hook (emacs-lisp-mode . lispy-mode)
   :config
-  (add-hook 'lispy-mode #'turn-off-smartparens-mode)
-  (add-hook 'lispy-mode #'turn-off-smartparens-strict-mode))
+  (add-hook 'lispy-mode-hook #'turn-off-smartparens-mode)
+  (add-hook 'lispy-mode-hook #'turn-off-smartparens-strict-mode))
 
 (use-package lispyville
   :hook (lispy-mode . lispyville-mode)
-  :config (lispyville-set-key-theme '(slurp/barf-lispy text-objects)))
+  :config (lispyville-set-key-theme '(slurp/barf-lispy
+				      text-objects
+				      lispyville-prettify
+				      atom-motions)))
 
 (use-package parinfer
   :disabled
