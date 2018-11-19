@@ -74,6 +74,13 @@ Inserted by installing org-mode or when a release is made."
 
 (provide 'org-version)
 
+(defmacro use-feature (name &rest args)
+  "Like `use-package', but with `straight-use-package-by-default' disabled."
+  (declare (indent defun))
+  `(use-package ,name
+     :straight nil
+     ,@args))
+
 ;; Provies better defaults for emacs cache files
 (use-package no-littering :demand t)
 
@@ -181,20 +188,22 @@ mars-map/ function")
     "e" 'eval-expression))
 
 ;; Org mode
-(use-package org
-  :config
-  (setq org-directory "~/org")
+(use-feature org
+  :init
+  (use-package org
+    :config
+    (setq org-directory "~/org")
 
-  :general
-  (mars-map/org
-    "c" 'org-capture))
+    :general
+    (mars-map/org
+      "c" 'org-capture))
 
-;; Per-project org things
-(use-package org-projectile
-  :config
-  (org-projectile-per-project)
-  (setq org-agenda-files (append org-agenda-files (org-projectile-todo-files)))
-  (push (org-projectile-project-todo-entry) org-capture-templates))
+  ;; Per-project org things
+  (use-package org-projectile
+    :config
+    (org-projectile-per-project)
+    (setq org-agenda-files (append org-agenda-files (org-projectile-todo-files)))
+    (push (org-projectile-project-todo-entry) org-capture-templates)))
 
 ;; Prettier org
 (use-package org-bullets
@@ -207,34 +216,36 @@ mars-map/ function")
 ;; Candidate selection
 
 ;; Select things in the minibuffer
-(use-package ivy
-  :config
-  (ivy-mode 1)
+(use-feature ivy
+  :init
+  (use-package ivy
+    :config
+    (ivy-mode 1)
 
-  :general
-  (mars-map "'" 'ivy-resume)
+    :general
+    (mars-map "'" 'ivy-resume)
   
-  (mars-map/help
-    "f" 'counsel-describe-function
-    "v" 'counsel-describe-variable
-    "k" 'counsel-descbinds)
+    (mars-map/help
+      "f" 'counsel-describe-function
+      "v" 'counsel-describe-variable
+      "k" 'counsel-descbinds)
 
-  (mars-map/ivy
-    "y" 'counsel-yank-pop
-    "c" 'counsel-command-history
-    "o" 'counsel-mark-ring))
+    (mars-map/ivy
+      "y" 'counsel-yank-pop
+      "c" 'counsel-command-history
+      "o" 'counsel-mark-ring))
 
-(use-package ivy-hydra)
+  (use-package ivy-hydra)
 
-;; Provide statistics for sorting/filtering
-(use-package prescient
-  :config
-  (prescient-persist-mode 1))
+  ;; Provide statistics for sorting/filtering
+  (use-package prescient
+    :config
+    (prescient-persist-mode 1))
 
-(use-package ivy-prescient
-  :demand t
-  :config
-  (ivy-prescient-mode 1))
+  (use-package ivy-prescient
+    :demand t
+    :config
+    (ivy-prescient-mode 1)))
 
 ;; Displays helpful documentation
 (use-package helpful
@@ -261,87 +272,91 @@ mars-map/ function")
 
 ;; File management
 
-(use-package projectile :config (projectile-mode 1))
+(use-feature projectile
+  :init
+  (use-package projectile :config (projectile-mode 1))
 
-;; Editor features
-(use-package counsel-projectile
-  :straight (:host github :repo "ericdanan/counsel-projectile"
-		   :fork (:repo "qleguennec/counsel-projectile"))
+  ;; Editor features
+  (use-package counsel-projectile
+    :straight (:host github :repo "ericdanan/counsel-projectile"
+		     :fork (:repo "qleguennec/counsel-projectile"))
 
-  :config
-  (setq projectile-globally-ignored-directories
-	(append projectile-globally-unignored-directories '("straight" "node_modules")))
+    :config
+    (setq projectile-globally-ignored-directories
+	  (append projectile-globally-unignored-directories '("straight" "node_modules")))
 
-  (defun mars-projectile-refresh-projects ()
-    "Clear projectile known projects and add to known projects directories in mars-workspace
+    (defun mars-projectile-refresh-projects ()
+      "Clear projectile known projects and add to known projects directories in mars-workspace
 (even if they are not under vcs), any vcs directory in HOME, and straight repos"
-    (interactive)
-    (projectile-clear-known-projects)
-    (setq projectile-known-projects
-	  (append
-	   (directory-files mars-workspace t directory-files-no-dot-files-regexp t)
-	   (cl-remove-if
-	    (lambda (dir)
-	      (eq 'none (projectile-project-vcs dir)))
-	    (directory-files "~/" t directory-files-no-dot-files-regexp t))
-	   (directory-files (concat user-emacs-directory "/straight/repos") t directory-files-no-dot-files-regexp t)))
-    (projectile-save-known-projects))
+      (interactive)
+      (projectile-clear-known-projects)
+      (setq projectile-known-projects
+	    (append
+	     (directory-files mars-workspace t directory-files-no-dot-files-regexp t)
+	     (cl-remove-if
+	      (lambda (dir)
+		(eq 'none (projectile-project-vcs dir)))
+	      (directory-files "~/" t directory-files-no-dot-files-regexp t))
+	     (directory-files (concat user-emacs-directory "/straight/repos") t directory-files-no-dot-files-regexp t)))
+      (projectile-save-known-projects))
 
-  (unless projectile-known-projects (mars-projectile-refresh-projects))
+    (unless projectile-known-projects (mars-projectile-refresh-projects))
 
-  :general
-  (mars-map
-    "SPC SPC" 'counsel-projectile
-    "?" 'counsel-projectile-ag)
-  (mars-map/projects
-    "p" 'counsel-projectile-switch-project))
+    :general
+    (mars-map
+      "SPC SPC" 'counsel-projectile
+      "?" 'counsel-projectile-ag)
+    (mars-map/projects
+      "p" 'counsel-projectile-switch-project)))
 
 ;; Vim-like keybindings.
-(use-package evil
-  :demand t
+(use-feature evil
   :init
-  ;; Required for evil-collection
-  (setq evil-want-integration t
-	evil-want-keybinding nil)
+  (use-package evil
+    :demand t
+    :init
+    ;; Required for evil-collection
+    (setq evil-want-integration t
+	  evil-want-keybinding nil)
 
-  :config
-  (evil-mode 1)
+    :config
+    (evil-mode 1)
 
-  ;; Unbind SPC in motion-state-map
-  ;; See https://stackoverflow.com/questions/33061926/emacs-evil-space-as-a-prefix-key-in-motion-state#33408565
-  (define-key evil-motion-state-map " " nil)
+    ;; Unbind SPC in motion-state-map
+    ;; See https://stackoverflow.com/questions/33061926/emacs-evil-space-as-a-prefix-key-in-motion-state#33408565
+    (define-key evil-motion-state-map " " nil)
 
-  :general
-  ;; Remaps evil-search-forward to swiper
-  (mars-map
-    [remap evil-search-forward] 'swiper)
+    :general
+    ;; Remaps evil-search-forward to swiper
+    (mars-map
+      [remap evil-search-forward] 'swiper)
 
-  (mars-map
-    ;; Window motion
-    "C-h" 'evil-window-left
-    "C-l" 'evil-window-right
-    "C-j" 'evil-window-down
-    "C-k" 'evil-window-up)
+    (mars-map
+      ;; Window motion
+      "C-h" 'evil-window-left
+      "C-l" 'evil-window-right
+      "C-j" 'evil-window-down
+      "C-k" 'evil-window-up)
 
-  (mars-map/windows
-    ;; Window motion
-    "h" 'evil-window-left
-    "l" 'evil-window-right
-    "j" 'evil-window-down
-    "k" 'evil-window-up
+    (mars-map/windows
+      ;; Window motion
+      "h" 'evil-window-left
+      "l" 'evil-window-right
+      "j" 'evil-window-down
+      "k" 'evil-window-up
 
-    ;; Window manipulation
-    "v" (lambda () (interactive) (evil-window-vsplit) (other-window 1))
-    "s" (lambda () (interactive) (evil-window-split) (other-window 1))
-    "q" 'evil-window-delete))
+      ;; Window manipulation
+      "v" (lambda () (interactive) (evil-window-vsplit) (other-window 1))
+      "s" (lambda () (interactive) (evil-window-split) (other-window 1))
+      "q" 'evil-window-delete))
 
-(use-package evil-collection
-  :demand t
-  :config
-  (evil-collection-init))
+  (use-package evil-collection
+    :demand t
+    :config
+    (evil-collection-init))
 
-(use-package evil-magit
-  :demand t)
+  (use-package evil-magit
+    :demand t))
 
 (use-package flycheck
   :init
@@ -350,6 +365,19 @@ mars-map/ function")
   (setq-default flycheck-disabled-checkers '(emacs-lisp emacs-lisp-checkdoc)))
 
 ;; Surround things.
+(use-package dumb-jump
+  :config
+  (setq dumb-jump-selector 'ivy)
+  
+  :general
+  (mars-map
+    "g d" 'dumb-jump-go
+    "g D" 'dumb-jump-go-other-window))
+
+(use-feature save-place
+  :init
+  (save-place-mode 1))
+
 (use-package evil-surround
   :demand t
   :config (global-evil-surround-mode 1))
@@ -359,15 +387,6 @@ mars-map/ function")
   (:keymaps 'evil-visual-state-map
 	    "v" 'er/expand-region
 	    "V" 'er/contract-region))
-
-(use-package dumb-jump
-  :config
-  (setq dumb-jump-selector 'ivy)
-  
-  :general
-  (mars-map
-    "g d" 'dumb-jump-go
-    "g D" 'dumb-jump-go-other-window))
 
 ;; Simpler lisp editing
 
@@ -383,11 +402,6 @@ mars-map/ function")
 				      text-objects
 				      lispyville-prettify
 				      atom-motions)))
-
-(use-package parinfer
-  :disabled
-  :config (setq parinfer-extensions '(defaults pretty-parens evil lispy))
-  :hook (emacs-lisp-mode . parinfer-mode))
 
 ;; Completion
 (use-package company
@@ -421,41 +435,46 @@ mars-map/ function")
 ;; Language packages
 
 ;; javascript
-(use-package rjsx-mode
+(use-feature javascript
   :init
-  (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode))
-  :config
   (setq js-indent-level 2)
-  (flycheck-select-checker 'javascript-eslint))
 
-(use-package prettier-js
-  :init (add-hook 'rjsx-mode-hook 'prettier-js-mode)
-  :config
-  (setq prettier-js-command "prettier_d")
-  (setq prettier-js-args '("--single-quote" "--print-width" "120" "--trailing-comma" "es5")))
+  (use-package rjsx-mode
+    :init
+    (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode))
+    :config
+    (flycheck-select-checker 'javascript-eslint))
+
+  (use-package prettier-js
+    :init (add-hook 'rjsx-mode-hook 'prettier-js-mode)
+    :config
+    (setq prettier-js-command "prettier_d")
+    (setq prettier-js-args '("--single-quote" "--print-width" "120" "--trailing-comma" "es5"))))
 
 ;; lsp
-(use-package lsp-mode
-  :config
-  (add-hook 'before-save-hook (lambda () (when (eq major-mode 'lsp-mode)
-					   (lsp-format-buffer)))))
-
-(use-package lsp-ui
+(use-feature lsp
   :init
-  (add-hook 'lsp-mode-hook #'lsp-ui-mode))
+  (use-package lsp-mode
+    :config
+    (add-hook 'before-save-hook (lambda () (when (eq major-mode 'lsp-mode)
+					     (lsp-format-buffer)))))
 
-(use-package company-lsp)
+  (use-package lsp-ui
+    :init
+    (add-hook 'lsp-mode-hook #'lsp-ui-mode))
 
-(use-package lsp-intellij
-  :demand t
-  :init
-  (add-hook 'java-mode-hook #'lsp-intellij-enable)
-  :config
-  (setq lsp-intellij-server-port 4224)
-  (push 'company-lsp company-backends)
-  (setq company-lsp-enable-snippet t
-	company-lsp-cache-candidates t)
-  (add-hook 'before-save-hook #'lsp-format-buffer))
+  (use-package company-lsp)
+
+  (use-package lsp-intellij
+    :demand t
+    :init
+    (add-hook 'java-mode-hook #'lsp-intellij-enable)
+    :config
+    (setq lsp-intellij-server-port 4224)
+    (push 'company-lsp company-backends)
+    (setq company-lsp-enable-snippet t
+	  company-lsp-cache-candidates t)
+    (add-hook 'before-save-hook #'lsp-format-buffer)))
 
 ;; UI
 
@@ -464,6 +483,7 @@ mars-map/ function")
 
 ;; Highlight lisp expressions
 (show-paren-mode 1)
+
 (setq show-paren-style 'expression)
 
 (use-package doom-themes
