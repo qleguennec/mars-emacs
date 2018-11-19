@@ -211,10 +211,9 @@ mars-map/ function")
 ;; Candidate selection
 
 ;; Select things in the minibuffer
-(use-package swiper
+(use-package ivy
   :config
   (ivy-mode 1)
-  (counsel-mode 1)
 
   :general
   (mars-map "'" 'ivy-resume)
@@ -228,6 +227,8 @@ mars-map/ function")
     "y" 'counsel-yank-pop
     "c" 'counsel-command-history
     "o" 'counsel-mark-ring))
+
+(use-package ivy-hydra)
 
 ;; Provide statistics for sorting/filtering
 (use-package prescient
@@ -291,9 +292,6 @@ mars-map/ function")
     (projectile-save-known-projects))
 
   (unless projectile-known-projects (mars-projectile-refresh-projects))
-
-  ;; Open magit when switching project
-  (setq counsel-projectile-switch-project-action #'counsel-projectile-switch-project-action-vc)
 
   :general
   (mars-map
@@ -360,7 +358,7 @@ mars-map/ function")
   :demand t
   :config (global-evil-surround-mode 1))
 
-;; Expand selected region at point.
+;; Ex(use-package evil-surround :demand t :config (global-evil-surround-mode 1)) ()d selected region at point.
 (use-package expand-region
   :general
   (:keymaps 'evil-visual-state-map
@@ -450,9 +448,9 @@ mars-map/ function")
   (add-hook 'java-mode-hook #'lsp-intellij-enable)
   :config
   (setq lsp-intellij-server-port 4224)
+  (push 'company-lsp company-backends)
   (setq company-lsp-enable-snippet t
 	company-lsp-cache-candidates t)
-  (push 'company-lsp company-backends)
   (add-hook 'before-save-hook #'lsp-format-buffer))
 
 ;; UI
