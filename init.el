@@ -107,8 +107,11 @@ Inserted by installing org-mode or when a release is made."
 ;; Disable menu bar
 (menu-bar-mode -1)
 
+;; Highlight current line.
+(hl-line-mode 1)
+
 (setq
-;; Disable startup screen
+ ;; Disable startup screen
  inhibit-startup-screen t
 
  ;; Disable scratch buffer message
@@ -131,9 +134,6 @@ Inserted by installing org-mode or when a release is made."
   :demand t
 
   :config
-  ;; Bind ESC to minibuffer-keyboard-quit
-  (define-key key-translation-map (kbd "ESC") (kbd "C-g"))
-
   (general-create-definer mars-map
     :states '(normal motion emacs))
 
@@ -166,6 +166,7 @@ mars-map/ function")
 		(let* ((section (cdr prefix))
 		       (definer (intern (concat "mars-map/" section))))
 		  `(general-create-definer ,definer
+		     :keymaps 'override
 		     :states '(normal motion emacs)
 		     :prefix ,(concat "SPC " (car prefix)))))
 	      mars-general-prefixes)))
@@ -187,6 +188,7 @@ mars-map/ function")
 (use-package org
   :config
   (setq org-directory "~/org")
+
   :general
   (mars-map/org
     "c" 'org-capture))
@@ -210,25 +212,13 @@ mars-map/ function")
 
 ;; Select things in the minibuffer
 (use-package swiper
-  :straight (:host github :repo "abo-abo/swiper"
-		   :files (:defaults (:exclude "counsel.el"))
-		   :fork (:repo "qleguennec/swiper"))
-
-  :config (ivy-mode 1)
-  (mars-map "'" 'ivy-resume))
-
-;; Remaps common emacs functions
-(use-package counsel
-  :demand t
-  :straight
-  (:host github :repo "abo-abo/swiper"
-	 :fork (:repo "qleguennec/swiper")
-	 :files ("counsel.el"))
-
   :config
+  (ivy-mode 1)
   (counsel-mode 1)
 
   :general
+  (mars-map "'" 'ivy-resume)
+  
   (mars-map/help
     "f" 'counsel-describe-function
     "v" 'counsel-describe-variable
@@ -236,7 +226,8 @@ mars-map/ function")
 
   (mars-map/ivy
     "y" 'counsel-yank-pop
-    "c" 'counsel-command-history))
+    "c" 'counsel-command-history
+    "o" 'counsel-mark-ring))
 
 ;; Provide statistics for sorting/filtering
 (use-package prescient
@@ -269,13 +260,7 @@ mars-map/ function")
   :general
   (mars-map/git
     "g" 'magit-status
-    "s" 'magit-stage)
-  (:keymaps 'magit-mode-map
-	    "SPC" nil))
-
-(use-package evil-magit
-  :demand t
-  :after evil)
+    "s" 'magit-stage))
 
 ;; File management
 
@@ -357,10 +342,12 @@ mars-map/ function")
     "q" 'evil-window-delete))
 
 (use-package evil-collection
-  :after evil
   :demand t
   :config
   (evil-collection-init))
+
+(use-package evil-magit
+  :demand t)
 
 (use-package flycheck
   :init
@@ -491,7 +478,9 @@ mars-map/ function")
 
 (use-package solaire-mode
   :demand t
-  :config (add-hook 'minibuffer-setup-hook #'solaire-mode-in-minibuffer))
+  :config
+  (add-hook 'minibuffer-setup-hook #'solaire-mode-in-minibuffer)
+  (add-hook 'magit-mode-hook #'solaire-mode))
 
 (use-package rainbow-delimiters
   :demand t
@@ -507,4 +496,5 @@ mars-map/ function")
 (set-face-attribute 'default nil :family mars-font :height mars-font-height)
 
 ;; Open init.el on startup
+
 (find-file user-init-file)
