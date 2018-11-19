@@ -378,6 +378,17 @@ mars-map/ function")
   :init
   (save-place-mode 1))
 
+(use-feature subword
+  :init
+  (subword-mode 1))
+
+(use-feature autorevert
+  :defer 2
+  :config
+  (setq auto-revert-interval 1
+	revert-without-query '(".*"))
+  (global-auto-revert-mode 1))
+
 (use-package evil-surround
   :demand t
   :config (global-evil-surround-mode 1))
