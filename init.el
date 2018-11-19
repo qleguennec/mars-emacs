@@ -140,10 +140,6 @@ Inserted by installing org-mode or when a release is made."
   ;; Unbind SPC
   (mars-map "SPC" nil)
 
-  ;; Dired
-  (with-eval-after-load 'dired
-    (mars-map :keymaps 'dired-mode-map "SPC" nil))
-
   (defvar mars-general-prefixes nil
     "Each car in the alist is the prefix key and the cdr defines the suffix of
 mars-map/ function")
@@ -358,12 +354,20 @@ mars-map/ function")
   :demand t
   :config (global-evil-surround-mode 1))
 
-;; Ex(use-package evil-surround :demand t :config (global-evil-surround-mode 1)) ()d selected region at point.
 (use-package expand-region
   :general
   (:keymaps 'evil-visual-state-map
 	    "v" 'er/expand-region
 	    "V" 'er/contract-region))
+
+(use-package dumb-jump
+  :config
+  (setq dumb-jump-selector 'ivy)
+  
+  :general
+  (mars-map
+    "g d" 'dumb-jump-go
+    "g D" 'dumb-jump-go-other-window))
 
 ;; Simpler lisp editing
 
