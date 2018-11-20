@@ -14,6 +14,9 @@ even if it does not countain a vcs subdir.")
 ;; Do not load package.el
 (setq package-enable-at-startup nil)
 
+;; Don't ask for confirmation for .dir-locals
+(advice-add 'risky-local-variable-p :override #'ignore)
+
 ;; Save customs in a seperate file
 (setq custom-file (expand-file-name
                    (format "custom-%d-%d.el" (emacs-pid) (random))
@@ -459,8 +462,7 @@ mars-map/ function")
   (use-package prettier-js
     :init (add-hook 'rjsx-mode-hook 'prettier-js-mode)
     :config
-    setq prettier-js-command "prettier_d"
-	  prettier-js-args '("--single-quote" "--print-width" "120" "--trailing-comma" "es5")))
+    (setq prettier-js-command "prettier_d")))
 
 ;; lsp
 (use-feature lsp
