@@ -380,7 +380,7 @@ mars-map/ function")
 
 (use-feature subword
   :init
-  (subword-mode 1))
+  (global-subword-mode 1))
 
 (use-feature autorevert
   :defer 2
@@ -459,8 +459,8 @@ mars-map/ function")
   (use-package prettier-js
     :init (add-hook 'rjsx-mode-hook 'prettier-js-mode)
     :config
-    (setq prettier-js-command "prettier_d")
-    (setq prettier-js-args '("--single-quote" "--print-width" "120" "--trailing-comma" "es5"))))
+    setq prettier-js-command "prettier_d"
+	  prettier-js-args '("--single-quote" "--print-width" "120" "--trailing-comma" "es5")))
 
 ;; lsp
 (use-feature lsp
