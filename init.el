@@ -5,12 +5,6 @@
 Every directory in mars-workspace is added to projectile-known-projects,
 even if it does not countain a vcs subdir.")
 
-;; Customs
-
-;; Toggles
-(defvar mars-ivy-use-preview t
-  "If non-nil, counsel-projectile command will preview the selected buffer/file in the window where counsel-projectile was executed.")
-
 ;; Do not load package.el
 (setq package-enable-at-startup nil)
 
@@ -266,6 +260,8 @@ mars-map/ function")
 (use-package magit
   :config
   (global-magit-file-mode 1)
+  ;; Auto commits in wip refs
+  (magit-wip-mode 1)
   (setq magit-display-buffer-function 'magit-display-buffer-same-window-except-diff-v1)
 
   :general
@@ -311,6 +307,14 @@ mars-map/ function")
       "?" 'counsel-projectile-ag)
     (mars-map/projects
       "p" 'counsel-projectile-switch-project)))
+
+;; Editor features
+
+(setq
+ ;; Don't break lines
+ truncate-lines t
+ ;; Don't ask for confirmation for .dir-locals
+ enable-local-variables :all)
 
 ;; Vim-like keybindings.
 (use-feature evil
@@ -380,6 +384,12 @@ mars-map/ function")
 (use-feature save-place
   :init
   (save-place-mode 1))
+
+;; Save things when switching buffers and other things
+(use-package super-save
+  :demand t
+  :config
+  (super-save-mode 1))
 
 (use-feature subword
   :init
