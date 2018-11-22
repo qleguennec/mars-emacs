@@ -277,9 +277,8 @@ mars-map/ function")
 
   ;; Editor features
   (use-package counsel-projectile
-    :straight (:host github :repo "ericdanan/counsel-projectile"
-		     :fork (:repo "qleguennec/counsel-projectile"))
-
+    :straight (:host github :repo "ericdanan/counsel-projectile")
+    
     :config
     (setq projectile-globally-ignored-directories
 	  (append projectile-globally-unignored-directories '("straight" "node_modules")))
