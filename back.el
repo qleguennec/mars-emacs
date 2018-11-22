@@ -1,0 +1,15 @@
+(defmacro mars-ivy-eval-and-prompt (expr)
+  (with-temp-buffer
+    (dolist (line (eval expr))
+      (insert (format "%s" line))
+      (newline))
+    (switch-to-buffer-other-window (current-buffer))
+    (swiper)
+    (move-beginning-of-line nil)
+    (set-mark-command nil)
+    (move-end-of-line nil)
+    (setq deactivate-mark nil)
+    (print-region (point) (mark))
+    (eval-region (point) (mark))))
+
+(mars-ivy-eval-and-prompt (directory-files "~"))
