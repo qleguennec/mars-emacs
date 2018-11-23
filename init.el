@@ -273,6 +273,9 @@ mars-map/ function")
   (magit-wip-mode 1)
   (setq magit-display-buffer-function 'magit-display-buffer-same-window-except-diff-v1)
 
+  ;; Refresh after a save.
+  (add-hook 'after-save-hook #'magit-refresh)
+
   :general
   (mars-map/git
     "g" 'magit-status
