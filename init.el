@@ -36,6 +36,15 @@ even if it does not countain a vcs subdir.")
       use-package-verbose t
       straight-default-vc 'git)
 
+(defun mars-reload-init-file ()
+  "Reload init.el."
+  (interactive)
+  (straight-transaction
+    (straight-mark-transaction-as-init)
+    (message "Reloading init.el...")
+    (load user-init-file nil 'nomessage)
+    (message "Reloading init.el... done.")))
+
 ;; Custom org install
 (require 'subr-x)
 
@@ -423,8 +432,7 @@ mars-map/ function")
   :hook (lispy-mode . lispyville-mode)
   :config (lispyville-set-key-theme '(slurp/barf-lispy
 				      text-objects
-				      lispyville-prettify
-				      atom-motions)))
+				      lispyville-prettify)))
 
 ;; Completion
 (use-package company
