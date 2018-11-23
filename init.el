@@ -8,9 +8,6 @@ even if it does not countain a vcs subdir.")
 ;; Do not load package.el
 (setq package-enable-at-startup nil)
 
-;; Don't ask for confirmation for .dir-locals
-(advice-add 'risky-local-variable-p :override #'ignore)
-
 ;; Save customs in a seperate file
 (setq custom-file (expand-file-name
                    (format "custom-%d-%d.el" (emacs-pid) (random))
