@@ -35,7 +35,6 @@ even if it does not countain a vcs subdir.")
     (load user-init-file nil 'nomessage)
     (message "Reloading init.el... done.")))
 
-
 (straight-use-package 'use-package)
 
 (setq straight-use-package-by-default t
@@ -436,9 +435,18 @@ mars-map/ function")
 
 (use-package lispyville
   :hook (lispy-mode . lispyville-mode)
-  :config (lispyville-set-key-theme '(slurp/barf-lispy
-				      text-objects
-				      lispyville-prettify)))
+  :config
+  (setq lispyville-motions-put-into-special t
+	lispyville-commands-put-into-special t)
+  (lispyville-set-key-theme '(slurp/barf-lispy
+			      text-objects
+			      lispyville-prettify
+			      escape))
+  :general
+  (:keymaps 'lispyville-mode-map
+   :states 'normal
+   "(" 'lispyville-backward-up-list
+   ")" 'lispyville-up-list))
 
 ;; Completion
 (use-package company
@@ -613,6 +621,9 @@ Lisp function does not specify a special indentation."
 
 ;; Highlight lisp expressions
 (show-paren-mode 1)
+
+;; Highlight current line
+(global-hl-line-mode 1)
 
 (setq show-paren-style 'expression)
 
