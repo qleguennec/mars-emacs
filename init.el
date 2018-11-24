@@ -26,6 +26,16 @@ even if it does not countain a vcs subdir.")
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
+(defun mars-reload-init-file ()
+  "Reload init.el, marking it as a straight transaction."
+  (interactive)
+  (straight-transaction
+    (straight-mark-transaction-as-init)
+    (message "Reloading init.el...")
+    (load user-init-file nil 'nomessage)
+    (message "Reloading init.el... done.")))
+
+
 (straight-use-package 'use-package)
 
 (setq straight-use-package-by-default t
@@ -33,14 +43,9 @@ even if it does not countain a vcs subdir.")
       use-package-verbose t
       straight-default-vc 'git)
 
-(defun mars-reload-init-file ()
-  "Reload init.el."
-  (interactive)
-  (straight-transaction
-    (straight-mark-transaction-as-init)
-    (message "Reloading init.el...")
-    (load user-init-file nil 'nomessage)
-    (message "Reloading init.el... done.")))
+;; Enable checking for system packages
+(use-package use-package-ensure-system-package
+  :demand t)
 
 ;; Custom org install
 (require 'subr-x)
@@ -163,7 +168,8 @@ mars-map/ function")
 	  ("h" . "help")
 	  ("i" . "ivy")
 	  ("g" . "git")
-	  ("o" . "org")))
+	  ("o" . "org")
+	  ("a" . "applications")))
 
   ;; Defines general definers for each prefix in mars-general-prefixes.
   (eval `(progn
@@ -255,8 +261,8 @@ mars-map/ function")
   :demand t
   :after counsel
   :config
-  (setq counsel-describe-function-function #'helpful-function)
-  counsel-describe-variable-function #'helpful-variable
+  (setq counsel-describe-function-function #'helpful-function
+	counsel-describe-variable-function #'helpful-variable)
 
   :general
   (mars-map/help
@@ -542,11 +548,48 @@ mars-map/ function")
   :disabled
   :init (global-origami-mode 1))
 
+;; Applications
+
+;; Mail reader
+(use-package mu4e
+  :ensure-system-package mu
+  :commands 'mu4e
+  :init (setq mail-user-agent 'mu4e-user-agent)
+  :config
+  (setq
+   mu4e-completing-read-function 'ivy-completing-read
+   mu4e-maildir "~/.mail"
+   mu4e-get-mail-command "mbsync -a"
+   mu4e-sent-messages-behavior 'delete
+   mu4e-contexts
+   `(,(make-mu4e-context
+       :name "Gmail"
+       :match-func (lambda (msg)
+		     (when msg
+		       (string-prefix-p "Gmail"
+					(mu4e-message-field msg :maildir))))
+       :vars '((mu4e-trash-folder . "/gmail/Trash")
+	       (mu4e-sent-folder . "/gmail/Sent")
+	       (mu4e-drafts-folder . "/gmail/Drafts")
+	       (user-mail-address . "quentin.leguennec1@gmail.com")
+	       (user-full-name . "Quentin Le Guennec")
+	       (smtpmail-smtp-user . "quentin.leguennec1")
+	       (smtpmail-default-smtp-server . "smtp.gmail.com")
+	       (smtpmail-smtp-server . "smtp.gmail.com")
+	       (smtpmail-smtp-service . 587)))))
+  :general
+  (mars-map/applications "m" 'mu4e)
+  (:keymaps 'mu4e-headers-mode-map
+	    :states 'normal
+	    "g r" 'mu4e-update-mail-and-index))
+
 ;; Font
 (setq mars-font "Hack")
 (setq mars-font-height 105)
 (set-face-attribute 'default nil :family mars-font :height mars-font-height)
 
-;; Open init.el on startup
+;; Starts emacs server
+(server-start)
 
+;; Open init.el on startup
 (find-file user-init-file)
