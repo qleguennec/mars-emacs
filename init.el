@@ -388,7 +388,6 @@ mars-map/ function")
 (use-package dumb-jump
   :config
   (setq dumb-jump-selector 'ivy)
-  
   :general
   (mars-map
     "g d" 'dumb-jump-go
@@ -425,29 +424,6 @@ mars-map/ function")
    "v" 'er/expand-region
    "V" 'er/contract-region))
 
-;; Simpler lisp editing
-
-(use-package lispy
-  :hook (emacs-lisp-mode . lispy-mode)
-  :config
-  (add-hook 'lispy-mode-hook #'turn-off-smartparens-mode)
-  (add-hook 'lispy-mode-hook #'turn-off-smartparens-strict-mode))
-
-(use-package lispyville
-  :hook (lispy-mode . lispyville-mode)
-  :config
-  (setq lispyville-motions-put-into-special t
-	lispyville-commands-put-into-special t)
-  (lispyville-set-key-theme '(slurp/barf-lispy
-			      text-objects
-			      lispyville-prettify
-			      escape))
-  :general
-  (:keymaps 'lispyville-mode-map
-   :states 'normal
-   "(" 'lispyville-backward-up-list
-   ")" 'lispyville-up-list))
-
 ;; Completion
 (use-package company
   :demand t
@@ -456,7 +432,6 @@ mars-map/ function")
 ;; Jump on things
 (use-package avy
   :config (avy-setup-default)
-
   :general
   (mars-map
     "J" 'avy-goto-line-below
@@ -480,6 +455,28 @@ mars-map/ function")
 ;; Language packages
 
 (use-feature lisp
+  :init
+  (use-package lispy
+    :hook (emacs-lisp-mode . lispy-mode)
+    :config
+    (add-hook 'lispy-mode-hook #'turn-off-smartparens-mode)
+    (add-hook 'lispy-mode-hook #'turn-off-smartparens-strict-mode))
+
+  (use-package lispyville
+    :hook (lispy-mode . lispyville-mode)
+    :config
+    (setq lispyville-motions-put-into-special t
+	  lispyville-commands-put-into-special t)
+    (lispyville-set-key-theme '(slurp/barf-lispy
+				text-objects
+				lispyville-prettify
+				escape))
+    :general
+    (:keymaps 'lispyville-mode-map
+     :states 'normal
+     "(" 'lispyville-backward-up-list
+     ")" 'lispyville-up-list))
+
   :init/el-patch
   ;; From https://github.com/raxod502/radian/blob/dc22d0524481b45dd3097bf5d9d4f2cd7ad3bad9/radian-emacs/radian-elisp.el#L21-L116
   ;; Fix the indentation of keyword lists in Emacs Lisp. See [1] and [2].
@@ -604,7 +601,7 @@ Lisp function does not specify a special indentation."
   (use-package company-lsp)
 
   (use-package lsp-intellij
-    :demand t
+    :commands 'lsp-intellij-enable
     :init
     (add-hook 'java-mode-hook #'lsp-intellij-enable)
     :config
