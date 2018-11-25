@@ -199,6 +199,7 @@ mars-map/ function")
 (use-feature org
   :init
   (use-package org
+    :defer 3
     :config
     (setq org-directory "~/org")
 
@@ -208,6 +209,7 @@ mars-map/ function")
 
   ;; Per-project org things
   (use-package org-projectile
+    :after org
     :config
     (org-projectile-per-project)
     (setq org-agenda-files (append org-agenda-files (org-projectile-todo-files)))
@@ -215,11 +217,10 @@ mars-map/ function")
 
 ;; Prettier org
 (use-package org-bullets
-  :demand t
   :config (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 
 ;; Restart emacs
-(use-package restart-emacs :demand t)
+(use-package restart-emacs)
 
 ;; Candidate selection
 
@@ -257,9 +258,8 @@ mars-map/ function")
 
 ;; Displays helpful documentation
 (use-package helpful
-  :demand t
   :after counsel
-  :config
+  :init
   (setq counsel-describe-function-function #'helpful-function
 	counsel-describe-variable-function #'helpful-variable)
 
@@ -376,6 +376,7 @@ mars-map/ function")
     (evil-collection-init))
 
   (use-package evil-magit
+    :after magit
     :demand t))
 
 (use-package flycheck
@@ -650,11 +651,16 @@ Lisp function does not specify a special indentation."
   :disabled
   :init (global-origami-mode 1))
 
-;; Applications
+;; Shell
+(use-feature eshell
+  :general
+  (mars-map/applications
+    "e" 'eshell))
 
 ;; Mail reader
 (use-package mu4e
   :ensure-system-package mu
+  :defer 5
   :commands 'mu4e
   :init (setq mail-user-agent 'mu4e-user-agent)
   :config
