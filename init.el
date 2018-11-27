@@ -187,7 +187,11 @@ mars-map/ function")
     "p" 'previous-buffer
     "n" 'next-buffer
     "k" 'kill-buffer
-    "b" 'counsel-ibuffer)
+    "b" 'counsel-ibuffer
+    "e" (lambda ()
+	  (interactive)
+	  (switch-to-buffer "*el scratch*")
+	  (emacs-lisp-mode 1)))
 
   (mars-map/eval
     "b" 'eval-buffer
@@ -282,6 +286,11 @@ mars-map/ function")
   (mars-map/git
     "g" 'magit-status
     "s" 'magit-stage))
+
+;; Disable built in emacs vc as we have magit for that
+(use-feature vc-hooks
+  :config
+  (setq vc-handled-backends nil))
 
 ;; File management
 
@@ -571,7 +580,6 @@ Lisp function does not specify a special indentation."
 	      (current-column)))
 	   (t $else)))))))
 
-;; javascript
 (use-feature javascript
   :init
   (setq js-indent-level 2)
@@ -585,7 +593,25 @@ Lisp function does not specify a special indentation."
   (use-package prettier-js
     :init (add-hook 'rjsx-mode-hook 'prettier-js-mode)
     :config
-    (setq prettier-js-command "prettier_d")))
+    (setq prettier-js-command "prettier_d")
+
+  
+    ;; Package `tern' provides a static code analyzer for JavaScript. This
+    ;; includes ElDoc and jump-to-definition out of the box.
+    (use-package tern
+      :demand t
+      :after rjsx-mode
+      :config
+      (add-hook 'js2-mode-hook #'tern-mode))
+    
+    ;; Package `company-tern' provides a Company backend which uses Tern.
+    (use-package company-tern
+      :demand t
+      :after (:all rjsx-mode company tern)
+      :config
+      (add-hook 'js2-mode-hook
+		(lambda () (setq-local company-backends
+				       (push 'company-tern company-backends)))))))
 
 ;; lsp
 (use-feature lsp
