@@ -207,8 +207,7 @@ mars-map/ function")
    ;; No unwanted splitting
    (setq
     shackle-select-reused-windows t
-    shackle-inhibit-window-quit-on-same-windows t
-    shackle-default-rule '(:same t)))
+    shackle-inhibit-window-quit-on-same-windows t))
 
 ;; Org mode
 (use-feature org
@@ -276,7 +275,7 @@ mars-map/ function")
   :init
   (setq counsel-describe-function-function #'helpful-function
 	counsel-describe-variable-function #'helpful-variable)
-  (push '(".*\\*helpful.*\\*.*" :regexp t :align right :size 0.3) shackle-rules)
+  (push '(".*\\*helpful.*\\*" :regexp t :align right :size 0.3) shackle-rules)
 
   :general
   (mars-map/help
@@ -297,7 +296,7 @@ mars-map/ function")
   (add-hook 'after-save-hook #'magit-refresh)
 
   ;; Pops magit in another window
-  (push '(".*magit.*" :regexp t :align right :size 0.4) shackle-rules)
+  (push '("magit: .*" :regexp t :align right :size 0.4) shackle-rules)
 
   :general
   (mars-map/git
