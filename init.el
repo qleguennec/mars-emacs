@@ -205,8 +205,10 @@ mars-map/ function")
    :config
    (shackle-mode 1)
    ;; No unwanted splitting
-   (setq shackle-rules '(("*undo-tree*" :popup t :align 'left :size 0.4))
-	 shackle-default-rule '(:select t :same t)))
+   (setq
+    shackle-select-reused-windows t
+    shackle-inhibit-window-quit-on-same-windows t
+    shackle-default-rule '(:same t)))
 
 ;; Org mode
 (use-feature org
@@ -271,10 +273,10 @@ mars-map/ function")
 
 ;; Displays helpful documentation
 (use-package helpful
-  :after counsel
   :init
   (setq counsel-describe-function-function #'helpful-function
 	counsel-describe-variable-function #'helpful-variable)
+  (push '(".*\\*helpful.*\\*.*" :regexp t :align right :size 0.3) shackle-rules)
 
   :general
   (mars-map/help
@@ -286,10 +288,16 @@ mars-map/ function")
   (global-magit-file-mode 1)
   ;; Auto commits in wip refs
   (magit-wip-mode 1)
-  (setq magit-display-buffer-function 'magit-display-buffer-same-window-except-diff-v1)
+  (setq
+   magit-display-buffer-function 'magit-display-buffer-same-window-except-diff-v1
+   ;; Always save everything before opening a magit buffer
+   magit-save-repository-buffers 'dontask)
 
   ;; Refresh after a save.
   (add-hook 'after-save-hook #'magit-refresh)
+
+  ;; Pops magit in another window
+  (push '(".*magit.*" :regexp t :align right :size 0.4) shackle-rules)
 
   :general
   (mars-map/git
@@ -370,11 +378,11 @@ mars-map/ function")
       [remap evil-search-forward] 'swiper)
 
     (mars-map
-      ;; Window motion
-      "C-h" 'evil-window-left
-      "C-l" 'evil-window-right
-      "C-j" 'evil-window-down
-      "C-k" 'evil-window-up)
+      ;; Window resizing
+      "C-h" 'shrink-window-horizontally
+      "C-l" 'enlarge-window-horizontally
+      "C-j" 'shrink-window
+      "C-k" 'enlarge-window)
 
     (mars-map/windows
       ;; Window motion
@@ -399,12 +407,14 @@ mars-map/ function")
 
 (use-package undo-tree
   :demand t
-  :config (global-undo-tree-mode 1)
+  :config
+  (global-undo-tree-mode 1)
+  (push '(".*\\*undo-tree\\*.*" :regexp t :align left :size 0.1) shackle-rules)
+
   :general
-  (:keymaps 'undo-tree-map
-   :states 'normal
-   "u" 'undo-tree-undo
-   "U" 'undo-tree-redo))
+  (mars-map
+    "U" 'undo-tree-visualize
+    "u" 'undo-tree-undo))
 
 (use-package flycheck
   :init
@@ -702,15 +712,39 @@ Lisp function does not specify a special indentation."
   :demand t
   :hook (emacs-lisp-mode . rainbow-delimiters-mode))
 
-(use-package origami
-  :disabled
-  :init (global-origami-mode 1))
+(use-package ace-window
+  :config
+  (setq aw-keys '(?a ?s ?d ?f ?h ?j ?k ?l))
+  :general
+  (mars-map/windows
+    "w" 'ace-window))
+
+;; Applications
 
 ;; Shell
 (use-feature eshell
+  :config
+  (push '(eshell-mode :popup t) shackle-rules)
+  (setq
+   ;; Send inpupt to suprocesses
+   eshell-send-direct-to-subprocesses t)
+
+  (defun mars-eshell-new-buffer ()
+    "Open a new eshell buffer if one already exists"
+    (interactive)
+    (let ((eshell-buffers-count
+	   (thread-last (buffer-list)
+	     (seq-filter (lambda (buffer) (string-match ".*\\*eshell.*\\*"
+							(buffer-name buffer))))
+	     (length))))
+      (unless (zerop eshell-buffers-count)
+	(setq eshell-buffer-name
+	      (format "*eshell-%d*" eshell-buffers-count))))
+    (eshell))
+
   :general
   (mars-map/applications
-    "e" 'eshell))
+    "e" 'mars-eshell-new-buffer))
 
 ;; Mail reader
 (use-package mu4e
