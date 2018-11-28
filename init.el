@@ -199,6 +199,15 @@ mars-map/ function")
     "f" 'eval-defun
     "e" 'eval-expression))
 
+;; Enforces popup rules
+ (use-package shackle
+   :demand t
+   :config
+   (shackle-mode 1)
+   ;; No unwanted splitting
+   (setq shackle-rules '(("*undo-tree*" :popup t :align 'left :size 0.4))
+	 shackle-default-rule '(:select t :same t)))
+
 ;; Org mode
 (use-feature org
   :init
@@ -356,8 +365,8 @@ mars-map/ function")
     (define-key evil-motion-state-map " " nil)
 
     :general
-    ;; Remaps evil-search-forward to swiper
     (mars-map
+      ;; Remaps evil-search-forward to swiper
       [remap evil-search-forward] 'swiper)
 
     (mars-map
@@ -388,13 +397,21 @@ mars-map/ function")
     :after magit
     :demand t))
 
+(use-package undo-tree
+  :demand t
+  :config (global-undo-tree-mode 1)
+  :general
+  (:keymaps 'undo-tree-map
+   :states 'normal
+   "u" 'undo-tree-undo
+   "U" 'undo-tree-redo))
+
 (use-package flycheck
   :init
   (global-flycheck-mode 1)
   :config
   (setq-default flycheck-disabled-checkers '(emacs-lisp emacs-lisp-checkdoc)))
 
-;; Surround things.
 (use-package dumb-jump
   :config
   (setq dumb-jump-selector 'ivy)
@@ -424,6 +441,7 @@ mars-map/ function")
 	revert-without-query '(".*"))
   (global-auto-revert-mode 1))
 
+;; Surround things.
 (use-package evil-surround
   :demand t
   :config (global-evil-surround-mode 1))
@@ -435,9 +453,20 @@ mars-map/ function")
    "V" 'er/contract-region))
 
 ;; Completion
-(use-package company
-  :demand t
-  :config (global-company-mode 1))
+(use-feature completion
+  :init
+  (use-package company
+    :defer 3
+    :config
+    ;; Always display the entire suggestion list onscreen, placing it
+    ;; above the cursor if necessary.
+    (setq company-tooltip-minimum company-tooltip-limit)
+    (global-company-mode 1))
+
+  (use-package company-prescient
+    :demand t
+    :after company
+    :config (company-prescient-mode 1)))
 
 ;; Jump on things
 (use-package avy
@@ -586,7 +615,7 @@ Lisp function does not specify a special indentation."
 
   (use-package rjsx-mode
     :init
-    (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode))
+    (add-hook 'js2-mode-hook 'rjsx-mode)
     :config
     (flycheck-select-checker 'javascript-eslint))
 
