@@ -651,6 +651,9 @@ Lisp function does not specify a special indentation."
 		(lambda () (setq-local company-backends
 				       (push 'company-tern company-backends)))))))
 
+(use-package yaml-mode
+  :config (setq yaml-indent-offset 4))
+
 ;; lsp
 (use-feature lsp
   :init
