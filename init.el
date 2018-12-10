@@ -624,14 +624,33 @@ Lisp function does not specify a special indentation."
 
   (use-package rjsx-mode
     :init
-    (add-hook 'js2-mode-hook 'rjsx-mode)
+    (defun mars/eslint-locate ()
+      (let* ((root (locate-dominating-file
+		    (or (buffer-file-name) default-directory)
+		    "node_modules"))
+	     (eslint (and root
+			  (expand-file-name "node_modules/eslint/bin/eslint.js"
+					    root))))
+	(when (and eslint (file-executable-p eslint))
+	  (setq-local flycheck-javascript-eslint-executable eslint))))
+
+    (add-hook 'rjsx-mode #'mars/eslint-locate)
+
     :config
-    (flycheck-select-checker 'javascript-eslint))
+    (add-to-list 'auto-mode-alist '("\\.jsx\\'" . rjsx-mode))
+    (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode)) 
+    (flycheck-add-mode 'javascript-eslint 'rjsx-mode))
+  
 
   (use-package prettier-js
-    :init (add-hook 'rjsx-mode-hook 'prettier-js-mode)
+    :init (add-hook 'rjsx-mode-hook #'prettier-js-mode)
     :config
     (setq prettier-js-command "prettier_d")
+    (setq prettier-js-args '("--trailing-comma" "es5"
+			     "--print-width" "120"
+			     "--single-quote" "true"
+			     "--tab-width" "2"
+			     "--use-tabs" "false"))
 
   
     ;; Package `tern' provides a static code analyzer for JavaScript. This
@@ -724,12 +743,21 @@ Lisp function does not specify a special indentation."
 ;; Applications
 
 ;; Shell
+
+(use-feature comint
+  :general
+  (:keymaps 'comint-mode-map
+   :states '(normal insert)
+   "<up>" 'comint-previous-input
+   "<down>" 'comint-next-input))
+
 (use-feature eshell
   :config
   (push '(eshell-mode :popup t) shackle-rules)
   (setq
    ;; Send inpupt to suprocesses
-   eshell-send-direct-to-subprocesses t)
+   eshell-send-direct-to-subprocesses nil
+   eshell-buffer-maximum-lines 5000)
 
   (defun mars-eshell-new-buffer ()
     "Open a new eshell buffer if one already exists"
@@ -747,6 +775,10 @@ Lisp function does not specify a special indentation."
   :general
   (mars-map/applications
     "e" 'mars-eshell-new-buffer))
+
+(use-feature shell
+  :config
+  (add-hook 'shell-mode-hook 'solaire-mode))
 
 ;; Mail reader
 (use-package mu4e
