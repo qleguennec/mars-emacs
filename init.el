@@ -809,6 +809,8 @@ Lisp function does not specify a special indentation."
   :general
   (:keymaps 'comint-mode-map
    :states '(normal insert)
+   "C-j" nil
+   "C-k" nil
    "<up>" 'comint-previous-input
    "<down>" 'comint-next-input))
 
@@ -836,13 +838,6 @@ Lisp function does not specify a special indentation."
   :general
   (mars-map/applications
     "e" 'mars-eshell-new-buffer))
-
-(use-feature shell
-  :general
-  (:keymaps 'shell-mode-map
-   :states '(normal-insert)
-   "<up>" 'shell-backward-command
-   "<down>" 'shell-forward-command))
 
 ;; Mail reader
 (use-package mu4e
