@@ -303,13 +303,20 @@ mars-map/ function")
     "g" 'magit-status
     "s" 'magit-stage))
 
+;; Github things
+(use-package magithub
+  :disabled
+  :demand t
+  :config
+  (magithub-feature-autoinject t)
+  (setq magithub-dir mars-workspace))
+
 ;; Disable built in emacs vc as we have magit for that
 (use-feature vc-hooks
   :config
   (setq vc-handled-backends nil))
 
-;; File management
-
+;; Project management
 (use-feature projectile
   :init
   (use-package projectile :config (projectile-mode 1))
@@ -540,7 +547,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-feature lisp
   :init
   (use-package lispy
-    :hook (emacs-lisp-mode . lispy-mode)
+    :hook ((emacs-lisp-mode clojure-mode cider-mode) . lispy-mode)
     :config
     (add-hook 'lispy-mode-hook #'turn-off-smartparens-mode)
     (add-hook 'lispy-mode-hook #'turn-off-smartparens-strict-mode))
@@ -733,6 +740,25 @@ Lisp function does not specify a special indentation."
 	  company-lsp-cache-candidates t)
     (add-hook 'before-save-hook #'lsp-format-buffer)))
 
+(use-feature clojure
+  :init
+  (use-package cider
+    :config
+    (setq clojure-indent-style :align-arguments)
+
+    :general
+    (:keymaps 'cider-repl-mode-map
+     :states '(normal insert)
+     "<up>" 'cider-repl-backward-input
+     "<down>" 'cider-repl-forward-input))
+
+  (use-package clj-refactor
+    :hook (clojure-mode-hook . clj-refactor-mode)
+
+    :config
+    ;; Automatically sort project dependencies after changing them.
+    (setq cljr-auto-sort-project-dependencies t)))
+
 ;; UI
 
 ;; Use ediff on the same window
@@ -765,8 +791,8 @@ Lisp function does not specify a special indentation."
   (add-hook 'magit-mode-hook #'solaire-mode))
 
 (use-package rainbow-delimiters
-  :demand t
-  :hook (emacs-lisp-mode . rainbow-delimiters-mode))
+  :commands rainbow-delimiters-mode
+  :hook ((clojure-mode cider-mode emacs-lisp-mode) . rainbow-delimiters-mode))
 
 (use-package ace-window
   :config
@@ -812,8 +838,11 @@ Lisp function does not specify a special indentation."
     "e" 'mars-eshell-new-buffer))
 
 (use-feature shell
-  :config
-  (add-hook 'shell-mode-hook 'solaire-mode))
+  :general
+  (:keymaps 'shell-mode-map
+   :states '(normal-insert)
+   "<up>" 'shell-backward-command
+   "<down>" 'shell-forward-command))
 
 ;; Mail reader
 (use-package mu4e
