@@ -322,7 +322,6 @@ mars-map/ function")
   :init
   (use-package projectile :config (projectile-mode 1))
 
-  ;; Editor features
   (use-package counsel-projectile
     :straight (:host github :repo "ericdanan/counsel-projectile")
     
@@ -355,7 +354,6 @@ mars-map/ function")
       "p" 'counsel-projectile-switch-project)))
 
 ;; Editor features
-
 (setq
  ;; Don't break lines
  truncate-lines t
@@ -368,7 +366,7 @@ mars-map/ function")
   (use-package evil
     :demand t
     :init
-    ;; Required for evil-collection
+    ;; Required for ollection
     (setq evil-want-integration t
 	  evil-want-keybinding nil)
 
@@ -410,14 +408,14 @@ mars-map/ function")
 
   (use-package evil-magit
     :after magit
-    :demand t)
+    :demand t))
 
-  (use-package smerge-mode
-    :after magit
-    :init
-    (defhydra unpackaged/smerge-hydra
-      (:color pink :hint nil :post (smerge-auto-leave))
-      "
+(use-package smerge-mode
+  :after magit
+  :init
+  (defhydra unpackaged/smerge-hydra
+    (:color pink :hint nil :post (smerge-auto-leave))
+    "
 ^Move^       ^Keep^               ^Diff^                 ^Other^
 ^^-----------^^-------------------^^---------------------^^-------
 _n_ext       _b_ase               _<_: upper/base        _C_ombine
@@ -426,26 +424,26 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ^^           _a_ll                _R_efine
 ^^           _RET_: current       _E_diff
 "
-      ("n" smerge-next)
-      ("p" smerge-prev)
-      ("b" smerge-keep-base)
-      ("u" smerge-keep-upper)
-      ("l" smerge-keep-lower)
-      ("a" smerge-keep-all)
-      ("RET" smerge-keep-current)
-      ("\C-m" smerge-keep-current)
-      ("<" smerge-diff-base-upper)
-      ("=" smerge-diff-upper-lower)
-      (">" smerge-diff-base-lower)
-      ("R" smerge-refine)
-      ("E" smerge-ediff)
-      ("C" smerge-combine-with-next)
-      ("r" smerge-resolve)
-      ("k" smerge-kill-current)
-      ("q" nil "cancel" :color blue))
-    :hook (magit-diff-visit-file . (lambda ()
-                                     (when smerge-mode
-                                       (unpackaged/smerge-hydra/body))))))
+    ("n" smerge-next)
+    ("p" smerge-prev)
+    ("b" smerge-keep-base)
+    ("u" smerge-keep-upper)
+    ("l" smerge-keep-lower)
+    ("a" smerge-keep-all)
+    ("RET" smerge-keep-current)
+    ("\C-m" smerge-keep-current)
+    ("<" smerge-diff-base-upper)
+    ("=" smerge-diff-upper-lower)
+    (">" smerge-diff-base-lower)
+    ("R" smerge-refine)
+    ("E" smerge-ediff)
+    ("C" smerge-combine-with-next)
+    ("r" smerge-resolve)
+    ("k" smerge-kill-current)
+    ("q" nil "cancel" :color blue))
+  :hook (magit-diff-visit-file . (lambda ()
+                                   (when smerge-mode
+                                     (unpackaged/smerge-hydra/body)))))
 
 (use-package undo-tree
   :demand t
@@ -753,10 +751,12 @@ Lisp function does not specify a special indentation."
   (use-package cider
     :config
     (setq clojure-indent-style :align-arguments)
+    (push '(".*\\*cider-error\\*.*" :regexp t :align bottom :size 0.3) shackle-rules)
 
     :general
     (:keymaps 'cider-repl-mode-map
      :states '(normal insert)
+     "RET" 'cider-repl-return
      "<up>" 'cider-repl-backward-input
      "<down>" 'cider-repl-forward-input))
 
