@@ -727,8 +727,9 @@ Lisp function does not specify a special indentation."
   :init
   (use-package lsp-mode
     :config
-    (add-hook 'before-save-hook (lambda () (when (eq major-mode 'lsp-mode)
-					     (lsp-format-buffer)))))
+    (add-hook 'before-save-hook
+	      (lambda () (when (eq major-mode 'lsp-mode)
+			   (lsp-format-buffer)))))
 
   (use-package lsp-ui
     :init
@@ -744,8 +745,7 @@ Lisp function does not specify a special indentation."
     (setq lsp-intellij-server-port 4224)
     (push 'company-lsp company-backends)
     (setq company-lsp-enable-snippet t
-	  company-lsp-cache-candidates t)
-    (add-hook 'before-save-hook #'lsp-format-buffer)))
+	  company-lsp-cache-candidates t)))
 
 (use-feature clojure
   :init
