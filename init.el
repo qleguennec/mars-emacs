@@ -766,6 +766,14 @@ Lisp function does not specify a special indentation."
     ;; Automatically sort project dependencies after changing them.
     (setq cljr-auto-sort-project-dependencies t)))
 
+;; sql
+(use-package ob-sql-mode
+  :demand t
+  :init
+  (setq org-confirm-babel-evaluate
+      (lambda (lang body)
+        (not (string= lang "sql-mode")))))
+
 ;; UI
 
 ;; Use ediff on the same window
