@@ -213,13 +213,39 @@ mars-map/ function")
 (use-feature org
   :init
   (use-package org
-    :defer 3
+    :demand t
     :config
-    (setq org-directory "~/org")
 
+    (defun mars/open-gtd-file ()
+      "Open gtd file."
+      (interactive)
+      (find-file org-todo-file))
+    
+    (defun mars/org-insert-heading ()
+      "Inserts a new heading and switches to insert state."
+      (interactive)
+      (outline-insert-heading)
+      (evil-insert 1))
+
+    (setq
+     org-directory "~/org"
+     org-default-notes-file (expand-file-name "gtd.org" org-directory)
+     org-blank-before-new-entry t)
+
+    (setq org-capture-templates
+	  '(("t" "Todo" entry (file+headline "~/org/gtd.org" "Tasks")
+             "* TODO %?\n  %i\n  %a")
+	    ("j" "Journal" entry (file+olp+datetree "~/org/journal.org")
+             "* %?\nEntered on %U\n  %i\n  %a")))
+    
     :general
     (mars-map/org
-      "c" 'org-capture))
+      "c" 'org-capture
+      "t" 'mars/open-todo-file)
+
+    (:keymaps 'org-mode-map
+     :states '(normal visual)
+     "RET" 'mars/org-insert-heading))
 
   ;; Per-project org things
   (use-package org-projectile
@@ -227,11 +253,11 @@ mars-map/ function")
     :config
     (org-projectile-per-project)
     (setq org-agenda-files (append org-agenda-files (org-projectile-todo-files)))
-    (push (org-projectile-project-todo-entry) org-capture-templates)))
+    (push (org-projectile-project-todo-entry) org-capture-templates))
 
-;; Prettier org
-(use-package org-bullets
-  :init (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+  ;; Prettier org
+  (use-package org-bullets
+    :config (add-hook 'org-mode-hook #'org-bullets-mode)))
 
 ;; Restart emacs
 (use-package restart-emacs)
@@ -777,6 +803,11 @@ Lisp function does not specify a special indentation."
 
 ;; UI
 
+;; Font
+(setq mars-font "Hack")
+(setq mars-font-height 105)
+(set-face-attribute 'default nil :family mars-font :height mars-font-height)
+
 ;; Use ediff on the same window
 (setq ediff-window-setup-function 'ediff-setup-windows-plain)
 
@@ -798,7 +829,8 @@ Lisp function does not specify a special indentation."
 
 (use-package centered-cursor-mode
   :demand t
-  :config (global-centered-cursor-mode 1))
+  :config
+  (global-centered-cursor-mode 1))
 
 (use-package solaire-mode
   :demand t
@@ -888,11 +920,6 @@ Lisp function does not specify a special indentation."
   (:keymaps 'mu4e-headers-mode-map
    :states 'normal
    "g r" 'mu4e-update-mail-and-index))
-
-;; Font
-(setq mars-font "Hack")
-(setq mars-font-height 105)
-(set-face-attribute 'default nil :family mars-font :height mars-font-height)
 
 ;; Starts emacs server
 (server-start)
