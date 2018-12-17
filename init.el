@@ -256,7 +256,8 @@ mars-map/ function")
     (mars-map/ivy
       "y" 'counsel-yank-pop
       "c" 'counsel-command-history
-      "o" 'counsel-mark-ring))
+      "o" 'counsel-mark-ring
+      "s" 'counsel-shell-history))
 
   (use-package ivy-hydra)
 
