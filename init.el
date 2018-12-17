@@ -678,11 +678,17 @@ Lisp function does not specify a special indentation."
 	  (setq-local flycheck-javascript-eslint-executable eslint))))
 
     (add-hook 'rjsx-mode #'mars/eslint-locate)
+    (add-hook 'rjsx-mode #'tern-mode)
 
     :config
     (add-to-list 'auto-mode-alist '("\\.jsx\\'" . rjsx-mode))
     (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode)) 
-    (flycheck-add-mode 'javascript-eslint 'rjsx-mode))
+    (flycheck-add-mode 'javascript-eslint 'rjsx-mode)
+
+    :general
+    (:keymaps 'rjsx-mode-map
+     :states '(normal visual)
+     "g d" 'tern-find-definition))
   
 
   (use-package prettier-js
