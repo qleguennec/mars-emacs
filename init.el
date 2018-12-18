@@ -231,7 +231,7 @@ mars-map/ function")
 
 ;; Prettier org
 (use-package org-bullets
-  :config (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+  :init (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 
 ;; Restart emacs
 (use-package restart-emacs)
@@ -668,6 +668,8 @@ Lisp function does not specify a special indentation."
   (use-package rjsx-mode
     :init
     (defun mars/eslint-locate ()
+      "Locates eslint in current directory"
+      (interactive)
       (let* ((root (locate-dominating-file
 		    (or (buffer-file-name) default-directory)
 		    "node_modules"))
@@ -715,9 +717,8 @@ Lisp function does not specify a special indentation."
       :demand t
       :after (:all rjsx-mode company tern)
       :config
-      (add-hook 'js2-mode-hook
-		(lambda () (setq-local company-backends
-				       (push 'company-tern company-backends)))))))
+
+      (add-to-list 'company-backends 'company-tern))))
 
 (use-package yaml-mode
   :config (setq yaml-indent-offset 4))
