@@ -219,7 +219,7 @@ mars-map/ function")
     (defun mars/open-gtd-file ()
       "Open gtd file."
       (interactive)
-      (find-file org-todo-file))
+      (find-file org-default-notes-file))
 
     (defun mars/org-insert-heading ()
       "Inserts a new heading and switches to insert state."
@@ -227,24 +227,48 @@ mars-map/ function")
       (outline-insert-heading)
       (evil-insert 1))
 
+    (defun mars/org-window-setup ()
+      "Changes ui of an org mode buffer"
+      (setq-local left-margin-width 4)
+      (setq-local right-margin-width 4))
+
+    (add-hook 'org-mode-hook #'mars/org-window-setup)
+
     (setq
      org-directory "~/org"
-     org-default-notes-file (expand-file-name "gtd.org" org-directory))
+     org-default-notes-file (expand-file-name "gtd.org" org-directory)
+     org-startup-indented t
+     org-ellipsis "  "
+     org-pretty-entities t
+     org-agenda-block-separator ""
+     org-fontify-whole-heading-line t
+     org-fontify-done-headline t
+     org-fontify-quote-and-verse-blocks t
+     org-todo-keywords '((sequence "TODO(t)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")))
 
     (setq org-capture-templates
-	  '(("t" "Todo" entry (file+headline "~/org/gtd.org" "Tasks")
-             "* TODO %?\n  %i\n  %a")
-	    ("j" "Journal" entry (file+olp+datetree "~/org/journal.org")
-             "* %?\nEntered on %U\n  %i\n  %a")))
+	  '(("t" "Todo" entry (file+headline "" "Inbox")
+             "* TODO"
+	     :empty-lines 1)))
+
+    (setq org-global-properties
+	  '(("Effort_ALL" . "1 2 3 5 7")))
 
     :general
     (mars-map/org
       "c" 'org-capture
-      "t" 'mars/open-todo-file)
+      "t" 'mars/open-gtd-file)
 
     (:keymaps 'org-mode-map
      :states '(normal visual)
-     "RET" 'mars/org-insert-heading))
+     "RET" 'mars/org-insert-heading
+     "<up>" 'org-metaup
+     "<down>" 'org-metadown
+     "<left>" 'org-shiftleft
+     "<right>" 'org-shiftright
+
+     [remap evil-shift-left] 'org-metaleft
+     [remap evil-shift-right] 'org-metaright))
 
   ;; Per-project org things
   (use-package org-projectile
@@ -838,7 +862,7 @@ Lisp function does not specify a special indentation."
 
 (use-package doom-themes
   :demand t
-  :config (load-theme 'doom-city-lights 'confirm))
+  :config (load-theme 'doom-solarized-light 'confirm))
 
 (use-package doom-modeline
   :demand t
@@ -866,10 +890,14 @@ Lisp function does not specify a special indentation."
   (mars-map/windows
     "w" 'ace-window))
 
+(use-package hide-mode-line
+  :init
+  (add-hook 'org-mode-hook #'hide-mode-line-mode)
+  (add-hook 'magit-mode-hook #'hide-mode-line-mode))
+
 ;; Applications
 
 ;; Shell
-
 (use-feature comint
   :general
   (:keymaps 'comint-mode-map
