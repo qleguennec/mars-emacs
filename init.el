@@ -220,7 +220,7 @@ mars-map/ function")
       "Open gtd file."
       (interactive)
       (find-file org-todo-file))
-    
+
     (defun mars/org-insert-heading ()
       "Inserts a new heading and switches to insert state."
       (interactive)
@@ -229,15 +229,14 @@ mars-map/ function")
 
     (setq
      org-directory "~/org"
-     org-default-notes-file (expand-file-name "gtd.org" org-directory)
-     org-blank-before-new-entry t)
+     org-default-notes-file (expand-file-name "gtd.org" org-directory))
 
     (setq org-capture-templates
 	  '(("t" "Todo" entry (file+headline "~/org/gtd.org" "Tasks")
              "* TODO %?\n  %i\n  %a")
 	    ("j" "Journal" entry (file+olp+datetree "~/org/journal.org")
              "* %?\nEntered on %U\n  %i\n  %a")))
-    
+
     :general
     (mars-map/org
       "c" 'org-capture
@@ -273,7 +272,7 @@ mars-map/ function")
 
     :general
     (mars-map "'" 'ivy-resume)
-  
+
     (mars-map/help
       "f" 'counsel-describe-function
       "v" 'counsel-describe-variable
@@ -350,7 +349,7 @@ mars-map/ function")
 
   (use-package counsel-projectile
     :straight (:host github :repo "ericdanan/counsel-projectile")
-    
+
     :config
     (setq projectile-globally-ignored-directories
 	  (append projectile-globally-unignored-directories '("straight" "node_modules")))
@@ -380,6 +379,24 @@ mars-map/ function")
       "p" 'counsel-projectile-switch-project)))
 
 ;; Editor features
+(define-minor-mode mars/before-save-mode
+  "Minor mode to automatically fix whitespace on save.
+If enabled, then saving the buffer deletes all trailing
+whitespace and ensures that the file ends with exactly one
+newline."
+  nil nil nil
+  (if mars/before-save-mode
+      (progn
+        (setq require-final-newline t)
+        (add-hook 'before-save-hook #'delete-trailing-whitespace nil 'local))
+    (setq require-final-newline nil)
+    (remove-hook 'before-save-hook #'delete-trailing-whitespace 'local)))
+
+(define-globalized-minor-mode mars/before-save-global-mode
+  mars/before-save-mode mars/before-save-mode)
+
+(mars/before-save-global-mode 1)
+
 (setq
  ;; Don't break lines
  truncate-lines t
@@ -708,14 +725,14 @@ Lisp function does not specify a special indentation."
 
     :config
     (add-to-list 'auto-mode-alist '("\\.jsx\\'" . rjsx-mode))
-    (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode)) 
+    (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode))
     (flycheck-add-mode 'javascript-eslint 'rjsx-mode)
 
     :general
     (:keymaps 'rjsx-mode-map
      :states '(normal visual)
      "g d" 'tern-find-definition))
-  
+
 
   (use-package prettier-js
     :init (add-hook 'rjsx-mode-hook #'prettier-js-mode)
@@ -727,7 +744,7 @@ Lisp function does not specify a special indentation."
 			     "--tab-width" "2"
 			     "--use-tabs" "false"))
 
-  
+
     ;; Package `tern' provides a static code analyzer for JavaScript. This
     ;; includes ElDoc and jump-to-definition out of the box.
     (use-package tern
@@ -735,7 +752,7 @@ Lisp function does not specify a special indentation."
       :after rjsx-mode
       :config
       (add-hook 'js2-mode-hook #'tern-mode))
-    
+
     ;; Package `company-tern' provides a Company backend which uses Tern.
     (use-package company-tern
       :demand t
