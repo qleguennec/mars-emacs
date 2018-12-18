@@ -256,7 +256,7 @@ mars-map/ function")
 
   ;; Prettier org
   (use-package org-bullets
-    :config (add-hook 'org-mode-hook #'org-bullets-mode)))
+    :init (add-hook 'org-mode-hook #'org-bullets-mode)))
 
 ;; Restart emacs
 (use-package restart-emacs)
