@@ -182,6 +182,13 @@ mars-map/ function")
 		     :prefix ,(concat "SPC " (car prefix)))))
 	      mars-general-prefixes)))
 
+  (general-create-definer mars/map
+    :keymaps 'override
+    :states '(normal motion emacs))
+
+  (mars/map
+   "C-s" 'save-buffer)
+
   (mars-map/buffers
     "s" 'save-buffer
     "p" 'previous-buffer
@@ -266,6 +273,9 @@ mars-map/ function")
      "<down>" 'org-metadown
      "<left>" 'org-shiftleft
      "<right>" 'org-shiftright
+
+     "C-j" nil
+     "C-k" nil
 
      [remap evil-shift-left] 'org-metaleft
      [remap evil-shift-right] 'org-metaright))
@@ -869,7 +879,7 @@ Lisp function does not specify a special indentation."
 ;; UI
 
 ;; Font
-(setq mars-font "Hack")
+(setq mars-font "Deja Vu Sans Mono")
 (setq mars-font-height 105)
 (set-face-attribute 'default nil :family mars-font :height mars-font-height)
 
