@@ -294,6 +294,30 @@ mars-map/ function")
     :config
     (ivy-mode 1)
 
+    (defun mars/relative-filename-without-extension (filename)
+      (interactive)
+      (file-name-sans-extension
+       (file-relative-name
+	(expand-file-name filename (projectile-project-root)))))
+
+    (defun mars/insert-relative-filename-without-extension (filename)
+      (interactive)
+      (insert
+       (mars/relative-filename-without-extension filename)))
+
+    (ivy-add-actions
+     #'counsel-find-file
+     '(("p" mars/insert-relative-filename-without-extension "insert relative")))
+
+    (ivy-add-actions
+     #'counsel-projectile-find-file
+     '(("p" mars/insert-relative-filename-without-extension "insert relative")))
+
+    (ivy-add-actions
+     #'counsel-projectile
+     '(("p" mars/insert-relative-filename-without-extension "insert relative")))
+
+
     :general
     (mars-map "'" 'ivy-resume)
 
@@ -744,8 +768,8 @@ Lisp function does not specify a special indentation."
 	(when (and eslint (file-executable-p eslint))
 	  (setq-local flycheck-javascript-eslint-executable eslint))))
 
-    (add-hook 'rjsx-mode #'mars/eslint-locate)
-    (add-hook 'rjsx-mode #'tern-mode)
+    (add-hook 'rjsx-mode-hook #'mars/eslint-locate)
+    (add-hook 'rjsx-mode-hook #'tern-mode)
 
     :config
     (add-to-list 'auto-mode-alist '("\\.jsx\\'" . rjsx-mode))
