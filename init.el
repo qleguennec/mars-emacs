@@ -88,6 +88,16 @@ Inserted by installing org-mode or when a release is made."
      :straight nil
      ,@args))
 
+(defun mars/set-pretty-symbols (mode symbols)
+  ;; TODO fix it. should be a macro.
+  "Set symbols SYMBOLS for quoted mode MODE."
+  (let ((alist (mapcar (lambda (symbol)
+			 `(,(car symbol) . (string-to-char (cdr symbol))))
+		       symbols)))
+    (add-hook mode (lambda ()
+		     (interactive)
+		     (setq-local prettify-symbols-alist alist)))))
+
 ;; Provies better defaults for emacs cache files
 (use-package no-littering :demand t)
 
@@ -263,7 +273,7 @@ mars-map/ function")
 
     :general
     (mars-map/org
-      "c" 'org-capture
+      "c" 'counsel-org-capture
       "t" 'mars/open-gtd-file)
 
     (:keymaps 'org-mode-map
@@ -276,6 +286,8 @@ mars-map/ function")
 
      "C-j" nil
      "C-k" nil
+
+     "?" 'counsel-org-goto
 
      [remap evil-shift-left] 'org-metaleft
      [remap evil-shift-right] 'org-metaright))
@@ -642,6 +654,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :config
   (require 'smartparens-config))
 
+;; Prettier code
+(global-prettify-symbols-mode 1)
+
 ;; Language packages
 
 (use-feature lisp
@@ -777,6 +792,9 @@ Lisp function does not specify a special indentation."
 					    root))))
 	(when (and eslint (file-executable-p eslint))
 	  (setq-local flycheck-javascript-eslint-executable eslint))))
+
+    (mars/set-pretty-symbols 'rjsx-mode '(("() =>" . "λ")
+					  ("===" . "⩶")))
 
     (add-hook 'rjsx-mode-hook #'mars/eslint-locate)
     (add-hook 'rjsx-mode-hook #'tern-mode)
