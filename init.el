@@ -241,15 +241,8 @@ mars-map/ function")
     (defun mars/org-insert-heading ()
       "Inserts a new heading and switches to insert state."
       (interactive)
-      (outline-insert-heading)
+      (org-insert-heading-respect-content)
       (evil-insert 1))
-
-    (defun mars/org-window-setup ()
-      "Changes ui of an org mode buffer"
-      (setq-local left-margin-width 4)
-      (setq-local right-margin-width 4))
-
-    (add-hook 'org-mode-hook #'mars/org-window-setup)
 
     (setq
      org-directory "~/org"
@@ -629,7 +622,12 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (use-package company-prescient
     :demand t
     :after company
-    :config (company-prescient-mode 1)))
+    :config (company-prescient-mode 1))
+
+  (use-package yasnippet
+    :init (yas-global-mode 1))
+
+  (use-package yasnippet-snippets))
 
 ;; Jump on things
 (use-package avy
@@ -1017,6 +1015,10 @@ Lisp function does not specify a special indentation."
   (:keymaps 'mu4e-headers-mode-map
    :states 'normal
    "g r" 'mu4e-update-mail-and-index))
+
+(use-package olivetti
+  :hook (org-mode-hook . olivetti-mode)
+  :config (olivetti-set-width 120))
 
 ;; Starts emacs server
 (server-start)
