@@ -161,6 +161,10 @@ Inserted by installing org-mode or when a release is made."
   (general-create-definer mars-map
     :states '(normal motion emacs))
 
+  (general-create-definer mars-leader-map
+    :states '(normal motion emacs)
+    :prefix "m")
+
   ;; Unbind SPC
   (mars-map "SPC" nil)
 
@@ -197,7 +201,7 @@ mars-map/ function")
     :states '(normal motion emacs))
 
   (mars/map
-   "C-s" 'save-buffer)
+    "C-s" 'save-buffer)
 
   (mars-map/buffers
     "s" 'save-buffer
@@ -254,11 +258,14 @@ mars-map/ function")
      org-fontify-whole-heading-line t
      org-fontify-done-headline t
      org-fontify-quote-and-verse-blocks t
-     org-todo-keywords '((sequence "TODO(t)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")))
+     org-todo-keywords '((sequence "TODO" "DOING" "WAITING" "DONE" "CANCELLED")))
 
     (setq org-capture-templates
-	  '(("t" "Todo" entry (file+headline "" "Inbox")
-             "* TODO"
+	  '(("o" "Thought" entry (file+olp+datetree "" "Thoughts")
+             "* %?"
+	     :empty-lines 1)
+	    ("t" "Todo" entry (file+headline "" "Inbox")
+             "* TODO "
 	     :empty-lines 1)))
 
     (setq org-global-properties
@@ -268,6 +275,14 @@ mars-map/ function")
     (mars-map/org
       "c" 'counsel-org-capture
       "t" 'mars/open-gtd-file)
+
+    (mars-leader-map
+      :keymaps 'org-mode-map
+      "t" (lambda () (interactive) (org-todo "TODO"))
+      "w" (lambda () (interactive) (org-todo "WAITING"))
+      "o" (lambda () (interactive) (org-todo "DOING"))
+      "d" (lambda () (interactive) (org-todo "DONE"))
+      "c" (lambda () (interactive) (org-todo "CANCELLED")))
 
     (:keymaps 'org-mode-map
      :states '(normal visual)
