@@ -251,6 +251,7 @@ mars-map/ function")
     (setq
      org-directory "~/org"
      org-default-notes-file (expand-file-name "gtd.org" org-directory)
+     org-agenda-files (list org-default-notes-file)
      org-startup-indented t
      org-ellipsis "  "
      org-pretty-entities t
@@ -298,7 +299,13 @@ mars-map/ function")
      "?" 'counsel-org-goto
 
      [remap evil-shift-left] 'org-metaleft
-     [remap evil-shift-right] 'org-metaright))
+     [remap evil-shift-right] 'org-metaright)
+
+    (:keymaps 'org-agenda-mode-map
+     :states '(normal visual emacs)
+     "RET" 'org-agenda-switch-to
+     "j" 'org-agenda-next-line
+     "k" 'org-agenda-previous-line))
 
   ;; Per-project org things
   (use-package org-projectile
