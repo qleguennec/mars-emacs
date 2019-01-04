@@ -253,7 +253,6 @@ mars-map/ function")
      org-default-notes-file (expand-file-name "gtd.org" org-directory)
      org-agenda-files (list org-default-notes-file)
      org-startup-indented t
-     org-ellipsis "  "
      org-pretty-entities t
      org-agenda-block-separator ""
      org-fontify-whole-heading-line t
@@ -917,7 +916,7 @@ Lisp function does not specify a special indentation."
 ;; UI
 
 ;; Font
-(setq mars-font "Deja Vu Sans Mono")
+(setq mars-font "Fira Mono")
 (setq mars-font-height 105)
 (set-face-attribute 'default nil :family mars-font :height mars-font-height)
 
