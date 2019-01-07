@@ -250,7 +250,7 @@ mars-map/ function")
 
     (setq
      org-directory "~/org"
-     org-default-notes-file (expand-file-name "gtd.org" org-directory)
+     org-default-notes-file (expand-file-name "gtd.org.gpg" org-directory)
      org-agenda-files (list org-default-notes-file)
      org-startup-indented t
      org-pretty-entities t
@@ -258,7 +258,7 @@ mars-map/ function")
      org-fontify-whole-heading-line t
      org-fontify-done-headline t
      org-fontify-quote-and-verse-blocks t
-     org-todo-keywords '((sequence "TODO" "DOING" "WAITING" "DONE" "CANCELLED")))
+     org-todo-keywords '((sequence "TODO" "DOING" "WAITING" "|" "DONE" "CANCELLED")))
 
     (setq org-capture-templates
 	  '(("o" "Thought" entry (file+olp+datetree "" "Thoughts")
