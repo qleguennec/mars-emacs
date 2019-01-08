@@ -258,6 +258,7 @@ mars-map/ function")
      org-fontify-whole-heading-line t
      org-fontify-done-headline t
      org-fontify-quote-and-verse-blocks t
+     org-reverse-note-order t
      org-todo-keywords '((sequence "TODO" "DOING" "WAITING" "|" "DONE" "CANCELLED")))
 
     (setq org-capture-templates
@@ -420,6 +421,8 @@ mars-map/ function")
   :config
   (magithub-feature-autoinject t)
   (setq magithub-dir mars-workspace))
+
+(use-package git-auto-commit-mode)
 
 ;; Disable built in emacs vc as we have magit for that
 (use-feature vc-hooks
