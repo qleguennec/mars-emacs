@@ -35,6 +35,11 @@ even if it does not countain a vcs subdir.")
     (load user-init-file nil 'nomessage)
     (message "Reloading init.el... done.")))
 
+(defun mars/yank-current-file ()
+  "Yanks the current edited file path"
+  (interactive)
+  (kill-new buffer-file-name))
+
 (straight-use-package 'use-package)
 
 (setq straight-use-package-by-default t
@@ -317,7 +322,9 @@ mars-map/ function")
 
   ;; Prettier org
   (use-package org-bullets
-    :init (add-hook 'org-mode-hook #'org-bullets-mode)))
+    :init (add-hook 'org-mode-hook #'org-bullets-mode))
+
+  (use-package org-pomodoro))
 
 ;; Restart emacs
 (use-package restart-emacs)
@@ -461,7 +468,7 @@ mars-map/ function")
     :general
     (mars-map
       "SPC SPC" 'counsel-projectile
-      "?" 'counsel-projectile-ag)
+      "?" 'counsel-projectile-git-grep)
     (mars-map/projects
       "p" 'counsel-projectile-switch-project)))
 
