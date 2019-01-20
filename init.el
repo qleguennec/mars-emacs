@@ -271,7 +271,12 @@ mars-map/ function")
 	  '(("j" "Journal" entry (file+olp+datetree "" "Journal")
              "* %?"
 	     :empty-lines 1)
+
 	    ("t" "Todo" entry (file+headline "" "Inbox")
+             "* TODO "
+	     :empty-lines 1)
+
+	    ("t" "Todo" entry (file+headline "" "Courses")
              "* TODO "
 	     :empty-lines 1)))
 
