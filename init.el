@@ -437,6 +437,10 @@ mars-map/ function")
    "<escape>" nil
    "q" 'magit-mode-bury-buffer))
 
+;; git forges
+(use-package forge
+  :after magit)
+
 ;; Github things
 (use-package magithub
   :disabled
@@ -1013,7 +1017,7 @@ Lisp function does not specify a special indentation."
   :init (setq size mars-font-height
 	      default-size mars-font-height)
   :demand t
-  :config (load-theme 'kaolin-valley-dark 'confirm))
+  :config (load-theme 'kaolin-aurora 'confirm))
 
 (use-package highlight-numbers
   :config (add-hook 'prog-mode-hook 'highlight-numbers-mode))
@@ -1048,11 +1052,17 @@ Lisp function does not specify a special indentation."
   (add-to-list 'all-the-icons-ivy-buffer-commands 'counsel-projectile-switch-to-buffer)
   (all-the-icons-ivy-setup))
 
-(use-package dired-sidebar
-  :commands (dired-sidebar-toggle-sidebar)
+(use-package neotree
+  :config
+  (setq neo-theme 'icons)
+
+  (advice-add 'counsel-projectile :after 'neo-global--do-autorefresh)
+  (advice-add 'counsel-projectile-switch-to-buffer :after 'neo-global--do-autorefresh)
+  (advice-add 'counsel-projectile-git-grep :after 'neo-global--do-autorefresh)
+
   :general
   (mars-map/applications
-    "t" 'dired-sidebar-toggle-sidebar))
+    "t" 'neotree-toggle))
 
 (use-package centered-cursor-mode
   :demand t
@@ -1161,4 +1171,5 @@ Lisp function does not specify a special indentation."
 
 ;; Open init.el on startup
 (find-file user-init-file)
-(dired-sidebar-show-sidebar)
+(neotree)
+(other-window 1)
