@@ -227,6 +227,7 @@ mars-map/ function")
 
 ;; Enforces popup rules
  (use-package shackle
+   :disabled
    :demand t
    :config
    (shackle-mode 1)
@@ -395,7 +396,7 @@ mars-map/ function")
   :init
   (setq counsel-describe-function-function #'helpful-function
 	counsel-describe-variable-function #'helpful-variable)
-  (push '(".*\\*helpful.*\\*" :regexp t :align right :size 0.3) shackle-rules)
+  ;; (push '(".*\\*helpful.*\\*" :regexp t :align right :size 0.3) shackle-rules)
 
   :general
   (mars-map/help
@@ -416,7 +417,7 @@ mars-map/ function")
   (add-hook 'after-save-hook #'magit-refresh)
 
   ;; Pops magit in another window
-  (push '("magit: .*" :regexp t :align right :size 0.4) shackle-rules)
+  ;; (push '("magit: .*" :regexp t :align right :size 0.4) shackle-rules)
 
   :general
   (mars-map/git
@@ -549,7 +550,7 @@ newline."
       ;; Window manipulation
       "v" (lambda () (interactive) (evil-window-vsplit) (other-window 1))
       "s" (lambda () (interactive) (evil-window-split) (other-window 1))
-      "q" 'evil-window-delete))
+      "q" 'delete-window))
 
   (use-package evil-collection
     :demand t
@@ -618,7 +619,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :demand t
   :config
   (global-undo-tree-mode 1)
-  (push '(".*\\*undo-tree\\*.*" :regexp t :align left :size 0.1) shackle-rules)
+  ;; (push '(".*\\*undo-tree\\*.*" :regexp t :align left :size 0.1) shackle-rules)
 
   :general
   (mars-map
@@ -942,7 +943,7 @@ Lisp function does not specify a special indentation."
   (use-package cider
     :config
     (setq clojure-indent-style :align-arguments)
-    (push '(".*\\*cider-error\\*.*" :regexp t :align bottom :size 0.3) shackle-rules)
+    ;; (push '(".*\\*cider-error\\*.*" :regexp t :align bottom :size 0.3) shackle-rules)
 
     :general
     (:keymaps 'cider-repl-mode-map
@@ -973,7 +974,7 @@ Lisp function does not specify a special indentation."
   :straight (:host github :repo "nabeix/emacs-font-size" :branch "master")
   :demand t
   :init
-  (setq mars-font "Fira Mono"
+  (setq mars-font "Inconsolata"
 	mars-font-height 10)
   (set-face-attribute 'default nil
 		      :family mars-font)
@@ -1006,6 +1007,10 @@ Lisp function does not specify a special indentation."
 (use-package all-the-icons
   :demand t)
 
+(use-package all-the-icons-dired
+  :demand t
+  :config (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
+
 (use-package all-the-icons-ivy
   :demand t
   :custom (all-the-icons-ivy-buffer-commands '(ivy-switch-buffer-other-window))
@@ -1016,6 +1021,12 @@ Lisp function does not specify a special indentation."
   (add-to-list 'all-the-icons-ivy-file-commands 'counsel-dired-jump)
   (add-to-list 'all-the-icons-ivy-buffer-commands 'counsel-projectile-switch-to-buffer)
   (all-the-icons-ivy-setup))
+
+(use-package dired-sidebar
+  :commands (dired-sidebar-toggle-sidebar)
+  :general
+  (mars-map/applications
+    "t" 'dired-sidebar-toggle-sidebar))
 
 (use-package centered-cursor-mode
   :demand t
@@ -1058,7 +1069,7 @@ Lisp function does not specify a special indentation."
 
 (use-feature eshell
   :config
-  (push '(eshell-mode :popup t) shackle-rules)
+  ;; (push '(eshell-mode :popup t) shackle-rules)
   (setq
    ;; Send inpupt to suprocesses
    eshell-send-direct-to-subprocesses nil
