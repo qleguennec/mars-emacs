@@ -337,6 +337,9 @@ mars-map/ function")
 ;; Restart emacs
 (use-package restart-emacs)
 
+;; Edit root file
+(use-package sudo-edit)
+
 ;; Candidate selection
 
 ;; Select things in the minibuffer
