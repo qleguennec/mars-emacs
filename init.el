@@ -213,7 +213,7 @@ mars-map/ function")
     "p" 'previous-buffer
     "n" 'next-buffer
     "k" 'kill-buffer
-    "b" 'counsel-ibuffer
+    "b" 'counsel-projectile-switch-to-buffer
     "e" (lambda ()
 	  (interactive)
 	  (switch-to-buffer "*el scratch*")
@@ -267,7 +267,7 @@ mars-map/ function")
      org-todo-keywords '((sequence "TODO" "DOING" "WAITING" "|" "DONE" "CANCELLED")))
 
     (setq org-capture-templates
-	  '(("o" "Thought" entry (file+olp+datetree "" "Thoughts")
+	  '(("j" "Journal" entry (file+olp+datetree "" "Journal")
              "* %?"
 	     :empty-lines 1)
 	    ("t" "Todo" entry (file+headline "" "Inbox")
@@ -324,7 +324,9 @@ mars-map/ function")
   (use-package org-bullets
     :init (add-hook 'org-mode-hook #'org-bullets-mode))
 
-  (use-package org-pomodoro))
+  (use-package org-pomodoro)
+
+  (use-package org-trello))
 
 ;; Restart emacs
 (use-package restart-emacs)
@@ -419,7 +421,12 @@ mars-map/ function")
   :general
   (mars-map/git
     "g" 'magit-status
-    "s" 'magit-stage))
+    "s" 'magit-stage)
+
+  (:keymaps 'magit-mode-map
+   :states 'normal
+   "<escape>" nil
+   "q" 'magit-mode-bury-buffer))
 
 ;; Github things
 (use-package magithub
@@ -428,6 +435,9 @@ mars-map/ function")
   :config
   (magithub-feature-autoinject t)
   (setq magithub-dir mars-workspace))
+
+;; Create URLs for files and commits in GitHub/Bitbucket/GitLab/... repositories
+(use-package git-link)
 
 (use-package git-auto-commit-mode)
 
@@ -443,6 +453,7 @@ mars-map/ function")
 
   (use-package counsel-projectile
     :straight (:host github :repo "ericdanan/counsel-projectile")
+    :demand t
 
     :config
     (setq projectile-globally-ignored-directories
@@ -514,7 +525,6 @@ newline."
     ;; See https://stackoverflow.com/questions/33061926/emacs-evil-space-as-a-prefix-key-in-motion-state#33408565
     (define-key evil-motion-state-map " " nil)
 
-    :general
     (mars-map
       ;; Remaps evil-search-forward to swiper
       [remap evil-search-forward] 'swiper)
@@ -524,7 +534,10 @@ newline."
       "C-h" 'shrink-window-horizontally
       "C-l" 'enlarge-window-horizontally
       "C-j" 'shrink-window
-      "C-k" 'enlarge-window)
+      "C-k" 'enlarge-window
+
+      ;; Custom bindings on unused evil bingins
+      "!" 'universal-argument)
 
     (mars-map/windows
       ;; Window motion
@@ -545,7 +558,26 @@ newline."
 
   (use-package evil-magit
     :after magit
-    :demand t))
+    :demand t)
+
+  (use-package evil-args
+    :config
+    (define-key evil-inner-text-objects-map "a" 'evil-inner-arg)
+    (define-key evil-outer-text-objects-map "a" 'evil-outer-arg)
+
+    :general
+    (mars/map :prefix "g"
+      "l" 'evil-forward-arg
+      "h" 'evil-backward-arg
+      "a" 'evil-jump-out-args))
+
+  (use-package evil-exchange
+    :demand t
+    :general
+    (mars-map
+      :prefix "g"
+      "x" 'evil-exchange
+      "X" 'evil-exchange-cancel)))
 
 (use-package smerge-mode
   :after magit
@@ -660,6 +692,10 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
   (use-package yasnippet-snippets))
 
+(use-feature text
+  :init
+  (use-feature abbrev))
+
 ;; Jump on things
 (use-package avy
   :config (avy-setup-default)
@@ -682,6 +718,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (smartparens-global-strict-mode 1)
   :config
   (require 'smartparens-config))
+
+(use-package hungry-delete)
 
 ;; Prettier code
 (global-prettify-symbols-mode 1)
@@ -864,7 +902,12 @@ Lisp function does not specify a special indentation."
       :after (:all rjsx-mode company tern)
       :config
 
-      (add-to-list 'company-backends 'company-tern))))
+      (add-to-list 'company-backends 'company-tern)))
+
+  (use-package js2r-refactor
+    :straight (:host github :repo "magnars/js2-refactor.el" :branch "master")
+    :after 'rjsx-mode
+    :init (add-hook 'rjsx-mode-hook #'js2-refactor-mode)))
 
 (use-package yaml-mode
   :config (setq yaml-indent-offset 4))
@@ -926,9 +969,17 @@ Lisp function does not specify a special indentation."
 ;; UI
 
 ;; Font
-(setq mars-font "Fira Mono")
-(setq mars-font-height 105)
-(set-face-attribute 'default nil :family mars-font :height mars-font-height)
+(use-package font-size
+  :straight (:host github :repo "nabeix/emacs-font-size" :branch "master")
+  :demand t
+  :init
+  (setq mars-font "Fira Mono"
+	mars-font-height 10)
+  (set-face-attribute 'default nil
+		      :family mars-font)
+
+  :config
+  (font-size-init mars-font-height))
 
 ;; Use ediff on the same window
 (setq ediff-window-setup-function 'ediff-setup-windows-plain)
@@ -943,11 +994,28 @@ Lisp function does not specify a special indentation."
 
 (use-package doom-themes
   :demand t
-  :config (load-theme 'doom-solarized-light 'confirm))
+  :init (setq
+	 default-size mars-font-height
+	 size mars-font-height)
+  :config (load-theme 'doom-one 'confirm))
 
 (use-package doom-modeline
   :demand t
   :config (doom-modeline-init))
+
+(use-package all-the-icons
+  :demand t)
+
+(use-package all-the-icons-ivy
+  :demand t
+  :custom (all-the-icons-ivy-buffer-commands '(ivy-switch-buffer-other-window))
+  :config
+  (add-to-list 'all-the-icons-ivy-file-commands 'counsel-projectile-find-file)
+  (add-to-list 'all-the-icons-ivy-file-commands 'counsel-find-file)
+  (add-to-list 'all-the-icons-ivy-file-commands 'counsel-projectile)
+  (add-to-list 'all-the-icons-ivy-file-commands 'counsel-dired-jump)
+  (add-to-list 'all-the-icons-ivy-buffer-commands 'counsel-projectile-switch-to-buffer)
+  (all-the-icons-ivy-setup))
 
 (use-package centered-cursor-mode
   :demand t
@@ -1050,6 +1118,10 @@ Lisp function does not specify a special indentation."
 (use-package olivetti
   :hook (org-mode-hook . olivetti-mode)
   :config (olivetti-set-width 120))
+
+(use-package eboy
+  :straight (:host github :repo "vreeze/eboy" :branch "master")
+  :demand t)
 
 ;; Starts emacs server
 (server-start)
