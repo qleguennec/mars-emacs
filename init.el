@@ -982,8 +982,8 @@ Lisp function does not specify a special indentation."
   :straight (:host github :repo "nabeix/emacs-font-size" :branch "master")
   :demand t
   :init
-  (setq mars-font "Inconsolata"
-	mars-font-height 10)
+  (setq mars-font "DejaVu Sans Mono"
+	mars-font-height 9)
   (set-face-attribute 'default nil
 		      :family mars-font)
 
@@ -1001,16 +1001,34 @@ Lisp function does not specify a special indentation."
 
 (setq show-paren-style 'expression)
 
-(use-package doom-themes
-  :demand t
-  :init (setq
-	 default-size mars-font-height
-	 size mars-font-height)
-  :config (load-theme 'doom-one 'confirm))
-
 (use-package doom-modeline
+   :demand t
+   :config (doom-modeline-init))
+
+(use-package dracula-theme)
+
+(use-package darktooth-theme)
+
+(use-package kaolin-themes
+  :init (setq size mars-font-height
+	      default-size mars-font-height)
   :demand t
-  :config (doom-modeline-init))
+  :config (load-theme 'kaolin-valley-dark 'confirm))
+
+(use-package highlight-numbers
+  :config (add-hook 'prog-mode-hook 'highlight-numbers-mode))
+
+(use-package highlight-quoted
+  :commands highlight-quoted-mode
+  :hook ((clojure-mode cider-mode emacs-lisp-mode) . rainbow-delimiters-mode))
+
+(use-package highlight-defined
+  :commands highlight-defined-mode
+  :hook (emacs-lisp-mode . highlight-defined-mode))
+
+(use-package rainbow-delimiters
+  :commands rainbow-delimiters-mode
+  :hook ((clojure-mode cider-mode emacs-lisp-mode) . rainbow-delimiters-mode))
 
 (use-package all-the-icons
   :demand t)
@@ -1046,10 +1064,6 @@ Lisp function does not specify a special indentation."
   :config
   (add-hook 'minibuffer-setup-hook #'solaire-mode-in-minibuffer)
   (add-hook 'magit-mode-hook #'solaire-mode))
-
-(use-package rainbow-delimiters
-  :commands rainbow-delimiters-mode
-  :hook ((clojure-mode cider-mode emacs-lisp-mode) . rainbow-delimiters-mode))
 
 (use-package ace-window
   :config
@@ -1147,3 +1161,4 @@ Lisp function does not specify a special indentation."
 
 ;; Open init.el on startup
 (find-file user-init-file)
+(dired-sidebar-show-sidebar)
