@@ -213,7 +213,7 @@ mars-map/ function")
     "p" 'previous-buffer
     "n" 'next-buffer
     "k" 'kill-buffer
-    "b" 'counsel-projectile-switch-to-buffer
+    "b" 'ivy-switch-buffer
     "e" (lambda ()
 	  (interactive)
 	  (switch-to-buffer "*el scratch*")
@@ -329,12 +329,7 @@ mars-map/ function")
   ;; Prettier org
   (use-package org-bullets
     :init (add-hook 'org-mode-hook #'org-bullets-mode))
-
-  (use-package org-pomodoro)
-
-  (use-package org-trello))
-
-;; Restart emacs
+  )
 (use-package restart-emacs)
 
 ;; Edit root file
@@ -374,7 +369,9 @@ mars-map/ function")
 
 
     :general
-    (mars-map "'" 'ivy-resume)
+    (mars-map
+      "'" 'ivy-resume
+      "M-x" 'counsel-M-x)
 
     (mars-map/help
       "f" 'counsel-describe-function
@@ -397,7 +394,11 @@ mars-map/ function")
   (use-package ivy-prescient
     :demand t
     :config
-    (ivy-prescient-mode 1)))
+    (ivy-prescient-mode 1))
+
+  (use-package ivy-rich
+    :config
+    (ivy-rich-mode 1)))
 
 ;; Displays helpful documentation
 (use-package helpful
@@ -440,14 +441,6 @@ mars-map/ function")
 ;; git forges
 (use-package forge
   :after magit)
-
-;; Github things
-(use-package magithub
-  :disabled
-  :demand t
-  :config
-  (magithub-feature-autoinject t)
-  (setq magithub-dir mars-workspace))
 
 ;; Create URLs for files and commits in GitHub/Bitbucket/GitLab/... repositories
 (use-package git-link)
@@ -494,7 +487,8 @@ mars-map/ function")
       "SPC SPC" 'counsel-projectile
       "?" 'counsel-projectile-git-grep)
     (mars-map/projects
-      "p" 'counsel-projectile-switch-project)))
+      "p" 'counsel-projectile-switch-project
+      "b" 'counsel-projectile-switch-to-buffer)))
 
 ;; Editor features
 (define-minor-mode mars/before-save-mode
