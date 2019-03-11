@@ -703,8 +703,12 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :config (avy-setup-default)
   :general
   (mars-map
-    "J" 'avy-goto-line-below
-    "K" 'avy-goto-line-above))
+    :prefix "g"
+    "j" 'avy-goto-line-below
+    "k" 'avy-goto-line-above
+    "g" 'avy-goto-char
+    "w" 'avy-goto-word-0-below
+    "W" 'avy-goto-word-0-above))
 
 (use-package evil-snipe
   :demand t
