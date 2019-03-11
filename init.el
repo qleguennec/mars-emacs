@@ -567,18 +567,6 @@ newline."
     :after magit
     :demand t)
 
-  (use-package evil-args
-    :disabled
-    :config
-    (define-key evil-inner-text-objects-map "a" 'evil-inner-arg)
-    (define-key evil-outer-text-objects-map "a" 'evil-outer-arg)
-
-    :general
-    (mars/map :prefix "g"
-      "l" 'evil-forward-arg
-      "h" 'evil-backward-arg
-      "a" 'evil-jump-out-args))
-
   (use-package evil-exchange
     :demand t
     :general
