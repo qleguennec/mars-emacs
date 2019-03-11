@@ -568,6 +568,7 @@ newline."
     :demand t)
 
   (use-package evil-args
+    :disabled
     :config
     (define-key evil-inner-text-objects-map "a" 'evil-inner-arg)
     (define-key evil-outer-text-objects-map "a" 'evil-outer-arg)
@@ -584,7 +585,13 @@ newline."
     (mars-map
       :prefix "g"
       "x" 'evil-exchange
-      "X" 'evil-exchange-cancel)))
+      "X" 'evil-exchange-cancel))
+
+  (use-package targets
+    :straight (:host github :repo "noctuid/targets.el" :branch "baf1e9f19487085c17b59f9f28e3f46b360db475")
+    :demand t
+    :config
+    (targets-setup t)))
 
 (use-package smerge-mode
   :after magit
