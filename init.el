@@ -388,17 +388,16 @@ mars-map/ function")
 
   ;; Provide statistics for sorting/filtering
   (use-package prescient
-    :config
-    (prescient-persist-mode 1))
+    :config (prescient-persist-mode 1))
 
   (use-package ivy-prescient
     :demand t
-    :config
-    (ivy-prescient-mode 1))
+    :config (ivy-prescient-mode 1))
 
-  (use-package ivy-rich
-    :config
-    (ivy-rich-mode 1)))
+  (use-package ivy-filthy-rich
+    :straight (:host github :repo "casouri/ivy-filthy-rich")
+    :demand t
+    :config (ivy-filthy-rich-mode 1)))
 
 ;; Displays helpful documentation
 (use-package helpful
@@ -684,6 +683,12 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
     (setq company-tooltip-minimum company-tooltip-limit)
     (global-company-mode 1))
 
+  (use-package company-box
+    :hook (company-mode . company-box-mode)
+    :general
+    (:keymaps 'company-active-map
+      "RET" 'company-complete-selection))
+
   (use-package company-prescient
     :demand t
     :after company
@@ -704,9 +709,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :general
   (mars-map
     :prefix "g"
-    "j" 'avy-goto-line-below
-    "k" 'avy-goto-line-above
-    "g" 'avy-goto-char
+    "J" 'avy-goto-line-below
+    "K" 'avy-goto-line-above
     "w" 'avy-goto-word-0-below
     "W" 'avy-goto-word-0-above))
 
@@ -1045,18 +1049,6 @@ Lisp function does not specify a special indentation."
   (add-to-list 'all-the-icons-ivy-buffer-commands 'counsel-projectile-switch-to-buffer)
   (all-the-icons-ivy-setup))
 
-(use-package neotree
-  :config
-  (setq neo-theme 'icons)
-
-  (advice-add 'counsel-projectile :after 'neo-global--do-autorefresh)
-  (advice-add 'counsel-projectile-switch-to-buffer :after 'neo-global--do-autorefresh)
-  (advice-add 'counsel-projectile-git-grep :after 'neo-global--do-autorefresh)
-
-  :general
-  (mars-map/applications
-    "t" 'neotree-toggle))
-
 (use-package centered-cursor-mode
   :demand t
   :config
@@ -1164,5 +1156,3 @@ Lisp function does not specify a special indentation."
 
 ;; Open init.el on startup
 (find-file user-init-file)
-(neotree)
-(other-window 1)
