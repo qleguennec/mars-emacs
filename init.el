@@ -326,10 +326,13 @@ mars-map/ function")
     (setq org-agenda-files (append org-agenda-files (org-projectile-todo-files)))
     (push (org-projectile-project-todo-entry) org-capture-templates))
 
+  (use-package org-trello)
+
   ;; Prettier org
   (use-package org-bullets
-    :init (add-hook 'org-mode-hook #'org-bullets-mode))
-  )
+    :init (add-hook 'org-mode-hook #'org-bullets-mode)))
+
+
 (use-package restart-emacs)
 
 ;; Edit root file
@@ -439,6 +442,7 @@ mars-map/ function")
 
 ;; git forges
 (use-package forge
+  :disabled
   :after magit)
 
 ;; Create URLs for files and commits in GitHub/Bitbucket/GitLab/... repositories
@@ -488,6 +492,21 @@ mars-map/ function")
     (mars-map/projects
       "p" 'counsel-projectile-switch-project
       "b" 'counsel-projectile-switch-to-buffer)))
+
+(use-package buffer-expose
+  :straight (:host github :repo "clemera/buffer-expose")
+  :demand t
+  :config
+  (buffer-expose-mode 1)
+
+  :general
+  (:keymaps 'buffer-expose-grid-map
+   "h" 'buffer-expose-left-window
+   "j" 'buffer-expose-down-window
+   "k" 'buffer-expose-up-window
+   "l" 'buffer-expose-right-window
+   "(" 'buffer-expose-prev-page
+   ")" 'buffer-expose-next-page))
 
 ;; Editor features
 (define-minor-mode mars/before-save-mode
