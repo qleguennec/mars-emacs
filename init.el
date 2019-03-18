@@ -938,17 +938,19 @@ Lisp function does not specify a special indentation."
     :init
     (add-hook 'lsp-mode-hook #'lsp-ui-mode))
 
-  (use-package company-lsp)
+  (use-package company-lsp
+    :after 'company
+    :init (add-hook 'lsp-mode-hook (lambda ()
+				     (push 'company-lsp company-backends)
+				     (setq company-lsp-enable-snippet t
+					   company-lsp-cache-candidates t))))
 
   (use-package lsp-intellij
     :commands 'lsp-intellij-enable
     :init
     (add-hook 'java-mode-hook #'lsp-intellij-enable)
     :config
-    (setq lsp-intellij-server-port 4224)
-    (push 'company-lsp company-backends)
-    (setq company-lsp-enable-snippet t
-	  company-lsp-cache-candidates t)))
+    (setq lsp-intellij-server-port 4224)))
 
 (use-feature clojure
   :init
