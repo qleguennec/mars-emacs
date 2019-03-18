@@ -741,12 +741,18 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (setq evil-snipe-scope 'buffer)
   (setq evil-snipe-repeat-scope 'buffer))
 
-(use-package smartparens
-  :demand t
+(use-feature electric-mode
   :init
-  (smartparens-global-strict-mode 1)
+  (add-hook 'prog-mode-hook #'electric-pair-mode)
+  (add-hook 'prog-mode-hook #'electric-indent-mode))
+
+(use-package electric-operator
   :config
-  (require 'smartparens-config))
+  (add-hook 'prog-mode-hook #'electric-operator-mode)
+  (electric-operator-add-rules-for-mode 'prog-mode
+					(cons "=>" " => "))
+  (electric-operator-add-rules-for-mode 'emacs-lisp-mode
+					(cons "-" nil))
 
 (use-package hungry-delete)
 
@@ -754,14 +760,11 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (global-prettify-symbols-mode 1)
 
 ;; Language packages
-
 (use-feature lisp
   :init
   (use-package lispy
     :hook ((emacs-lisp-mode clojure-mode cider-mode) . lispy-mode)
     :config
-    (add-hook 'lispy-mode-hook #'turn-off-smartparens-mode)
-    (add-hook 'lispy-mode-hook #'turn-off-smartparens-strict-mode))
 
   (use-package lispyville
     :hook (lispy-mode . lispyville-mode)
@@ -896,7 +899,6 @@ Lisp function does not specify a special indentation."
 					  ("===" . "⩶")))
 
     (add-hook 'rjsx-mode-hook #'mars/eslint-locate)
-    (add-hook 'rjsx-mode-hook #'lsp)
 
     :config
     (add-to-list 'auto-mode-alist '("\\.jsx\\'" . rjsx-mode))
@@ -926,6 +928,7 @@ Lisp function does not specify a special indentation."
 
 (use-feature lsp
   :commands 'lsp
+  :hook prog-mode
   :init
   (use-package lsp-mode
     :config
@@ -934,23 +937,9 @@ Lisp function does not specify a special indentation."
 	      (lambda () (when (eq major-mode 'lsp-mode)
 			   (lsp-format-buffer)))))
 
-  (use-package lsp-ui
-    :init
-    (add-hook 'lsp-mode-hook #'lsp-ui-mode))
+  (use-package lsp-ui)
 
-  (use-package company-lsp
-    :after 'company
-    :init (add-hook 'lsp-mode-hook (lambda ()
-				     (push 'company-lsp company-backends)
-				     (setq company-lsp-enable-snippet t
-					   company-lsp-cache-candidates t))))
-
-  (use-package lsp-intellij
-    :commands 'lsp-intellij-enable
-    :init
-    (add-hook 'java-mode-hook #'lsp-intellij-enable)
-    :config
-    (setq lsp-intellij-server-port 4224)))
+  (use-package company-lsp))
 
 (use-feature clojure
   :init
@@ -1010,6 +999,12 @@ Lisp function does not specify a special indentation."
 (use-package doom-modeline
    :demand t
    :config (doom-modeline-init))
+
+(use-package focus
+  :demand t
+  :config
+  (add-to-list 'focus-mode-to-thing '(lsp-mode . lsp-folding-range))
+  (add-hook 'lsp-mode #'focus-mode))
 
 (use-package dracula-theme)
 
@@ -1113,6 +1108,13 @@ Lisp function does not specify a special indentation."
   :general
   (mars-map/applications
     "e" 'mars-eshell-new-buffer))
+
+(use-feature shell
+  :init
+  (push (cons "\\*shell.*\\*" display-buffer--same-window-action) display-buffer-alist)
+  (use-package shell-here)
+  :general
+  (mars-map/applications "s" 'shell-here))
 
 ;; Mail reader
 (use-package mu4e
