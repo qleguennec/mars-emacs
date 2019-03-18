@@ -695,18 +695,18 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-feature completion
   :init
   (use-package company
-    :defer 3
+    :demand t
     :config
     ;; Always display the entire suggestion list onscreen, placing it
     ;; above the cursor if necessary.
     (setq company-tooltip-minimum company-tooltip-limit)
-    (global-company-mode 1))
-
-  (use-package company-box
-    :hook (company-mode . company-box-mode)
+    (global-company-mode 1)
     :general
     (:keymaps 'company-active-map
-      "RET" 'company-complete-selection))
+     "RET" 'company-complete-selection))
+
+  (use-package company-box
+    :hook (company-mode . company-box-mode))
 
   (use-package company-prescient
     :demand t
@@ -871,6 +871,9 @@ Lisp function does not specify a special indentation."
 	      (current-column)))
 	   (t $else)))))))
 
+(use-package yaml-mode
+  :config (setq yaml-indent-offset 4))
+
 (use-feature javascript
   :init
   (setq js-indent-level 2)
@@ -893,7 +896,7 @@ Lisp function does not specify a special indentation."
 					  ("===" . "⩶")))
 
     (add-hook 'rjsx-mode-hook #'mars/eslint-locate)
-    (add-hook 'rjsx-mode-hook #'tern-mode)
+    (add-hook 'rjsx-mode-hook #'lsp)
 
     :config
     (add-to-list 'auto-mode-alist '("\\.jsx\\'" . rjsx-mode))
@@ -914,38 +917,19 @@ Lisp function does not specify a special indentation."
 			     "--print-width" "120"
 			     "--single-quote" "true"
 			     "--tab-width" "2"
-			     "--use-tabs" "false"))
-
-
-    ;; Package `tern' provides a static code analyzer for JavaScript. This
-    ;; includes ElDoc and jump-to-definition out of the box.
-    (use-package tern
-      :demand t
-      :after rjsx-mode
-      :config
-      (add-hook 'js2-mode-hook #'tern-mode))
-
-    ;; Package `company-tern' provides a Company backend which uses Tern.
-    (use-package company-tern
-      :demand t
-      :after (:all rjsx-mode company tern)
-      :config
-
-      (add-to-list 'company-backends 'company-tern)))
+			     "--use-tabs" "false")))
 
   (use-package js2r-refactor
     :straight (:host github :repo "magnars/js2-refactor.el" :branch "master")
     :after 'rjsx-mode
     :init (add-hook 'rjsx-mode-hook #'js2-refactor-mode)))
 
-(use-package yaml-mode
-  :config (setq yaml-indent-offset 4))
-
-;; lsp
 (use-feature lsp
+  :commands 'lsp
   :init
   (use-package lsp-mode
     :config
+    (require 'lsp-clients)
     (add-hook 'before-save-hook
 	      (lambda () (when (eq major-mode 'lsp-mode)
 			   (lsp-format-buffer)))))
