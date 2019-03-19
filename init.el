@@ -752,7 +752,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (electric-operator-add-rules-for-mode 'prog-mode
 					(cons "=>" " => "))
   (electric-operator-add-rules-for-mode 'emacs-lisp-mode
-					(cons "-" nil))
+					(cons "-" nil)))
 
 (use-package hungry-delete)
 
@@ -872,7 +872,7 @@ Lisp function does not specify a special indentation."
 	    (save-excursion
 	      (goto-char (+ 2 (elt state 1)))
 	      (current-column)))
-	   (t $else)))))))
+	   (t $else))))))))
 
 (use-package yaml-mode
   :config (setq yaml-indent-offset 4))
@@ -908,7 +908,7 @@ Lisp function does not specify a special indentation."
     :general
     (:keymaps 'rjsx-mode-map
      :states '(normal visual)
-     "g d" 'tern-find-definition))
+     "g d" 'lsp-ui-peek-find-definitions))
 
 
   (use-package prettier-js
@@ -1000,28 +1000,31 @@ Lisp function does not specify a special indentation."
    :demand t
    :config (doom-modeline-init))
 
-(use-package focus
+(use-package dracula-theme
   :demand t
-  :config
-  (add-to-list 'focus-mode-to-thing '(lsp-mode . lsp-folding-range))
-  (add-hook 'lsp-mode #'focus-mode))
-
-(use-package dracula-theme)
+  :init (setq size mars-font-height
+	      default-size mars-font-height)
+  :config (load-theme 'dracula 'confirm))
 
 (use-package darktooth-theme)
 
-(use-package kaolin-themes
-  :init (setq size mars-font-height
-	      default-size mars-font-height)
-  :demand t
-  :config (load-theme 'kaolin-aurora 'confirm))
+(use-package kaolin-themes)
+
+(use-package solarized-theme)
+
+(use-package material-theme)
+
+(use-package zenburn-theme)
+
+(use-package sublime-themes)
 
 (use-package highlight-numbers
-  :config (add-hook 'prog-mode-hook 'highlight-numbers-mode))
+  :commands highlight-numbers-mode
+  :hook (prog-mode . highlight-numbers-mode))
 
 (use-package highlight-quoted
   :commands highlight-quoted-mode
-  :hook ((clojure-mode cider-mode emacs-lisp-mode) . rainbow-delimiters-mode))
+  :hook ((clojure-mode cider-mode emacs-lisp-mode) . highlight-quoted-mode))
 
 (use-package highlight-defined
   :commands highlight-defined-mode
@@ -1029,7 +1032,7 @@ Lisp function does not specify a special indentation."
 
 (use-package rainbow-delimiters
   :commands rainbow-delimiters-mode
-  :hook ((clojure-mode cider-mode emacs-lisp-mode) . rainbow-delimiters-mode))
+  :hook (prog-mode . rainbow-delimiters-mode))
 
 (use-package all-the-icons
   :demand t)
