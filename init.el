@@ -652,6 +652,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (setq-default flycheck-disabled-checkers '(emacs-lisp emacs-lisp-checkdoc)))
 
 (use-package dumb-jump
+  :disabled
   :config
   (setq dumb-jump-selector 'ivy)
   :general
@@ -903,12 +904,7 @@ Lisp function does not specify a special indentation."
     :config
     (add-to-list 'auto-mode-alist '("\\.jsx\\'" . rjsx-mode))
     (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode))
-    (flycheck-add-mode 'javascript-eslint 'rjsx-mode)
-
-    :general
-    (:keymaps 'rjsx-mode-map
-     :states '(normal visual)
-     "g d" 'lsp-ui-peek-find-definitions))
+    (flycheck-add-mode 'javascript-eslint 'rjsx-mode))
 
 
   (use-package prettier-js
@@ -937,7 +933,11 @@ Lisp function does not specify a special indentation."
 	      (lambda () (when (eq major-mode 'lsp-mode)
 			   (lsp-format-buffer)))))
 
-  (use-package lsp-ui)
+  (use-package lsp-ui
+    :general
+    (:keymaps 'lsp-ui-mode-map
+     :states '(normal visual)
+     "g d" 'lsp-ui-peek-find-definitions))
 
   (use-package company-lsp))
 
@@ -977,8 +977,8 @@ Lisp function does not specify a special indentation."
   :straight (:host github :repo "nabeix/emacs-font-size" :branch "master")
   :demand t
   :init
-  (setq mars-font "DejaVu Sans Mono"
-	mars-font-height 9)
+  (setq mars-font "Ubuntu Mono"
+	mars-font-height 12)
   (set-face-attribute 'default nil
 		      :family mars-font)
 
@@ -1000,15 +1000,15 @@ Lisp function does not specify a special indentation."
    :demand t
    :config (doom-modeline-init))
 
-(use-package dracula-theme
-  :demand t
-  :init (setq size mars-font-height
-	      default-size mars-font-height)
-  :config (load-theme 'dracula 'confirm))
+(use-package dracula-theme)
 
 (use-package darktooth-theme)
 
-(use-package kaolin-themes)
+(use-package kaolin-themes
+  :demand t
+  :init (setq size mars-font-height
+	      default-size mars-font-height)
+  :config (load-theme 'kaolin-valley-dark 'confirm))
 
 (use-package solarized-theme)
 
