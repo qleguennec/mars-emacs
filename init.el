@@ -745,9 +745,13 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-feature electric-mode
   :init
   (add-hook 'prog-mode-hook #'electric-pair-mode)
-  (add-hook 'prog-mode-hook #'electric-indent-mode))
+  (add-hook 'prog-mode-hook #'electric-indent-mode)
+  (add-hook 'prog-mode-hook #'electric-layout-mode)
+  (add-hook 'prog-mode-hook #'electric-quote-mode))
 
 (use-package electric-operator
+  :commands electric-operator-mode
+  :demand t
   :config
   (add-hook 'prog-mode-hook #'electric-operator-mode)
   (electric-operator-add-rules-for-mode 'prog-mode
@@ -971,6 +975,34 @@ Lisp function does not specify a special indentation."
         (not (string= lang "sql-mode")))))
 
 ;; UI
+(use-package window-purpose
+  :straight (:host github :repo "bmag/emacs-purpose" :branch "master")
+  :demand t
+  :config
+  (purpose-mode)
+  (require 'window-purpose-x)
+
+  (setq pop-up-frames t)
+  (purpose-x-magit-single-on)
+  (purpose-x-popwin-setup)
+
+  (add-to-list 'purpose-user-mode-purposes '(lsp-ui-imenu-mode . imenu))
+  (purpose-compile-user-configuration)
+
+  (add-to-list 'purpose-special-action-sequences
+	       '(Magit
+		 purpose-display-reuse-window-buffer
+		 purpose-display-reuse-window-purpose
+		 purpose-display-pop-up-frame))
+
+  (add-to-list 'purpose-x-popwin-major-modes
+	       'helpful-mode)
+  (add-to-list 'purpose-x-popwin-major-modes
+	       'help-mode)
+
+  (setq purpose-x-popwin-position 'bottom)
+
+  (purpose-x-popwin-update-conf))
 
 ;; Font
 (use-package font-size
@@ -1101,7 +1133,7 @@ Lisp function does not specify a special indentation."
     (let ((eshell-buffers-count
 	   (thread-last (buffer-list)
 	     (seq-filter (lambda (buffer) (string-match ".*\\*eshell.*\\*"
-							(buffer-name buffer))))
+						   (buffer-name buffer))))
 	     (length))))
       (unless (zerop eshell-buffers-count)
 	(setq eshell-buffer-name
@@ -1166,3 +1198,4 @@ Lisp function does not specify a special indentation."
 
 ;; Open init.el on startup
 (find-file user-init-file)
+(purpose-x-code1-setup)
