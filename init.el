@@ -225,17 +225,6 @@ mars-map/ function")
     "f" 'eval-defun
     "e" 'eval-expression))
 
-;; Enforces popup rules
- (use-package shackle
-   :disabled
-   :demand t
-   :config
-   (shackle-mode 1)
-   ;; No unwanted splitting
-   (setq
-    shackle-select-reused-windows t
-    shackle-inhibit-window-quit-on-same-windows t))
-
 ;; Org mode
 (use-feature org
   :init
@@ -407,7 +396,6 @@ mars-map/ function")
   :init
   (setq counsel-describe-function-function #'helpful-function
 	counsel-describe-variable-function #'helpful-variable)
-  ;; (push '(".*\\*helpful.*\\*" :regexp t :align right :size 0.3) shackle-rules)
 
   :general
   (mars-map/help
@@ -428,7 +416,6 @@ mars-map/ function")
   (add-hook 'after-save-hook #'magit-refresh)
 
   ;; Pops magit in another window
-  ;; (push '("magit: .*" :regexp t :align right :size 0.4) shackle-rules)
 
   :general
   (mars-map/git
@@ -638,7 +625,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :demand t
   :config
   (global-undo-tree-mode 1)
-  ;; (push '(".*\\*undo-tree\\*.*" :regexp t :align left :size 0.1) shackle-rules)
 
   :general
   (mars-map
@@ -950,7 +936,6 @@ Lisp function does not specify a special indentation."
   (use-package cider
     :config
     (setq clojure-indent-style :align-arguments)
-    ;; (push '(".*\\*cider-error\\*.*" :regexp t :align bottom :size 0.3) shackle-rules)
 
     :general
     (:keymaps 'cider-repl-mode-map
@@ -999,6 +984,8 @@ Lisp function does not specify a special indentation."
 	       'helpful-mode)
   (add-to-list 'purpose-x-popwin-major-modes
 	       'help-mode)
+  (add-to-list 'purpose-x-popwin-major-modes
+	       'shell-mode)
 
   (setq purpose-x-popwin-position 'bottom)
 
@@ -1121,7 +1108,6 @@ Lisp function does not specify a special indentation."
 
 (use-feature eshell
   :config
-  ;; (push '(eshell-mode :popup t) shackle-rules)
   (setq
    ;; Send inpupt to suprocesses
    eshell-send-direct-to-subprocesses nil
@@ -1198,4 +1184,3 @@ Lisp function does not specify a special indentation."
 
 ;; Open init.el on startup
 (find-file user-init-file)
-(purpose-x-code1-setup)
