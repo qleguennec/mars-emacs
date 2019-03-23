@@ -916,7 +916,7 @@ Lisp function does not specify a special indentation."
 			     "--use-tabs" "false")))
 
   (use-package js2r-refactor
-    :straight (:host github :repo "magnars/js2-refactor.el" :branch "master")
+    :straight (:host github :repo "magnars/js2-refactor.el")
     :after 'rjsx-mode
     :init (add-hook 'rjsx-mode-hook #'js2-refactor-mode)))
 
@@ -969,7 +969,7 @@ Lisp function does not specify a special indentation."
 
 ;; UI
 (use-package window-purpose
-  :straight (:host github :repo "bmag/emacs-purpose" :branch "master")
+  :straight (:host github :repo "bmag/emacs-purpose")
   :demand t
   :config
   (purpose-mode)
@@ -1001,7 +1001,7 @@ Lisp function does not specify a special indentation."
 
 ;; Font
 (use-package font-size
-  :straight (:host github :repo "nabeix/emacs-font-size" :branch "master")
+  :straight (:host github :repo "nabeix/emacs-font-size")
   :demand t
   :init
   (setq mars-font "Ubuntu Mono"
@@ -1185,7 +1185,7 @@ Lisp function does not specify a special indentation."
   :config (olivetti-set-width 120))
 
 (use-package eboy
-  :straight (:host github :repo "vreeze/eboy" :branch "master")
+  :straight (:host github :repo "vreeze/eboy")
   :demand t)
 
 ;; Starts emacs server
