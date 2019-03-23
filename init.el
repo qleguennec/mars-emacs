@@ -194,7 +194,8 @@ mars-map/ function")
 	  ("h" . "help")
 	  ("i" . "ivy")
 	  ("o" . "org")
-	  ("a" . "applications")))
+	  ("a" . "applications")
+	  ("f" . "frames")))
 
   ;; Defines general definers for each prefix in mars-general-prefixes.
   (eval `(progn
@@ -1015,15 +1016,40 @@ Lisp function does not specify a special indentation."
   :config
   (setq fg-hide-with-xdotool nil)
 
-  (setq mars/magit-frame-prefix "magit: ")
+  (setq mars/magit-frame-prefix "magit: "
+	mars/core-frame-prefix "core: ")
 
-  (defun mars/after-frame-switch-hook (frame-name)
+  (defun mars/get-core-projectile-frame (&optional project-root)
     (interactive)
-    (when-let ((git-root (nth 1 (s-split mars/magit-frame-prefix frame-name))))
-      (cd git-root)
-      (magit-status)))
+    (concat mars/core-frame-prefix (or project-root (projectile-project-root))))
 
-  (add-hook 'fg-create-hook #'mars/after-frame-switch-hook)
+  (defun mars/projectile-switch-project-action (project-root)
+    (interactive)
+    (fg-create-frame (mars/get-core-projectile-frame project-root)))
+
+  (defun mars/set-core-projectile-frame (project-root)
+    (interactive)
+    (projectile-find-file))
+
+  (setq counsel-projectile-switch-project-action #'mars/projectile-switch-project-action)
+  (add-hook 'projectile-after-switch-project-hook #'mars/set-core-projectile-frame)
+
+  (defun mars/after-frame-switch-hook (frame-name &optional new)
+    (interactive)
+    (when-let* ((split (s-split ": " frame-name))
+		(prefix (nth 0 split))
+		(project-root (nth 1 split)))
+      (pcase prefix
+	("magit"
+	 (cd project-root)
+	 (magit-status))
+
+	("core"
+	 (when new
+	   (cd project-root)
+	   (counsel-projectile-find-file))))))
+
+  (add-hook 'fg-create-hook (lambda (frame-name) (mars/after-frame-switch-hook frame-name t)))
   (add-hook 'fg-after-switch-hook #'mars/after-frame-switch-hook)
 
   (defun mars/magit-frame ()
@@ -1033,7 +1059,10 @@ Lisp function does not specify a special indentation."
 
   :general
   (mars-map/applications
-    "g" 'mars/magit-frame))
+    "g" 'mars/magit-frame)
+
+  (mars-map/frames
+    "s" 'fg-switch-to-frame))
 
 (use-package fireplace
   :demand t
@@ -1048,8 +1077,7 @@ Lisp function does not specify a special indentation."
 	  (switch-to-buffer-other-frame buffer)
 	  (fireplace)))))
 
-  (add-hook 'desktop-after-read-hook #'mars/fireplace)
-  )
+  (add-hook 'desktop-after-read-hook #'mars/fireplace))
 
 ;; Use ediff on the same window
 (setq ediff-window-setup-function 'ediff-setup-windows-plain)
@@ -1074,7 +1102,7 @@ Lisp function does not specify a special indentation."
   :demand t
   :init (setq size mars-font-height
 	      default-size mars-font-height)
-  :config (load-theme 'kaolin-valley-dark 'confirm))
+  :config (load-theme 'kaolin-galaxy 'confirm))
 
 (use-package solarized-theme)
 
