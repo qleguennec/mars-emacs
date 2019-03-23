@@ -193,7 +193,6 @@ mars-map/ function")
 	  ("w" . "windows")
 	  ("h" . "help")
 	  ("i" . "ivy")
-	  ("g" . "git")
 	  ("o" . "org")
 	  ("a" . "applications")))
 
@@ -423,13 +422,7 @@ mars-map/ function")
   ;; Refresh after a save.
   (add-hook 'after-save-hook #'magit-refresh)
 
-  ;; Pops magit in another window
-
   :general
-  (mars-map/git
-    "g" 'magit-status
-    "s" 'magit-stage)
-
   (:keymaps 'magit-mode-map
    :states 'normal
    "<escape>" nil
@@ -975,28 +968,21 @@ Lisp function does not specify a special indentation."
   (purpose-mode)
   (require 'window-purpose-x)
 
-  (setq pop-up-frames t)
-  (purpose-x-magit-single-on)
   (purpose-x-popwin-setup)
 
   (mars/add-to-list purpose-user-mode-purposes
-		    (lsp-ui-imenu-mode . imenu)
-		    (shell-mode . shell))
-  (purpose-compile-user-configuration)
-
-  (mars/add-to-list purpose-special-action-sequences
-		    (Magit
-		     purpose-display-reuse-window-buffer
-		     purpose-display-reuse-window-purpose
-		     purpose-display-pop-up-frame))
+		    (prog-mode . code))
 
   (mars/add-to-list purpose-x-popwin-major-modes
-		    helpful-mode
 		    help-mode
-		    shell-mode)
+		    helpful-mode
+		    shell-mode
+		    eshell-mode)
 
-  (setq purpose-x-popwin-position 'bottom)
+  (setq purpose-x-popwin-width 0.3
+	purpose-x-popwin-position 'right)
 
+  (purpose-compile-user-configuration)
   (purpose-x-popwin-update-conf))
 
 ;; Font
@@ -1011,6 +997,43 @@ Lisp function does not specify a special indentation."
 
   :config
   (font-size-init mars-font-height))
+
+;; Frames
+(mars/add-to-list default-frame-alist
+		  (width . 1600)
+		  (height . 900))
+
+;; desktop-save-mode
+(use-feature desktop-save-mode
+  :init
+  (desktop-save-mode)
+  (setq desktop-save-mode t))
+
+(use-package framegroups
+  :straight (:host github :repo "noctuid/framegroups.el")
+  :demand t
+  :config
+  (setq fg-hide-with-xdotool nil)
+
+  (setq mars/magit-frame-prefix "magit: ")
+
+  (defun mars/after-frame-switch-hook (frame-name)
+    (interactive)
+    (when-let ((git-root (nth 1 (s-split mars/magit-frame-prefix frame-name))))
+      (cd git-root)
+      (magit-status)))
+
+  (add-hook 'fg-create-hook #'mars/after-frame-switch-hook)
+  (add-hook 'fg-after-switch-hook #'mars/after-frame-switch-hook)
+
+  (defun mars/magit-frame ()
+    (interactive)
+    (let ((frame-name (concat mars/magit-frame-prefix (projectile-project-root))))
+      (fg-switch-to-frame frame-name)))
+
+  :general
+  (mars-map/applications
+    "g" 'mars/magit-frame))
 
 ;; Use ediff on the same window
 (setq ediff-window-setup-function 'ediff-setup-windows-plain)
