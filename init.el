@@ -1035,6 +1035,22 @@ Lisp function does not specify a special indentation."
   (mars-map/applications
     "g" 'mars/magit-frame))
 
+(use-package fireplace
+  :demand t
+  :config
+  (setq fireplace-toggle-smoke t)
+
+  (defun mars/fireplace ()
+    (interactive)
+    (dolist (buffer (buffer-list))
+      (when (string-equal "*scratch*" (buffer-name buffer))
+	(save-excursion
+	  (switch-to-buffer-other-frame buffer)
+	  (fireplace)))))
+
+  (add-hook 'desktop-after-read-hook #'mars/fireplace)
+  )
+
 ;; Use ediff on the same window
 (setq ediff-window-setup-function 'ediff-setup-windows-plain)
 
@@ -1213,6 +1229,3 @@ Lisp function does not specify a special indentation."
 
 ;; Starts emacs server
 (server-start)
-
-;; Open init.el on startup
-(find-file user-init-file)
