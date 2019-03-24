@@ -1113,6 +1113,7 @@ Lisp function does not specify a special indentation."
 
   (mars-map/frames
     "s" 'fg-switch-to-frame
+    "f" 'fg-switch-to-last-frame
     "k" 'delete-frame))
 
 ;; Use ediff on the same window
