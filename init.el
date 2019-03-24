@@ -914,6 +914,24 @@ Lisp function does not specify a special indentation."
     :after 'rjsx-mode
     :init (add-hook 'rjsx-mode-hook #'js2-refactor-mode)))
 
+(use-feature python
+  :init
+  (defun mars/python-reload ()
+    (interactive)
+    (let* ((python-file (expand-file-name python-main-file (projectile-project-root)))
+	   (buffer-to-eval (or (find-buffer-visiting python-file)
+			       (find-file python-file))))
+      (save-excursion
+	(with-current-buffer buffer-to-eval
+	  (when (python-shell-get-process)
+	    (set-process-query-on-exit-flag (python-shell-get-process) nil)
+	    (kill-process (python-shell-get-process))
+	    (sleep-for 0.5))
+
+	  (run-python nil t nil)
+	  (python-shell-send-file python-file)
+	  (other-window 1))))))
+
 (use-feature lsp
   :commands 'lsp
   :hook prog-mode
@@ -923,7 +941,7 @@ Lisp function does not specify a special indentation."
     (require 'lsp-clients)
     (add-hook 'before-save-hook
 	      (lambda () (when (eq major-mode 'lsp-mode)
-			   (lsp-format-buffer)))))
+		      (lsp-format-buffer)))))
 
   (use-package lsp-ui
     :general
@@ -972,13 +990,19 @@ Lisp function does not specify a special indentation."
   (purpose-x-popwin-setup)
 
   (mars/add-to-list purpose-user-mode-purposes
-		    (prog-mode . code))
+		    (prog-mode . code)
+		    (inferior-python-mode . repl))
 
   (mars/add-to-list purpose-x-popwin-major-modes
 		    help-mode
 		    helpful-mode
 		    shell-mode
 		    eshell-mode)
+
+  (mars/add-to-list 'purpose-special-action-sequences
+		    '(repl
+		      purpose-display-reuse-window-purpose))
+
 
   (setq purpose-x-popwin-width 0.3
 	purpose-x-popwin-position 'right)
@@ -1004,7 +1028,7 @@ Lisp function does not specify a special indentation."
 		  (width . 1600)
 		  (height . 900))
 
-;; desktop-save-mode
+;e; desktop-save-mode
 (use-feature desktop-save-mode
   :init
   (desktop-save-mode)
@@ -1088,11 +1112,13 @@ Lisp function does not specify a special indentation."
 ;; Highlight current line
 (global-hl-line-mode 1)
 
-(setq show-paren-style 'expression)
+(setq show-paren-style 'expression
+      show-paren-when-point-inside-paren t
+      show-paren-when-point-in-periphery t)
 
 (use-package doom-modeline
-   :demand t
-   :config (doom-modeline-init))
+  :demand t
+  :config (doom-modeline-init))
 
 (use-package dracula-theme)
 
@@ -1127,6 +1153,14 @@ Lisp function does not specify a special indentation."
 (use-package rainbow-delimiters
   :commands rainbow-delimiters-mode
   :hook (prog-mode . rainbow-delimiters-mode))
+
+(set-face-attribute 'show-paren-match nil
+		    :foreground 'unspecified
+		    :background 'unspecified)
+
+(set-face-attribute 'show-paren-match-expression nil
+		    :weight 'bold
+		    :slant 'italic)
 
 (use-package all-the-icons
   :demand t)
