@@ -773,7 +773,7 @@ This function can be hooked into the modes of interest.  E.g. "
 	    ".")
 	   nil)))))
 
-  (add-hook 'emacs-lisp-mode #'mars/lisp-butt-display)
+  (add-hook 'emacs-lisp-mode-hook #'mars/lisp-butt-display)
 
   (use-package lispy
     :hook ((emacs-lisp-mode clojure-mode cider-mode) . lispy-mode)
@@ -938,19 +938,25 @@ Lisp function does not specify a special indentation."
   :init
   (defun mars/python-reload ()
     (interactive)
-    (let* ((python-file (expand-file-name python-main-file (projectile-project-root)))
-	   (buffer-to-eval (or (find-buffer-visiting python-file)
-			       (find-file python-file))))
-      (save-excursion
-	(with-current-buffer buffer-to-eval
-	  (when (python-shell-get-process)
-	    (set-process-query-on-exit-flag (python-shell-get-process) nil)
-	    (kill-process (python-shell-get-process))
-	    (sleep-for 0.5))
+    (when (and (eq major-mode 'python-mode)
+	       python-main-file)
 
-	  (run-python nil t nil)
-	  (python-shell-send-file python-file)
-	  (other-window 1))))))
+      (when-let* ((python-file (expand-file-name python-main-file (projectile-project-root)))
+		  (exists (file-exists-p python-file))
+		  (buffer-to-eval (or (find-buffer-visiting python-file)
+				      (find-file python-file))))
+	(save-excursion
+	  (with-current-buffer buffer-to-eval
+	    (when (python-shell-get-process)
+	      (set-process-query-on-exit-flag (python-shell-get-process) nil)
+	      (kill-process (python-shell-get-process))
+	      (sleep-for 0.5))
+
+	    (run-python nil t nil)
+	    (python-shell-send-file python-file)
+	    (other-window 1))))))
+
+  (add-hook 'after-save-hook #'mars/python-reload))
 
 (use-feature lsp
   :commands 'lsp
@@ -1072,16 +1078,17 @@ Lisp function does not specify a special indentation."
 
   (defun mars/set-core-projectile-frame (project-root)
     (interactive)
-    (projectile-find-file))
+    (setq-local projectile-project-root project-root))
 
   (setq counsel-projectile-switch-project-action #'mars/projectile-switch-project-action)
-  (add-hook 'projectile-after-switch-project-hook #'mars/set-core-projectile-frame)
 
   (defun mars/after-frame-switch-hook (frame-name &optional new)
     (interactive)
+    (message frame-name)
     (when-let* ((split (s-split ": " frame-name))
 		(prefix (nth 0 split))
 		(project-root (nth 1 split)))
+      (setq-local projectile-project-root project-root)
       (pcase prefix
 	("magit"
 	 (cd project-root)
@@ -1092,7 +1099,7 @@ Lisp function does not specify a special indentation."
 	   (cd project-root)
 	   (counsel-projectile-find-file))))))
 
-  (add-hook 'fg-create-hook (lambda (frame-name) (mars/after-frame-switch-hook frame-name t)))
+  (add-hook 'fg-create-hook (lambda (frame-name) (mars/after-frame-switch-hook frame-name 't)))
   (add-hook 'fg-after-switch-hook #'mars/after-frame-switch-hook)
 
   (defun mars/magit-frame ()
@@ -1105,22 +1112,8 @@ Lisp function does not specify a special indentation."
     "g" 'mars/magit-frame)
 
   (mars-map/frames
-    "s" 'fg-switch-to-frame))
-
-(use-package fireplace
-  :demand t
-  :config
-  (setq fireplace-toggle-smoke t)
-
-  (defun mars/fireplace ()
-    (interactive)
-    (dolist (buffer (buffer-list))
-      (when (string-equal "*scratch*" (buffer-name buffer))
-	(save-excursion
-	  (switch-to-buffer-other-frame buffer)
-	  (fireplace)))))
-
-  (add-hook 'desktop-after-read-hook #'mars/fireplace))
+    "s" 'fg-switch-to-frame
+    "k" 'delete-frame))
 
 ;; Use ediff on the same window
 (setq ediff-window-setup-function 'ediff-setup-windows-plain)
