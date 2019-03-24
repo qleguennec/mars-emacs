@@ -402,12 +402,16 @@ mars-map/ function")
 ;; Displays helpful documentation
 (use-package helpful
   :init
-  (setq counsel-describe-function-function #'helpful-function
+  (setq counsel-describe-function-function #'helpful-callable
 	counsel-describe-variable-function #'helpful-variable)
 
   :general
   (mars-map/help
     "." 'helpful-at-point))
+
+;; Displays demos
+(use-package elisp-demos
+  :init (advice-add 'helpful-update :after #'elisp-demos-advice-helpful-update))
 
 ;; VC
 (use-package magit
