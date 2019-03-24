@@ -461,22 +461,24 @@ mars-map/ function")
     (setq projectile-globally-ignored-directories
 	  (append projectile-globally-unignored-directories '("straight" "node_modules")))
 
-    (defun mars-projectile-refresh-projects ()
+    (defun mars/projectile-refresh-projects ()
       "Clear projectile known projects and add to known projects directories in mars-workspace
 (even if they are not under vcs), any vcs directory in HOME, and straight repos"
       (interactive)
       (projectile-clear-known-projects)
       (setq projectile-known-projects
-	    (append
-	     (directory-files mars-workspace t directory-files-no-dot-files-regexp t)
-	     (cl-remove-if
-	      (lambda (dir)
-		(eq 'none (projectile-project-vcs dir)))
-	      (directory-files "~/" t directory-files-no-dot-files-regexp t))
-	     (directory-files (concat user-emacs-directory "/straight/repos") t directory-files-no-dot-files-regexp t)))
+	    (--map
+	     (concat (s-replace (expand-file-name "~") "~" it) "/")
+	     (append
+	      (directory-files mars-workspace t directory-files-no-dot-files-regexp t)
+	      (cl-remove-if
+	       (lambda (dir)
+		 (eq 'none (projectile-project-vcs dir)))
+	       (directory-files "~/" t directory-files-no-dot-files-regexp t))
+	      (directory-files (concat user-emacs-directory "/straight/repos") t directory-files-no-dot-files-regexp t))))
       (projectile-save-known-projects))
 
-    (unless projectile-known-projects (mars-projectile-refresh-projects))
+    (unless projectile-known-projects (mars/projectile-refresh-projects))
 
     :general
     (mars-map
@@ -751,7 +753,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (electric-operator-add-rules-for-mode 'emacs-lisp-mode
 					(cons "-" nil)))
 
-(use-package hungry-delete)
+(use-package hungry-delete
+  :init (hungry-delete-mode))
 
 ;; Prettier code
 (global-prettify-symbols-mode 1)
@@ -759,41 +762,54 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; Language packages
 (use-feature lisp
   :init
+  (defun mars/lisp-butt-display ()
+    "Function to produce nicer lisp butts.
+This function can be hooked into the modes of interest.  E.g. "
+    (font-lock-add-keywords
+     nil
+     '((")\\())+\\))"
+	(1 (compose-region
+	    (match-beginning 1) (match-end 1)
+	    ".")
+	   nil)))))
+
+  (add-hook 'emacs-lisp-mode #'mars/lisp-butt-display)
+
   (use-package lispy
     :hook ((emacs-lisp-mode clojure-mode cider-mode) . lispy-mode)
     :config
 
-  (use-package lispyville
-    :hook (lispy-mode . lispyville-mode)
-    :config
-    (setq lispyville-motions-put-into-special t
-	  lispyville-commands-put-into-special t)
-    (lispyville-set-key-theme '(slurp/barf-lispy
-				text-objects
-				lispyville-prettify
-				escape))
-    :general
-    (:keymaps 'lispyville-mode-map
-     :states 'normal
-     "(" 'lispyville-backward-up-list
-     ")" 'lispyville-up-list))
+    (use-package lispyville
+      :hook (lispy-mode . lispyville-mode)
+      :config
+      (setq lispyville-motions-put-into-special t
+	    lispyville-commands-put-into-special t)
+      (lispyville-set-key-theme '(slurp/barf-lispy
+				  text-objects
+				  lispyville-prettify
+				  escape))
+      :general
+      (:keymaps 'lispyville-mode-map
+       :states 'normal
+       "(" 'lispyville-backward-up-list
+       ")" 'lispyville-up-list))
 
-  :init/el-patch
-  ;; From https://github.com/raxod502/radian/blob/dc22d0524481b45dd3097bf5d9d4f2cd7ad3bad9/radian-emacs/radian-elisp.el#L21-L116
-  ;; Fix the indentation of keyword lists in Emacs Lisp. See [1] and [2].
-  ;;
-  ;; Before:
-  ;;  (:foo bar
-  ;;        :baz quux)
-  ;;
-  ;; After:
-  ;;  (:foo bar
-  ;;   :bar quux)
-  ;;
-  ;; [1]: https://github.com/Fuco1/.emacs.d/blob/af82072196564fa57726bdbabf97f1d35c43b7f7/site-lisp/redef.el#L12-L94
-  ;; [2]: http://emacs.stackexchange.com/q/10230/12534
-  (defun lisp-indent-function (indent-point state)
-    "This function is the normal value of the variable `lisp-indent-function'.
+    :init/el-patch
+    ;; From https://github.com/raxod502/radian/blob/dc22d0524481b45dd3097bf5d9d4f2cd7ad3bad9/radian-emacs/radian-elisp.el#L21-L116
+    ;; Fix the indentation of keyword lists in Emacs Lisp. See [1] and [2].
+    ;;
+    ;; Before:
+    ;;  (:foo bar
+    ;;        :baz quux)
+    ;;
+    ;; After:
+    ;;  (:foo bar
+    ;;   :bar quux)
+    ;;
+    ;; [1]: https://github.com/Fuco1/.emacs.d/blob/af82072196564fa57726bdbabf97f1d35c43b7f7/site-lisp/redef.el#L12-L94
+    ;; [2]: http://emacs.stackexchange.com/q/10230/12534
+    (defun lisp-indent-function (indent-point state)
+      "This function is the normal value of the variable `lisp-indent-function'.
 The function `calculate-lisp-indent' calls this to determine
 if the arguments of a Lisp function call should be indented specially.
 INDENT-POINT is the position at which the line being indented begins.
@@ -813,63 +829,63 @@ it specifies how to indent.  The property value can be:
   that it itself received.
 This function returns either the indentation to use, or nil if the
 Lisp function does not specify a special indentation."
-    (el-patch-let (($cond (and (elt state 2)
-			       (el-patch-wrap 1 1
-				 (or (not (looking-at "\\sw\\|\\s_"))
-				     (looking-at ":")))))
-		   ($then (progn
-			    (if (not (> (save-excursion (forward-line 1) (point))
-					calculate-lisp-indent-last-sexp))
-				(progn (goto-char calculate-lisp-indent-last-sexp)
-				       (beginning-of-line)
-				       (parse-partial-sexp (point)
-							   calculate-lisp-indent-last-sexp 0 t)))
-			    ;; Indent under the list or under the first sexp on the same
-			    ;; line as calculate-lisp-indent-last-sexp.  Note that first
-			    ;; thing on that line has to be complete sexp since we are
-			    ;; inside the innermost containing sexp.
-			    (backward-prefix-chars)
-			    (current-column)))
-		   ($else (let ((function (buffer-substring (point)
-							    (progn (forward-sexp 1) (point))))
-				method)
-			    (setq method (or (function-get (intern-soft function)
-							   'lisp-indent-function)
-					     (get (intern-soft function) 'lisp-indent-hook)))
-			    (cond ((or (eq method 'defun)
-				       (and (null method)
-					    (> (length function) 3)
-					    (string-match "\\`def" function)))
-				   (lisp-indent-defform state indent-point))
-				  ((integerp method)
-				   (lisp-indent-specform method state
-							 indent-point normal-indent))
-				  (method
-				   (funcall method indent-point state))))))
-      (let ((normal-indent (current-column))
-	    (el-patch-add
-	      (orig-point (point))))
-	(goto-char (1+ (elt state 1)))
-	(parse-partial-sexp (point) calculate-lisp-indent-last-sexp 0 t)
-	(el-patch-swap
-	  (if $cond
-	      ;; car of form doesn't seem to be a symbol
-	      $then
-	    $else)
-	  (cond
-	   ;; car of form doesn't seem to be a symbol, or is a keyword
-	   ($cond $then)
-	   ((and (save-excursion
-		   (goto-char indent-point)
-		   (skip-syntax-forward " ")
-		   (not (looking-at ":")))
-		 (save-excursion
-		   (goto-char orig-point)
-		   (looking-at ":")))
-	    (save-excursion
-	      (goto-char (+ 2 (elt state 1)))
-	      (current-column)))
-	   (t $else))))))))
+      (el-patch-let (($cond (and (elt state 2)
+				 (el-patch-wrap 1 1
+				   (or (not (looking-at "\\sw\\|\\s_"))
+				       (looking-at ":")))))
+		     ($then (progn
+			      (if (not (> (save-excursion (forward-line 1) (point))
+					  calculate-lisp-indent-last-sexp))
+				  (progn (goto-char calculate-lisp-indent-last-sexp)
+					 (beginning-of-line)
+					 (parse-partial-sexp (point)
+							     calculate-lisp-indent-last-sexp 0 t)))
+			      ;; Indent under the list or under the first sexp on the same
+			      ;; line as calculate-lisp-indent-last-sexp.  Note that first
+			      ;; thing on that line has to be complete sexp since we are
+			      ;; inside the innermost containing sexp.
+			      (backward-prefix-chars)
+			      (current-column)))
+		     ($else (let ((function (buffer-substring (point)
+							      (progn (forward-sexp 1) (point))))
+				  method)
+			      (setq method (or (function-get (intern-soft function)
+							     'lisp-indent-function)
+					       (get (intern-soft function) 'lisp-indent-hook)))
+			      (cond ((or (eq method 'defun)
+					 (and (null method)
+					      (> (length function) 3)
+					      (string-match "\\`def" function)))
+				     (lisp-indent-defform state indent-point))
+				    ((integerp method)
+				     (lisp-indent-specform method state
+							   indent-point normal-indent))
+				    (method
+				     (funcall method indent-point state))))))
+	(let ((normal-indent (current-column))
+	      (el-patch-add
+		(orig-point (point))))
+	  (goto-char (1+ (elt state 1)))
+	  (parse-partial-sexp (point) calculate-lisp-indent-last-sexp 0 t)
+	  (el-patch-swap
+	    (if $cond
+		;; car of form doesn't seem to be a symbol
+		$then
+	      $else)
+	    (cond
+	     ;; car of form doesn't seem to be a symbol, or is a keyword
+	     ($cond $then)
+	     ((and (save-excursion
+		     (goto-char indent-point)
+		     (skip-syntax-forward " ")
+		     (not (looking-at ":")))
+		   (save-excursion
+		     (goto-char orig-point)
+		     (looking-at ":")))
+	      (save-excursion
+		(goto-char (+ 2 (elt state 1)))
+		(current-column)))
+	     (t $else))))))))
 
 (use-package yaml-mode
   :config (setq yaml-indent-offset 4))
@@ -1003,9 +1019,8 @@ Lisp function does not specify a special indentation."
 		    shell-mode
 		    eshell-mode)
 
-  (mars/add-to-list 'purpose-special-action-sequences
-		    '(repl
-		      purpose-display-reuse-window-purpose))
+  (mars/add-to-list purpose-special-action-sequences
+		    (repl purpose-display-reuse-window-purpose))
 
 
   (setq purpose-x-popwin-width 0.3
@@ -1126,13 +1141,13 @@ Lisp function does not specify a special indentation."
 
 (use-package dracula-theme)
 
-(use-package darktooth-theme)
-
-(use-package kaolin-themes
+(use-package darktooth-theme
   :demand t
   :init (setq size mars-font-height
 	      default-size mars-font-height)
-  :config (load-theme 'kaolin-galaxy 'confirm))
+  :config (load-theme 'darktooth 'confirm))
+
+(use-package kaolin-themes)
 
 (use-package solarized-theme)
 
