@@ -93,6 +93,14 @@ Inserted by installing org-mode or when a release is made."
      :straight nil
      ,@args))
 
+(defmacro mars/add-to-list (list &rest args)
+  "Adds multiple items to LIST.
+Allows for adding a sequence of items to the same list, rather
+than having to call `add-to-list' multiple times."
+  (dolist (item args)
+    (add-to-list list item))
+  list)
+
 (defun mars/set-pretty-symbols (mode symbols)
   ;; TODO fix it. should be a macro.
   "Set symbols SYMBOLS for quoted mode MODE."
@@ -971,21 +979,21 @@ Lisp function does not specify a special indentation."
   (purpose-x-magit-single-on)
   (purpose-x-popwin-setup)
 
-  (add-to-list 'purpose-user-mode-purposes '(lsp-ui-imenu-mode . imenu))
+  (mars/add-to-list purpose-user-mode-purposes
+		    (lsp-ui-imenu-mode . imenu)
+		    (shell-mode . shell))
   (purpose-compile-user-configuration)
 
-  (add-to-list 'purpose-special-action-sequences
-	       '(Magit
-		 purpose-display-reuse-window-buffer
-		 purpose-display-reuse-window-purpose
-		 purpose-display-pop-up-frame))
+  (mars/add-to-list purpose-special-action-sequences
+		    (Magit
+		     purpose-display-reuse-window-buffer
+		     purpose-display-reuse-window-purpose
+		     purpose-display-pop-up-frame))
 
-  (add-to-list 'purpose-x-popwin-major-modes
-	       'helpful-mode)
-  (add-to-list 'purpose-x-popwin-major-modes
-	       'help-mode)
-  (add-to-list 'purpose-x-popwin-major-modes
-	       'shell-mode)
+  (mars/add-to-list purpose-x-popwin-major-modes
+		    helpful-mode
+		    help-mode
+		    shell-mode)
 
   (setq purpose-x-popwin-position 'bottom)
 
@@ -1064,11 +1072,12 @@ Lisp function does not specify a special indentation."
   :demand t
   :custom (all-the-icons-ivy-buffer-commands '(ivy-switch-buffer-other-window))
   :config
-  (add-to-list 'all-the-icons-ivy-file-commands 'counsel-projectile-find-file)
-  (add-to-list 'all-the-icons-ivy-file-commands 'counsel-find-file)
-  (add-to-list 'all-the-icons-ivy-file-commands 'counsel-projectile)
-  (add-to-list 'all-the-icons-ivy-file-commands 'counsel-dired-jump)
-  (add-to-list 'all-the-icons-ivy-buffer-commands 'counsel-projectile-switch-to-buffer)
+  (mars/add-to-list all-the-icons-ivy-file-commands
+		    counsel-projectile-find-file
+		    counsel-find-file
+		    counsel-projectile
+		    counsel-dired-jump)
+  (mars/add-to-list all-the-icons-ivy-buffer-commands counsel-projectile-switch-to-buffer)
   (all-the-icons-ivy-setup))
 
 (use-package centered-cursor-mode
