@@ -693,6 +693,7 @@ If point is on a src block, runs org-indent"
     ;; Auto revert buffers
     (magit-auto-revert-mode 1)
     (setq auto-revert-interval 1
+	  magit-auto-revert-immediately t
 	  revert-without-query '(".*"))
 
     ;; Enable magit-file-mode
@@ -711,9 +712,16 @@ If point is on a src block, runs org-indent"
       "u" 'magit-unstage
       "c" 'magit-commit
       "p" 'magit-push
-      "b" 'magit-checkout
       "f" 'magit-fetch
-      "F" 'magit-pull)
+      "b" 'magit-branch-checkout
+      "F" 'magit-pull
+      "r" 'magit-rebase
+      "O" 'magit-reset
+      "l" 'magit-log
+      "z" 'magit-stash
+      "r" 'magit-revert
+      "u" 'magit-unstage
+      "x" 'magit-discard)
 
     (:keymaps 'magit-mode-map
      :states 'normal
