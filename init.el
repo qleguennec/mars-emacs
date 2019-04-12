@@ -45,6 +45,7 @@ even if it does not countain a vcs subdir.")
 (setq straight-use-package-by-default t
       use-package-always-defer t
       use-package-verbose t
+      use-package-compute-statistics t
       straight-default-vc 'git)
 
 ;; Enable checking for system packages
@@ -242,12 +243,10 @@ mars-map/ function")
     "e" 'eval-expression))
 
 ;; Org mode
-(use-feature org
+(use-feature feature/org
   :init
   (use-package org
-    :demand t
     :config
-
     (defun mars/open-gtd-file ()
       "Open gtd file."
       (interactive)
@@ -376,13 +375,6 @@ If point is on a src block, runs org-indent"
      "j" 'org-agenda-next-line
      "k" 'org-agenda-previous-line))
 
-  ;; Per-project org things
-  (use-package org-projectile
-    :after org
-    :config
-    (org-projectile-per-project)
-    (setq org-agenda-files (append org-agenda-files (org-projectile-todo-files)))
-    (push (org-projectile-project-todo-entry) org-capture-templates))
 
   (use-package org-trello)
 
@@ -530,7 +522,9 @@ If point is on a src block, runs org-indent"
     :config
     (setq ivy-display-function #'ivy-posframe-display)
     (setq ivy-display-function #'ivy-posframe-display-at-frame-center)
-    (ivy-posframe-enable)))
+    (ivy-posframe-enable))
+
+  (use-package wgrep))
 
 ;; Displays helpful documentation
 (use-package helpful
@@ -692,6 +686,9 @@ newline."
       "C-j" 'shrink-window
       "C-k" 'enlarge-window
 
+      ;; Visual
+      "_" 'evil-visual-block
+
       ;; Custom bindings on unused evil bingins
       "!" 'universal-argument)
 
@@ -730,34 +727,16 @@ newline."
     :straight (:host github :repo "noctuid/things.el")
     :demand t)
 
-
-  (use-package multiple-cursors
+  (use-package evil-mc
+    :straight (:host github :repo "gabesoft/evil-mc")
     :demand t
-    :config
-    (defhydra hydra-multiple-cursors (:hint nil)
-      "
- Up^^             Down^^           Miscellaneous           % 2(mc/num-cursors) cursor%s(if (> (mc/num-cursors) 1) \"s\" \"\")
-------------------------------------------------------------------
- [_p_]   Next     [_n_]   Next     [_l_] Edit lines  [_0_] Insert numbers
- [_P_]   Skip     [_N_]   Skip     [_a_] Mark all    [_A_] Insert letters
- [_M-p_] Unmark   [_M-n_] Unmark   [_s_] Search
- [Click] Cursor at point       [_q_] Quit"
-      ("l" mc/edit-lines :exit t)
-      ("a" mc/mark-all-like-this :exit t)
-      ("n" mc/mark-next-like-this)
-      ("N" mc/skip-to-next-like-this)
-      ("M-n" mc/unmark-next-like-this)
-      ("p" mc/mark-previous-like-this)
-      ("P" mc/skip-to-previous-like-this)
-      ("M-p" mc/unmark-previous-like-this)
-      ("s" mc/mark-all-in-region-regexp :exit t)
-      ("0" mc/insert-numbers :exit t)
-      ("A" mc/insert-letters :exit t)
-      ("<mouse-1>" mc/add-cursor-on-click)
-      ;; Help with click recognition in this hydra
-      ("<down-mouse-1>" ignore)
-      ("<drag-mouse-1>" ignore)
-      ("q" nil))))
+    :config (global-evil-mc-mode)
+
+    :general
+    (mars-map
+      :states 'visual
+      "I" 'evil-mc-make-cursor-in-visual-selection-beg
+      "A" 'evil-mc-make-cursor-in-visual-selection-end)))
 
 (use-package smerge-mode
   :after magit
@@ -1139,36 +1118,8 @@ Lisp function does not specify a special indentation."
 
   (use-package company-lsp))
 
-;; Used mainly for SQL.
-;; Need to eval the following code to run
-;; the python kernel with SQL magic enabled:
-;; #+BEGIN_SRC jupyter-python
-;; %reload_ext sql
-;; %config SqlMagic.autopandas = True
-;; %sql postgresql://user:pass@hostname/dbname
-;; #+END_SRC
-(use-package jupyter
-  :init
-  (org-babel-do-load-languages
-   'org-babel-load-languages
-   '((emacs-lisp . t)
-     (jupyter . t)))
-
-  (setq org-babel-default-header-args:jupyter-python
-	'((:async . "yes")
-          (:session . "jupy")
-	  (:kernel . "python3")
-	  (:display . "text/plain")
-	  (:noweb . "yes")))
-
-  :general
-  (:keymaps 'jupyter-repl-mode-map
-   :states '(normal insert)
-   "<up>" 'jupyter-repl-history-previous
-   "<down>" 'jupyter-repl-history-next
-   "RET" 'jupyter-repl-ret))
-
 (use-feature clojure
+  :disabled
   :init
   (use-package cider
     :config
@@ -1317,13 +1268,13 @@ Lisp function does not specify a special indentation."
 
 (use-package dracula-theme)
 
-(use-package darktooth-theme
+(use-package darktooth-theme)
+
+(use-package kaolin-themes
   :demand t
   :init (setq size mars-font-height
 	      default-size mars-font-height)
-  :config (load-theme 'darktooth 'confirm))
-
-(use-package kaolin-themes)
+  :config (load-theme 'kaolin-light 'confirm))
 
 (use-package solarized-theme)
 
