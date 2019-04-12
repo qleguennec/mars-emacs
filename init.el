@@ -516,7 +516,8 @@ If point is on a src block, runs org-indent"
     :config
     (setq ivy-display-function #'ivy-posframe-display-at-frame-center
 	  ivy-posframe-height 20
-	  ivy-posframe-border-width 2)
+	  ivy-posframe-width 150
+	  ivy-posframe-border-width 1)
     (ivy-posframe-enable))
 
   (use-package wgrep))
@@ -1292,7 +1293,9 @@ Lisp function does not specify a special indentation."
   :demand t
   :init (setq size mars-font-height
 	      default-size mars-font-height)
-  :config (load-theme 'darktooth 'confirm))
+  :config
+  (load-theme 'darktooth 'confirm)
+  (set-face-attribute 'internal-border nil :background "#66999D"))
 
 (use-package solarized-theme)
 
