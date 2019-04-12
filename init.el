@@ -397,31 +397,15 @@ If point is on a src block, runs org-indent"
     :config
     (ivy-mode 1)
 
-    (defun mars/relative-filename-without-extension (filename)
-      (interactive)
-      (file-name-sans-extension
-       (file-relative-name
-	(expand-file-name filename (projectile-project-root)))))
-
-    (defun mars/insert-relative-filename-without-extension (filename)
-      (interactive)
-      (insert
-       (mars/relative-filename-without-extension filename)))
-
-    (ivy-add-actions
-     #'counsel-find-file
-     '(("p" mars/insert-relative-filename-without-extension "insert relative")))
-
-    (ivy-add-actions
-     #'counsel-projectile-find-file
-     '(("p" mars/insert-relative-filename-without-extension "insert relative")))
-
-    (ivy-add-actions
-     #'counsel-projectile
-     '(("p" mars/insert-relative-filename-without-extension "insert relative")))
-
+    (setq ivy-height 20)
 
     :general
+    (:keymaps 'ivy-minibuffer-map
+     "$" 'ivy-toggle-calling
+     "^" 'ivy-occur
+     "#" 'ivy-posframe-read-action
+     "%" 'ivy-posframe-avy)
+
     (mars-map
       "'" 'ivy-resume
       "M-x" 'counsel-M-x)
@@ -520,8 +504,9 @@ If point is on a src block, runs org-indent"
   (use-package ivy-posframe
     :demand t
     :config
-    (setq ivy-display-function #'ivy-posframe-display)
-    (setq ivy-display-function #'ivy-posframe-display-at-frame-center)
+    (setq ivy-display-function #'ivy-posframe-display-at-frame-center
+	  ivy-posframe-height 20
+	  ivy-posframe-border-width 2)
     (ivy-posframe-enable))
 
   (use-package wgrep))
@@ -1300,13 +1285,13 @@ Lisp function does not specify a special indentation."
   :commands rainbow-delimiters-mode
   :hook (prog-mode . rainbow-delimiters-mode))
 
-(set-face-attribute 'show-paren-match nil
-		    :foreground 'unspecified
-		    :background 'unspecified)
+;; (set-face-attribute 'show-paren-match nil
+;; 		    :foreground 'unspecified
+;; 		    :background 'unspecified)
 
-(set-face-attribute 'show-paren-match-expression nil
-		    :weight 'bold
-		    :slant 'italic)
+;; (set-face-attribute 'show-paren-match-expression nil
+;; 		    :weight 'bold
+;; 		    :slant 'italic)
 
 (use-package all-the-icons
   :demand t)
@@ -1336,6 +1321,7 @@ Lisp function does not specify a special indentation."
 (use-package solaire-mode
   :demand t
   :config
+  (add-hook 'ivy-mode-hook #'solaire-mode)
   (add-hook 'minibuffer-setup-hook #'solaire-mode-in-minibuffer)
   (add-hook 'magit-mode-hook #'solaire-mode))
 
