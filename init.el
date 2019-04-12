@@ -111,6 +111,14 @@ than having to call `add-to-list' multiple times."
 		     (interactive)
 		     (setq-local prettify-symbols-alist alist)))))
 
+
+(use-package exwm
+  :disabled
+  :demand t
+  :config
+  (require 'exwm-config)
+  (exwm-config-default))
+
 ;; Provies better defaults for emacs cache files
 (use-package no-littering :demand t)
 
@@ -245,11 +253,58 @@ mars-map/ function")
       (interactive)
       (find-file org-default-notes-file))
 
-    (defun mars/org-insert-heading ()
-      "Inserts a new heading and switches to insert state."
+    (defun mars/org-ret ()
+      "Inserts a new heading and switches to insert state.
+If point is on a src block, runs org-indent"
       (interactive)
-      (org-insert-heading-respect-content)
-      (evil-insert 1))
+      (if (org-in-src-block-p)
+	  (org-return-indent)
+	(org-insert-heading-respect-content)
+	(evil-insert 1)))
+
+    (defun mars/org-left ()
+      "Does various things depending on where the point is"
+      (interactive)
+      (if (org-at-table-p)
+	  (org-table-beginning-of-field 1))
+      (org-shiftleft))
+
+    (defun mars/org-right ()
+      "Does various things depending on where the point is"
+      (interactive)
+      (if (org-at-table-p)
+	  (org-table-end-of-field 1))
+      (org-shiftright))
+
+    (defun mars/org-change-display ()
+      "Changes the :display keyword in a src block and execute it"
+      (interactive)
+      (let ((display-list '("plain" "org")))
+	(save-excursion
+	  (org-babel-goto-src-block-head)
+	  (if (and (re-search-forward ":display" (line-end-position) t)
+		   (re-search-forward (regexp-opt display-list)))
+	      (when-let*
+		  ((current-display (thing-at-point 'word 'no-properties))
+		   (pos (member current-display display-list))
+		   (next (or (cadr pos)
+			     (car display-list))))
+		(replace-match next)
+		(org-babel-execute-src-block))
+	    (end-of-line)
+	    (insert " :display plain")))))
+
+    (defun mars/org-babel-execute ()
+      "Execute next executable thing."
+      (interactive)
+      (org-babel-next-src-block)
+      (org-babel-execute-src-block))
+
+    (defun mars/org-leader-d ()
+      "Does various things, starting with a D"
+      (interactive)
+      (cond ((org-in-src-block-p) (mars/org-change-display))
+	    (t (org-todo "DONE"))))
 
     (setq
      org-directory "~/org"
@@ -262,7 +317,9 @@ mars-map/ function")
      org-fontify-done-headline t
      org-fontify-quote-and-verse-blocks t
      org-reverse-note-order t
-     org-todo-keywords '((sequence "TODO" "DOING" "WAITING" "|" "DONE" "CANCELLED")))
+     org-todo-keywords '((sequence "TODO" "DOING" "WAITING" "|" "DONE" "CANCELLED"))
+     org-confirm-babel-evaluate nil
+     org-src-window-setup 'current-window)
 
     (setq org-capture-templates
 	  '(("j" "Journal" entry (file+olp+datetree "" "Journal")
@@ -290,16 +347,16 @@ mars-map/ function")
       "t" (lambda () (interactive) (org-todo "TODO"))
       "w" (lambda () (interactive) (org-todo "WAITING"))
       "o" (lambda () (interactive) (org-todo "DOING"))
-      "d" (lambda () (interactive) (org-todo "DONE"))
+      "d" 'mars/org-leader-d
+      "e" 'mars/org-babel-execute
       "c" (lambda () (interactive) (org-todo "CANCELLED")))
 
     (:keymaps 'org-mode-map
      :states '(normal visual)
-     "RET" 'mars/org-insert-heading
      "<up>" 'org-metaup
      "<down>" 'org-metadown
-     "<left>" 'org-shiftleft
-     "<right>" 'org-shiftright
+     "<left>" 'mars/org-left
+     "<right>" 'mars/org-right
 
      "C-j" nil
      "C-k" nil
@@ -308,6 +365,10 @@ mars-map/ function")
 
      [remap evil-shift-left] 'org-metaleft
      [remap evil-shift-right] 'org-metaright)
+
+    (:keymaps 'org-mode-map
+     :states '(normal visual insert)
+     "RET" 'mars/org-ret)
 
     (:keymaps 'org-agenda-mode-map
      :states '(normal visual emacs)
@@ -394,10 +455,82 @@ mars-map/ function")
     :demand t
     :config (ivy-prescient-mode 1))
 
-  (use-package ivy-filthy-rich
-    :straight (:host github :repo "casouri/ivy-filthy-rich")
+  (use-package ivy-rich
+    :after (ivy counsel)
     :demand t
-    :config (ivy-filthy-rich-mode 1)))
+    :init
+    (setq ivy-rich-path-style 'abbrev
+	  ivy-virtual-abbreviate 'full
+	  ivy-format-function #'ivy-format-function-line)
+
+    :config
+    (setq ivy-format-function #'ivy-format-function-line)
+
+    (defun ivy-rich-switch-buffer-icon (candidate)
+      (with-current-buffer
+   	  (get-buffer candidate)
+	(let ((icon (all-the-icons-icon-for-mode major-mode)))
+	  (if (symbolp icon)
+	      (all-the-icons-icon-for-mode 'fundamental-mode)
+	    icon))))
+
+    (setq ivy-rich-display-transformers-list
+	  '(ivy-switch-buffer
+	    (:columns
+	     ((ivy-rich-switch-buffer-icon :width 2)
+	      (ivy-rich-candidate
+	       (:width 30))
+	      (ivy-rich-switch-buffer-size
+	       (:width 7))
+	      (ivy-rich-switch-buffer-indicators
+	       (:width 4 :face error :align right))
+	      (ivy-rich-switch-buffer-major-mode
+	       (:width 12 :face warning))
+	      (ivy-rich-switch-buffer-project
+	       (:width 15 :face success))
+	      (ivy-rich-switch-buffer-path
+	       (:width
+		(lambda
+		  (x)
+		  (ivy-rich-switch-buffer-shorten-path x
+						       (ivy-rich-minibuffer-width 0.3))))))
+	     :predicate
+	     (lambda
+	       (cand)
+	       (get-buffer cand)))
+	    counsel-M-x
+	    (:columns
+	     ((counsel-M-x-transformer
+	       (:width 40))
+	      (ivy-rich-counsel-function-docstring
+	       (:face font-lock-doc-face))))
+	    counsel-describe-function
+	    (:columns
+	     ((counsel-describe-function-transformer
+	       (:width 40))
+	      (ivy-rich-counsel-function-docstring
+	       (:face font-lock-doc-face))))
+	    counsel-describe-variable
+	    (:columns
+	     ((counsel-describe-variable-transformer
+	       (:width 40))
+	      (ivy-rich-counsel-variable-docstring
+	       (:face font-lock-doc-face))))
+	    counsel-recentf
+	    (:columns
+	     ((ivy-rich-candidate
+	       (:width 0.8))
+	      (ivy-rich-file-last-modified-time
+	       (:face font-lock-comment-face))))))
+
+    (ivy-rich-mode))
+
+  (use-package ivy-posframe
+    :demand t
+    :config
+    (setq ivy-display-function #'ivy-posframe-display)
+    (setq ivy-display-function #'ivy-posframe-display-at-frame-center)
+    (ivy-posframe-enable)))
 
 ;; Displays helpful documentation
 (use-package helpful
@@ -428,6 +561,9 @@ mars-map/ function")
   (add-hook 'after-save-hook #'magit-refresh)
 
   :general
+  (mars-map/applications
+    "g" 'magit-status)
+
   (:keymaps 'magit-mode-map
    :states 'normal
    "<escape>" nil
@@ -559,6 +695,8 @@ newline."
       ;; Custom bindings on unused evil bingins
       "!" 'universal-argument)
 
+    (define-key universal-argument-map "!" 'universal-argument-more)
+
     (mars-map/windows
       ;; Window motion
       "h" 'evil-window-left
@@ -588,11 +726,38 @@ newline."
       "x" 'evil-exchange
       "X" 'evil-exchange-cancel))
 
-  (use-package targets
-    :straight (:host github :repo "noctuid/targets.el" :branch "baf1e9f19487085c17b59f9f28e3f46b360db475")
+  (use-package things
+    :straight (:host github :repo "noctuid/things.el")
+    :demand t)
+
+
+  (use-package multiple-cursors
     :demand t
     :config
-    (targets-setup t)))
+    (defhydra hydra-multiple-cursors (:hint nil)
+      "
+ Up^^             Down^^           Miscellaneous           % 2(mc/num-cursors) cursor%s(if (> (mc/num-cursors) 1) \"s\" \"\")
+------------------------------------------------------------------
+ [_p_]   Next     [_n_]   Next     [_l_] Edit lines  [_0_] Insert numbers
+ [_P_]   Skip     [_N_]   Skip     [_a_] Mark all    [_A_] Insert letters
+ [_M-p_] Unmark   [_M-n_] Unmark   [_s_] Search
+ [Click] Cursor at point       [_q_] Quit"
+      ("l" mc/edit-lines :exit t)
+      ("a" mc/mark-all-like-this :exit t)
+      ("n" mc/mark-next-like-this)
+      ("N" mc/skip-to-next-like-this)
+      ("M-n" mc/unmark-next-like-this)
+      ("p" mc/mark-previous-like-this)
+      ("P" mc/skip-to-previous-like-this)
+      ("M-p" mc/unmark-previous-like-this)
+      ("s" mc/mark-all-in-region-regexp :exit t)
+      ("0" mc/insert-numbers :exit t)
+      ("A" mc/insert-letters :exit t)
+      ("<mouse-1>" mc/add-cursor-on-click)
+      ;; Help with click recognition in this hydra
+      ("<down-mouse-1>" ignore)
+      ("<drag-mouse-1>" ignore)
+      ("q" nil))))
 
 (use-package smerge-mode
   :after magit
@@ -697,10 +862,15 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
     (setq company-tooltip-minimum company-tooltip-limit)
     (global-company-mode 1)
     :general
+    (mars/map
+      :states 'insert
+      "TAB" 'company-complete)
+
     (:keymaps 'company-active-map
      "RET" 'company-complete-selection))
 
   (use-package company-box
+    :disabled
     :hook (company-mode . company-box-mode))
 
   (use-package company-prescient
@@ -762,19 +932,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; Language packages
 (use-feature lisp
   :init
-  (defun mars/lisp-butt-display ()
-    "Function to produce nicer lisp butts.
-This function can be hooked into the modes of interest.  E.g. "
-    (font-lock-add-keywords
-     nil
-     '((")\\())+\\))"
-	(1 (compose-region
-	    (match-beginning 1) (match-end 1)
-	    ".")
-	   nil)))))
-
-  (add-hook 'emacs-lisp-mode-hook #'mars/lisp-butt-display)
-
   (use-package lispy
     :hook ((emacs-lisp-mode clojure-mode cider-mode) . lispy-mode)
     :config
@@ -918,6 +1075,11 @@ Lisp function does not specify a special indentation."
 						  ("\\.js\\'" . rjsx-mode))))
     (flycheck-add-mode 'javascript-eslint 'rjsx-mode))
 
+  (use-package js-import
+    :general
+    (mars-leader-map
+      :keymaps 'rjsx-mode-map
+      "i" 'js-import))
 
   (use-package prettier-js
     :init (add-hook 'rjsx-mode-hook #'prettier-js-mode)
@@ -977,6 +1139,35 @@ Lisp function does not specify a special indentation."
 
   (use-package company-lsp))
 
+;; Used mainly for SQL.
+;; Need to eval the following code to run
+;; the python kernel with SQL magic enabled:
+;; #+BEGIN_SRC jupyter-python
+;; %reload_ext sql
+;; %config SqlMagic.autopandas = True
+;; %sql postgresql://user:pass@hostname/dbname
+;; #+END_SRC
+(use-package jupyter
+  :init
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (jupyter . t)))
+
+  (setq org-babel-default-header-args:jupyter-python
+	'((:async . "yes")
+          (:session . "jupy")
+	  (:kernel . "python3")
+	  (:display . "text/plain")
+	  (:noweb . "yes")))
+
+  :general
+  (:keymaps 'jupyter-repl-mode-map
+   :states '(normal insert)
+   "<up>" 'jupyter-repl-history-previous
+   "<down>" 'jupyter-repl-history-next
+   "RET" 'jupyter-repl-ret))
+
 (use-feature clojure
   :init
   (use-package cider
@@ -996,14 +1187,6 @@ Lisp function does not specify a special indentation."
     :config
     ;; Automatically sort project dependencies after changing them.
     (setq cljr-auto-sort-project-dependencies t)))
-
-;; sql
-(use-package ob-sql-mode
-  :demand t
-  :init
-  (setq org-confirm-babel-evaluate
-      (lambda (lang body)
-        (not (string= lang "sql-mode")))))
 
 ;; UI
 (use-package window-purpose
@@ -1070,17 +1253,16 @@ Lisp function does not specify a special indentation."
 
   (defun mars/get-core-projectile-frame (&optional project-root)
     (interactive)
-    (concat mars/core-frame-prefix (or project-root (projectile-project-root))))
+    (concat mars/core-frame-prefix
+	    (funcall projectile-project-name-function
+		     (or project-root (projectile-project-root)))))
 
   (defun mars/projectile-switch-project-action (project-root)
     (interactive)
-    (fg-create-frame (mars/get-core-projectile-frame project-root)))
+    (fg-create-frame (mars/get-core-projectile-frame (funcall projectile-project-name-function
+							      project-root))))
 
-  (defun mars/set-core-projectile-frame (project-root)
-    (interactive)
-    (setq-local projectile-project-root project-root))
-
-  (setq counsel-projectile-switch-project-action #'mars/projectile-switch-project-action)
+  ;; (setq counsel-projectile-switch-project-action #'mars/projectile-switch-project-action)
 
   (defun mars/after-frame-switch-hook (frame-name &optional new)
     (interactive)
@@ -1099,17 +1281,17 @@ Lisp function does not specify a special indentation."
 	   (cd project-root)
 	   (counsel-projectile-find-file))))))
 
-  (add-hook 'fg-create-hook (lambda (frame-name) (mars/after-frame-switch-hook frame-name 't)))
-  (add-hook 'fg-after-switch-hook #'mars/after-frame-switch-hook)
+  ;; (add-hook 'fg-create-hook (lambda (frame-name) (mars/after-frame-switch-hook frame-name 't)))
+  ;; (add-hook 'fg-after-switch-hook #'mars/after-frame-switch-hook)
 
-  (defun mars/magit-frame ()
-    (interactive)
-    (let ((frame-name (concat mars/magit-frame-prefix (projectile-project-root))))
-      (fg-switch-to-frame frame-name)))
+  ;; (defun mars/magit-frame ()
+  ;;   (interactive)
+  ;;   (let ((frame-name (concat mars/magit-frame-prefix (projectile-project-root))))
+  ;;     (fg-switch-to-frame frame-name)))
 
   :general
-  (mars-map/applications
-    "g" 'mars/magit-frame)
+  ;; (mars-map/applications
+  ;;   "g" 'mars/magit-frame)
 
   (mars-map/frames
     "s" 'fg-switch-to-frame
@@ -1183,6 +1365,7 @@ Lisp function does not specify a special indentation."
   :config (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
 
 (use-package all-the-icons-ivy
+  :disabled
   :demand t
   :custom (all-the-icons-ivy-buffer-commands '(ivy-switch-buffer-other-window))
   :config
@@ -1218,6 +1401,68 @@ Lisp function does not specify a special indentation."
   (add-hook 'magit-mode-hook #'hide-mode-line-mode))
 
 ;; Applications
+
+;; Dired
+(use-feature dired
+  :init
+  (defhydra hydra-dired (:hint nil :color pink)
+    "
+_+_ mkdir          _v_iew           _m_ark             _(_ details        _i_nsert-subdir    wdired
+_C_opy             _O_ view other   _U_nmark all       _)_ omit-mode      _$_ hide-subdir    C-x C-q : edit
+_D_elete           _o_pen other     _u_nmark           _l_ redisplay      _w_ kill-subdir    C-c C-c : commit
+_R_ename           _M_ chmod        _t_oggle           _g_ revert buf     _e_ ediff          C-c ESC : abort
+_Y_ rel symlink    _G_ chgrp        _E_xtension mark   _s_ort             _=_ pdiff
+_S_ymlink          ^ ^              _F_ind marked      _._ toggle hydra   \\ flyspell
+_r_sync            ^ ^              ^ ^                ^ ^                _?_ summary
+_z_ compress-file  _A_ find regexp
+_Z_ compress       _Q_ repl regexp
+
+T - tag prefix
+"
+    ("\\" dired-do-ispell)
+    ("(" dired-hide-details-mode)
+    (")" dired-omit-mode)
+    ("+" dired-create-directory)
+    ("=" diredp-ediff) ;; smart diff
+    ("?" dired-summary)
+    ("$" diredp-hide-subdir-nomove)
+    ("A" dired-do-find-regexp)
+    ("C" dired-do-copy)	;; Copy all marked files
+    ("D" dired-do-delete)
+    ("E" dired-mark-extension)
+    ("e" dired-ediff-files)
+    ("F" dired-do-find-marked-files)
+    ("G" dired-do-chgrp)
+    ("g" revert-buffer)	;; read all directories again (refresh)
+    ("i" dired-maybe-insert-subdir)
+    ("l" dired-do-redisplay) ;; relist the marked or singel directory
+    ("M" dired-do-chmod)
+    ("m" dired-mark)
+    ("O" dired-display-file)
+    ("o" dired-find-file-other-window)
+    ("Q" dired-do-find-regexp-and-replace)
+    ("R" dired-do-rename)
+    ("r" dired-do-rsynch)
+    ("S" dired-do-symlink)
+    ("s" dired-sort-toggle-or-edit)
+    ("t" dired-toggle-marks)
+    ("U" dired-unmark-all-marks)
+    ("u" dired-unmark)
+    ("v" dired-view-file) ;; q to exit, s to search, = gets line #
+    ("w" dired-kill-subdir)
+    ("Y" dired-do-relsymlink)
+    ("z" diredp-compress-this-file)
+    ("Z" dired-do-compress)
+    ("q" nil)
+    ("." nil :color blue))
+
+  (use-package dired-git-info
+    :commands dired-git-info-mode)
+
+  :general
+  (mars-map
+    :keymaps 'dired-mode-map
+    "." 'hydra-dired/body))
 
 ;; Shell
 (use-feature comint
@@ -1297,10 +1542,6 @@ Lisp function does not specify a special indentation."
 (use-package olivetti
   :hook (org-mode-hook . olivetti-mode)
   :config (olivetti-set-width 120))
-
-(use-package eboy
-  :straight (:host github :repo "vreeze/eboy")
-  :demand t)
 
 ;; Starts emacs server
 (server-start)
