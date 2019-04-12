@@ -102,16 +102,26 @@ than having to call `add-to-list' multiple times."
     (add-to-list list item))
   list)
 
-(defun mars/set-pretty-symbols (mode symbols)
-  ;; TODO fix it. should be a macro.
-  "Set symbols SYMBOLS for quoted mode MODE."
+(defmacro mars/set-pretty-symbols (mode &rest symbols)
+  "Set symbols SYMBOLS for mode MODE."
   (let ((alist (mapcar (lambda (symbol)
-			 `(,(car symbol) . (string-to-char (cdr symbol))))
-		       symbols)))
-    (add-hook mode (lambda ()
-		     (interactive)
-		     (setq-local prettify-symbols-alist alist)))))
+			 `(,(car symbol) . ,(string-to-char (cdr symbol))))
+		       symbols))
+	(fun-name (intern (concat "mars/set-pretty-symbols-for-" (symbol-name mode)))))
+    `(progn
+       (defun ,fun-name ()
+	   (interactive)
+	   (setq-local prettify-symbols-alist (append prettify-symbols-alist ',alist)))
+       (add-hook ',(intern (concat (symbol-name mode) "-hook")) #',fun-name))))
 
+;; Symbols for all modes
+(mars/set-pretty-symbols prog-mode
+			 (">=" . "≥")
+			 ("<=" . "≤")
+			 ("&&" . "⋀")
+			 ("||" . "⋁")
+			 ("[]" . "∅")
+			 ("{}" . "⦱"))
 
 (use-package exwm
   :disabled
@@ -391,7 +401,7 @@ If point is on a src block, runs org-indent"
 ;; Candidate selection
 
 ;; Select things in the minibuffer
-(use-feature ivy
+(use-feature feature/ivy
   :init
   (use-package ivy
     :config
@@ -559,12 +569,12 @@ If point is on a src block, runs org-indent"
 (use-package git-auto-commit-mode)
 
 ;; Disable built in emacs vc as we have magit for that
-(use-feature vc-hooks
+(use-feature feature/vc-hooks
   :config
   (setq vc-handled-backends nil))
 
 ;; Project management
-(use-feature projectile
+(use-feature feature/projectile
   :init
   (use-package projectile :config (projectile-mode 1))
 
@@ -644,7 +654,7 @@ newline."
  enable-local-variables :all)
 
 ;; Vim-like keybindings.
-(use-feature evil
+(use-feature feature/evil
   :init
   (use-package evil
     :demand t
@@ -783,7 +793,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
     "g d" 'dumb-jump-go
     "g D" 'dumb-jump-go-other-window))
 
-(use-feature save-place
+(use-feature feature/save-place
   :init
   (save-place-mode 1))
 
@@ -793,11 +803,11 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :config
   (super-save-mode 1))
 
-(use-feature subword
+(use-feature feature/subword
   :init
   (global-subword-mode 1))
 
-(use-feature autorevert
+(use-feature feature/autorevert
   :defer 2
   :config
   (setq auto-revert-interval 1
@@ -816,7 +826,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
    "V" 'er/contract-region))
 
 ;; Completion
-(use-feature completion
+(use-feature feature/completion
   :init
   (use-package company
     :demand t
@@ -847,9 +857,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
   (use-package yasnippet-snippets))
 
-(use-feature text
+(use-feature feature/text
   :init
-  (use-feature abbrev))
+  (use-feature feature/abbrev))
 
 ;; Jump on things
 (use-package avy
@@ -870,7 +880,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (setq evil-snipe-scope 'buffer)
   (setq evil-snipe-repeat-scope 'buffer))
 
-(use-feature electric-mode
+(use-feature feature/electric-mode
   :init
   (add-hook 'prog-mode-hook #'electric-pair-mode)
   (add-hook 'prog-mode-hook #'electric-indent-mode)
@@ -883,9 +893,14 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :config
   (add-hook 'prog-mode-hook #'electric-operator-mode)
   (electric-operator-add-rules-for-mode 'prog-mode
+					(cons ">=" " >= ")
+					(cons "<=" " <= ")
+					(cons "=" " = ")
 					(cons "=>" " => "))
   (electric-operator-add-rules-for-mode 'emacs-lisp-mode
-					(cons "-" nil)))
+					(cons "-" nil))
+  (electric-operator-add-rules-for-mode 'rjsx-mode
+					(cons "==" " === ")))
 
 (use-package hungry-delete
   :init (hungry-delete-mode))
@@ -894,8 +909,18 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (global-prettify-symbols-mode 1)
 
 ;; Language packages
-(use-feature lisp
+(use-feature feature/lisp
   :init
+  (mars/set-pretty-symbols emacs-lisp-mode
+			   ("defun" . "ƒ")
+			   ("defmacro" . "ɱ📦")
+			   ("nil" . "◯")
+			   ("t" . "●")
+			   ("()" . "∅")
+			   ;; Waiting for https://github.com/ekaschalk/notate release
+			   ;; ("setq" . "⟾")
+			   )
+
   (use-package lispy
     :hook ((emacs-lisp-mode clojure-mode cider-mode) . lispy-mode)
     :config
@@ -1011,7 +1036,7 @@ Lisp function does not specify a special indentation."
 (use-package yaml-mode
   :config (setq yaml-indent-offset 4))
 
-(use-feature javascript
+(use-feature feature/javascript
   :init
   (setq js-indent-level 2)
 
@@ -1029,14 +1054,19 @@ Lisp function does not specify a special indentation."
 	(when (and eslint (file-executable-p eslint))
 	  (setq-local flycheck-javascript-eslint-executable eslint))))
 
-    (mars/set-pretty-symbols 'rjsx-mode '(("() =>" . "λ")
-					  ("===" . "⩶")))
+    (mars/set-pretty-symbols rjsx-mode
+			     ("() =>" . "λ")
+			     ("===" . "⩶")
+			     ("import" . "⟼")
+			     ("export" . "⟻"))
 
     (add-hook 'rjsx-mode-hook #'mars/eslint-locate)
 
     :config
-    (setq auto-mode-alist (cons auto-mode-alist '(("\\.jsx\\'" . rjsx-mode)
-						  ("\\.js\\'" . rjsx-mode))))
+    (mars/add-to-list auto-mode-alist
+		      ("\\.jsx\\'" . rjsx-mode)
+		      ("\\.js\\'" . rjsx-mode))
+
     (flycheck-add-mode 'javascript-eslint 'rjsx-mode))
 
   (use-package js-import
@@ -1060,7 +1090,7 @@ Lisp function does not specify a special indentation."
     :after 'rjsx-mode
     :init (add-hook 'rjsx-mode-hook #'js2-refactor-mode)))
 
-(use-feature python
+(use-feature feature/python
   :init
   (defun mars/python-reload ()
     (interactive)
@@ -1084,8 +1114,8 @@ Lisp function does not specify a special indentation."
 
   (add-hook 'after-save-hook #'mars/python-reload))
 
-(use-feature lsp
-  :commands 'lsp
+(use-feature feature/lsp
+  :commands lsp
   :hook prog-mode
   :init
   (use-package lsp-mode
@@ -1103,7 +1133,7 @@ Lisp function does not specify a special indentation."
 
   (use-package company-lsp))
 
-(use-feature clojure
+(use-feature feature/clojure
   :disabled
   :init
   (use-package cider
@@ -1159,13 +1189,18 @@ Lisp function does not specify a special indentation."
   :straight (:host github :repo "nabeix/emacs-font-size")
   :demand t
   :init
-  (setq mars-font "Ubuntu Mono"
-	mars-font-height 12)
+  (setq mars-font "Fira Mono"
+	mars-font-height 9)
   (set-face-attribute 'default nil
 		      :family mars-font)
-
   :config
   (font-size-init mars-font-height))
+
+;; Symbols
+(use-package notate
+  :disabled
+  :demand t
+  :straight (:host github :repo "ekaschalk/notate"))
 
 ;; Frames
 (mars/add-to-list default-frame-alist
@@ -1173,7 +1208,7 @@ Lisp function does not specify a special indentation."
 		  (height . 900))
 
 ;e; desktop-save-mode
-(use-feature desktop-save-mode
+(use-feature feature/desktop-save-mode
   :init
   (desktop-save-mode)
   (setq desktop-save-mode t))
@@ -1253,13 +1288,11 @@ Lisp function does not specify a special indentation."
 
 (use-package dracula-theme)
 
-(use-package darktooth-theme)
-
-(use-package kaolin-themes
+(use-package darktooth-theme
   :demand t
   :init (setq size mars-font-height
 	      default-size mars-font-height)
-  :config (load-theme 'kaolin-light 'confirm))
+  :config (load-theme 'darktooth 'confirm))
 
 (use-package solarized-theme)
 
@@ -1267,7 +1300,9 @@ Lisp function does not specify a special indentation."
 
 (use-package zenburn-theme)
 
-(use-package sublime-themes)
+(use-package creamsody-theme)
+
+(use-package nimbus-theme)
 
 (use-package highlight-numbers
   :commands highlight-numbers-mode
@@ -1284,14 +1319,6 @@ Lisp function does not specify a special indentation."
 (use-package rainbow-delimiters
   :commands rainbow-delimiters-mode
   :hook (prog-mode . rainbow-delimiters-mode))
-
-;; (set-face-attribute 'show-paren-match nil
-;; 		    :foreground 'unspecified
-;; 		    :background 'unspecified)
-
-;; (set-face-attribute 'show-paren-match-expression nil
-;; 		    :weight 'bold
-;; 		    :slant 'italic)
 
 (use-package all-the-icons
   :demand t)
@@ -1335,12 +1362,13 @@ Lisp function does not specify a special indentation."
 (use-package hide-mode-line
   :init
   (add-hook 'org-mode-hook #'hide-mode-line-mode)
-  (add-hook 'magit-mode-hook #'hide-mode-line-mode))
+  (add-hook 'magit-mode-hook #'hide-mode-line-mode)
+  (add-hook 'helpful-mode-hook #'hide-mode-line-mode))
 
 ;; Applications
 
 ;; Dired
-(use-feature dired
+(use-feature feature/dired
   :init
   (defhydra hydra-dired (:hint nil :color pink)
     "
@@ -1402,7 +1430,7 @@ T - tag prefix
     "." 'hydra-dired/body))
 
 ;; Shell
-(use-feature comint
+(use-feature feature/comint
   :general
   (:keymaps 'comint-mode-map
    :states '(normal insert)
@@ -1411,7 +1439,7 @@ T - tag prefix
    "<up>" 'comint-previous-input
    "<down>" 'comint-next-input))
 
-(use-feature eshell
+(use-feature feature/eshell
   :config
   (setq
    ;; Send inpupt to suprocesses
@@ -1435,7 +1463,7 @@ T - tag prefix
   (mars-map/applications
     "e" 'mars-eshell-new-buffer))
 
-(use-feature shell
+(use-feature feature/shell
   :init
   (push (cons "\\*shell.*\\*" display-buffer--same-window-action) display-buffer-alist)
   (use-package shell-here)
