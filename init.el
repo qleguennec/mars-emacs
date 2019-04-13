@@ -94,6 +94,48 @@ Inserted by installing org-mode or when a release is made."
      :straight nil
      ,@args))
 
+(defmacro mars/defhook (name arglist hook docstring &rest body)
+  "Define a function called NAME and add it to a hook.
+ARGLIST is as in `defun'. HOOK is the hook to which to add the
+function. DOCSTRING and BODY are as in `defun'."
+  (declare (indent 2)
+           (doc-string 4))
+  (unless (string-match-p "-hook$" (symbol-name hook))
+    (error "Symbol `%S' is not a hook" hook))
+  (unless (stringp docstring)
+    (error "mars/defhook: no docstring provided"))
+  `(progn
+     (defun ,name ,arglist
+       ,(format "%s\n\nThis function is for use in `%S'."
+                docstring hook)
+       ,@body)
+     (add-hook ',hook ',name)))
+
+(defmacro mars-defadvice (name arglist where place docstring &rest body)
+  "Define an advice called NAME and add it to a function.
+ARGLIST is as in `defun'. WHERE is a keyword as passed to
+`advice-add', and PLACE is the function to which to add the
+advice, like in `advice-add'. DOCSTRING and BODY are as in
+`defun'."
+  (declare (indent 2)
+           (doc-string 5))
+  (unless (stringp docstring)
+    (error "mars-defadvice: no docstring provided"))
+  `(progn
+     (defun ,name ,arglist
+       ,(let ((article (if (string-match-p "^:[aeiou]" (symbol-name where))
+                           "an"
+                         "a")))
+          (format "%s\n\nThis is %s `%S' advice for `%S'."
+                  docstring article where
+                  (if (and (listp place)
+                           (memq (car place) ''function))
+                      (cadr place)
+                    place)))
+       ,@body)
+     (advice-add ',place ',where #',name)
+     ',name))
+
 (defmacro mars/add-to-list (list &rest args)
   "Adds multiple items to LIST.
 Allows for adding a sequence of items to the same list, rather
@@ -107,12 +149,28 @@ than having to call `add-to-list' multiple times."
   (let ((alist (mapcar (lambda (symbol)
 			 `(,(car symbol) . ,(string-to-char (cdr symbol))))
 		       symbols))
-	(fun-name (intern (concat "mars/set-pretty-symbols-for-" (symbol-name mode)))))
+	(fun-name (intern (concat "mars/set-pretty-symbols|" (symbol-name mode)))))
+    `(mars/defhook
+	 ,fun-name ()
+       ,(intern (concat (symbol-name mode) "-hook"))
+       ,(concat "Set pretty symbols for `" (symbol-name mode) "’.")
+       (setq-local prettify-symbols-alist (append prettify-symbols-alist ',alist)))))
+
+(defmacro mars/counsel-M-x-initial-input (mode input)
+  "Defines a M-x command for MODE with initial INPUT"
+  (let ((fun-name (intern (concat "mars/counsel-M-x|" (symbol-name mode))))
+	(keymap-name (intern (concat (symbol-name mode) "-map"))))
     `(progn
        (defun ,fun-name ()
-	   (interactive)
-	   (setq-local prettify-symbols-alist (append prettify-symbols-alist ',alist)))
-       (add-hook ',(intern (concat (symbol-name mode) "-hook")) #',fun-name))))
+	 (interactive)
+	 (let ((ivy-initial-inputs-alist '((counsel-M-x .
+							,(if (stringp input)
+							     input
+							   (eval input))))))
+	   (counsel-M-x)))
+       (mars-leader-map
+	 :keymaps ',keymap-name
+	 "M-x" ',fun-name))))
 
 ;; Symbols for all modes
 (mars/set-pretty-symbols prog-mode
@@ -597,6 +655,7 @@ If point is on a src block, runs org-indent"
      magit-section-initial-visibility-alist '((stashes . hide)
 					      (untracked . hide))
      magit-log-section-commit-count 20
+     ;; Don’t ask when doing stuff
      magit-commit-ask-to-stage nil
      magit-no-confirm
      '(reverse
@@ -794,6 +853,9 @@ newline."
   (use-package things
     :straight (:host github :repo "noctuid/things.el")
     :demand t)
+
+  ;; Needed for js2-refactor
+  (use-package multiple-cursors)
 
   (use-package evil-mc
     :straight (:host github :repo "gabesoft/evil-mc")
@@ -996,6 +1058,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 			   ;; ("setq" . "⟾")
 			   )
 
+  (mars/counsel-M-x-initial-input emacs-lisp-mode
+				  "emacs-lisp ")
+
   (use-package lispy
     :hook ((emacs-lisp-mode clojure-mode cider-mode) . lispy-mode)
     :config
@@ -1117,27 +1182,24 @@ Lisp function does not specify a special indentation."
 
   (use-package rjsx-mode
     :init
-    (defun mars/eslint-locate ()
-      "Locates eslint in current directory"
-      (interactive)
-      (let* ((root (locate-dominating-file
-		    (or (buffer-file-name) default-directory)
-		    "node_modules"))
-	     (eslint (and root
-			  (expand-file-name "node_modules/eslint_d/bin/eslint_d.js"
-					    root))))
-	(when (and eslint (file-executable-p eslint))
-	  (setq-local flycheck-javascript-eslint-executable eslint)
-	  ;; (setq-local eslintd-fix-executable eslint)
-	  )))
-
     (mars/set-pretty-symbols rjsx-mode
 			     ("() =>" . "λ")
 			     ("===" . "⩶")
 			     ("import" . "⟼")
 			     ("export" . "⟻"))
 
-    (add-hook 'rjsx-mode-hook #'mars/eslint-locate)
+    (mars/defhook mars/eslint-locate|rjsx-mode ()
+      rjsx-mode-hook
+      "Locate eslint in current directory."
+      (interactive)
+      (let* ((root (locate-dominating-file
+		    (or (buffer-file-name) default-directory)
+		    "node_modules"))
+	     (eslint (and root
+			  (expand-file-name "node_modules/eslint/bin/eslint.js"
+					    root))))
+	(when (and eslint (file-executable-p eslint))
+	  (setq-local flycheck-javascript-eslint-executable eslint))))
 
     :config
     (mars/add-to-list auto-mode-alist
@@ -1153,9 +1215,9 @@ Lisp function does not specify a special indentation."
       "i" 'js-import))
 
   (use-package js2r-refactor
-    :disabled
-    :straight (:host github :repo "magnars/js2-refactor.el")
     :after rjsx-mode
+    :commands 'js2-refactor-mode
+    :straight (:host github :repo "magnars/js2-refactor.el")
     :init (add-hook 'rjsx-mode-hook #'js2-refactor-mode))
 
   (use-package eslintd-fix
@@ -1188,7 +1250,10 @@ Lisp function does not specify a special indentation."
 	(add-hook 'before-save-hook #'mars/before-save-rjsx)
       (remove-hook 'before-save-hook #'mars/before-save-rjsx)))
 
-  (add-hook 'rjsx-mode-hook #'mars/before-save-rjsx-mode))
+  (add-hook 'rjsx-mode-hook #'mars/before-save-rjsx-mode)
+
+  (mars/counsel-M-x-initial-input rjsx-mode
+				  (concat "^" (regexp-opt '("rjsx" "js2" "lsp")) " ")))
 
 (use-feature feature/python
   :init
@@ -1217,17 +1282,38 @@ Lisp function does not specify a special indentation."
 (use-feature feature/lsp
   :init
   (use-package lsp-mode
-    :demand t
-    :config
-    (add-hook 'prog-mode-hook #'lsp)
+    :commands 'lsp
+    :init
+    (mars/defhook mars/enable|lsp-mode ()
+	prog-mode-hook
+      "Enable lsp-mode for most programming modes."
+      (unless (derived-mode-p #'emacs-lisp-mode)
+	(lsp)))
 
+    :config
     (require 'lsp-clients))
 
   (use-package lsp-ui
+    :config
+    (mars-defadvice mars/advice-apply-single-fix|lsp-ui (orig-fun &rest args)
+      :around lsp-ui-sideline-apply-code-actions
+      "Apply code fix immediately if only one is possible."
+      (cl-letf* ((orig-completing-read (symbol-function #'completing-read))
+		 ((symbol-function #'completing-read)
+		  (lambda (prompt collection &rest args)
+		    (if (= (safe-length collection) 1)
+			(car collection)
+		      (apply orig-completing-read prompt collection args)))))
+	(apply orig-fun args)))
+
     :general
     (:keymaps 'lsp-ui-mode-map
      :states '(normal visual)
-     "g d" 'lsp-ui-peek-find-definitions))
+     "g d" 'lsp-ui-peek-find-definitions)
+
+    (mars-leader-map
+      :keymaps 'lsp-ui-mode-map
+      "f" 'lsp-ui-sideline-apply-code-actions))
 
   (use-package company-lsp))
 
