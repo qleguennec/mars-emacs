@@ -842,7 +842,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
       "TAB" 'company-complete)
 
     (:keymaps 'company-active-map
-     "RET" 'company-complete-selection))
+     "RET" 'company-complete-selection
+     "<tab>" 'complete-symbol))
 
   (use-package company-box
     :disabled
@@ -904,7 +905,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 					(cons "==" " === ")))
 
 (use-package hungry-delete
-  :init (hungry-delete-mode))
+  :demand t
+  :config (global-hungry-delete-mode))
 
 ;; Prettier code
 (global-prettify-symbols-mode 1)
@@ -1050,10 +1052,11 @@ Lisp function does not specify a special indentation."
 		    (or (buffer-file-name) default-directory)
 		    "node_modules"))
 	     (eslint (and root
-			  (expand-file-name "node_modules/eslint/bin/eslint.js"
+			  (expand-file-name "node_modules/eslint_d/bin/eslint_d.js"
 					    root))))
 	(when (and eslint (file-executable-p eslint))
-	  (setq-local flycheck-javascript-eslint-executable eslint))))
+	  (setq-local flycheck-javascript-eslint-executable eslint)
+	  (setq-local eslintd-fix-executable eslint))))
 
     (mars/set-pretty-symbols rjsx-mode
 			     ("() =>" . "λ")
@@ -1076,20 +1079,40 @@ Lisp function does not specify a special indentation."
       :keymaps 'rjsx-mode-map
       "i" 'js-import))
 
+  (use-package js2r-refactor
+    :disabled
+    :straight (:host github :repo "magnars/js2-refactor.el")
+    :after rjsx-mode
+    :init (add-hook 'rjsx-mode-hook #'js2-refactor-mode))
+
+  (use-package eslintd-fix
+    :after rjsx-mode)
+
   (use-package prettier-js
-    :init (add-hook 'rjsx-mode-hook #'prettier-js-mode)
-    :config
-    (setq prettier-js-command "prettier_d")
-    (setq prettier-js-args '("--trailing-comma" "es5"
+    :after rjsx-mode
+    :init
+    (setq prettier-js-command "prettier_d"
+	  prettier-js-args '("--trailing-comma" "es5"
 			     "--print-width" "120"
 			     "--single-quote" "true"
 			     "--tab-width" "2"
 			     "--use-tabs" "false")))
 
-  (use-package js2r-refactor
-    :straight (:host github :repo "magnars/js2-refactor.el")
-    :after 'rjsx-mode
-    :init (add-hook 'rjsx-mode-hook #'js2-refactor-mode)))
+  (defun mars/before-save-rjsx ()
+    "Reformat javascript on save. Runs prettier + eslint"
+    (interactive)
+    (when (eq major-mode 'rjsx-mode)
+      (prettier-js)
+      (eslintd-fix)))
+
+  (define-minor-mode mars/before-save-rjsx-mode
+    "Reformat javascript on save. Runs prettier + eslint"
+    nil nil nil
+    (if mars/before-save-rjsx-mode
+	(add-hook 'before-save-hook #'mars/before-save-rjsx)
+      (remove-hook 'before-save-hook #'mars/before-save-rjsx)))
+
+  (add-hook 'rjsx-mode-hook #'mars/before-save-rjsx-mode))
 
 (use-feature feature/python
   :init
@@ -1116,11 +1139,12 @@ Lisp function does not specify a special indentation."
   (add-hook 'after-save-hook #'mars/python-reload))
 
 (use-feature feature/lsp
-  :commands lsp
-  :hook prog-mode
   :init
   (use-package lsp-mode
+    :demand t
     :config
+    (add-hook 'prog-mode-hook #'lsp)
+
     (require 'lsp-clients)
     (add-hook 'before-save-hook
 	      (lambda () (when (eq major-mode 'lsp-mode)
@@ -1357,10 +1381,17 @@ Lisp function does not specify a special indentation."
 
 (use-package ace-window
   :config
-  (setq aw-keys '(?a ?s ?d ?f ?h ?j ?k ?l))
+  (setq aw-keys '(?a ?s ?d ?f ?h ?j ?k ?l)
+	aw-dispatch-always t)
   :general
   (mars-map/windows
     "w" 'ace-window))
+
+(use-feature feature/winner-mode
+  :init
+  (winner-mode))
+
+(use-package transpose-frame)
 
 (use-package hide-mode-line
   :init
