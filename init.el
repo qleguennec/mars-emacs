@@ -584,7 +584,33 @@ If point is on a src block, runs org-indent"
   (setq
    magit-display-buffer-function 'magit-display-buffer-same-window-except-diff-v1
    ;; Always save everything before opening a magit buffer
-   magit-save-repository-buffers 'dontask)
+   magit-save-repository-buffers 'dontask
+   ;; Cursor on Unstaged Changes by default
+   magit-status-initial-section '(2)
+   magit-section-initial-visibility-alist '((stashes . hide)
+					    (untracked . hide))
+   magit-log-section-commit-count 20
+   magit-commit-ask-to-stage nil
+   magit-no-confirm
+   '((const reverse)
+     (const discard)
+     (const rename)
+     (const resurrect)
+     (const untrack)
+     (const trash)
+     (const delete)
+     (const abort-rebase)
+     (const abort-merge)
+     (const merge-dirty)
+     (const drop-stashes)
+     (const reset-bisect)
+     (const kill-process)
+     (const delete-unmerged-branch)
+     (const delete-pr-branch)
+     (const remove-modules)
+     (const stage-all-changes)
+     (const unstage-all-changes)
+     (const safe-with-wip)))
 
   ;; Refresh after a save.
   (add-hook 'after-save-hook #'magit-refresh)
