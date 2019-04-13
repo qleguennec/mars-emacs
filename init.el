@@ -581,8 +581,7 @@ If point is on a src block, runs org-indent"
 		  (ivy-rich-switch-buffer-shorten-path x
 						       (ivy-rich-minibuffer-width 0.3))))))
 	     :predicate
-	     (lambda
-	       (cand)
+	     (lambda (cand)
 	       (get-buffer cand)))
 	    counsel-M-x
 	    (:columns
@@ -864,7 +863,11 @@ newline."
     (mars-map
       :states 'visual
       "I" 'evil-mc-make-cursor-in-visual-selection-beg
-      "A" 'evil-mc-make-cursor-in-visual-selection-end)))
+      "A" 'evil-mc-make-cursor-in-visual-selection-end))
+
+  (use-package evil-goggles
+    :demand t
+    :config (add-hook 'prog-mode-hook #'evil-goggles-mode)))
 
 (use-package smerge-mode
   :after magit
