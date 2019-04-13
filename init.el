@@ -1138,7 +1138,8 @@ Lisp function does not specify a special indentation."
 			     "--print-width" "120"
 			     "--single-quote" "true"
 			     "--tab-width" "2"
-			     "--use-tabs" "false")))
+			     "--use-tabs" "false")
+	  prettier-js-show-errors nil))
 
   (defun mars/before-save-rjsx ()
     "Reformat javascript on save. Runs prettier + eslint"
@@ -1187,10 +1188,7 @@ Lisp function does not specify a special indentation."
     :config
     (add-hook 'prog-mode-hook #'lsp)
 
-    (require 'lsp-clients)
-    (add-hook 'before-save-hook
-	      (lambda () (when (eq major-mode 'lsp-mode)
-		      (lsp-format-buffer)))))
+    (require 'lsp-clients))
 
   (use-package lsp-ui
     :general
