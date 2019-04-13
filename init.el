@@ -689,6 +689,12 @@ If point is on a src block, runs org-indent"
        safe-with-wip)
      magit-status-show-hashes-in-headers t)
 
+    ;; Auto revert buffers
+    (magit-auto-revert-mode 1)
+    (setq auto-revert-interval 1
+	  revert-without-query '(".*"))
+
+
     ;; Refresh after a save.
     (add-hook 'after-save-hook #'magit-refresh)
 
@@ -709,7 +715,19 @@ If point is on a src block, runs org-indent"
   ;; Create URLs for files and commits in GitHub/Bitbucket/GitLab/... repositories
   (use-package git-link)
 
-  (use-package git-auto-commit-mode))
+  (use-package git-auto-commit-mode)
+
+  (use-package git-gutter
+    :hook (prog-mode . git-gutter-mode)
+    :config
+    (evil-define-text-object evil-inner-hunk (count &optional _beg _end _type)
+      (let ((hunk (git-gutter:search-here-diffinfo git-gutter:diffinfos)))
+	(list (git-gutter:line-point (git-gutter-hunk-start-line hunk))
+	      (git-gutter:line-point (1+ (git-gutter-hunk-end-line hunk))))))
+    :general
+    (general-define-key
+     :keymaps 'evil-inner-text-objects-map
+     "h" 'evil-inner-hunk)))
 
 ;; Disable built in emacs vc as we have magit for that
 (use-feature feature/vc-hooks
@@ -857,79 +875,44 @@ newline."
       "s" (lambda () (interactive) (evil-window-split) (other-window 1))
       "q" 'delete-window)
 
-  (use-package evil-collection
-    :demand t
-    :config
-    (evil-collection-init))
+    (use-package evil-collection
+      :demand t
+      :config
+      (evil-collection-init))
 
-  (use-package evil-magit
-    :after magit
-    :demand t)
+    (use-package evil-magit
+      :after magit
+      :demand t)
 
-  (use-package evil-exchange
-    :demand t
-    :general
-    (mars-map
-      :prefix "g"
-      "x" 'evil-exchange
-      "X" 'evil-exchange-cancel))
+    (use-package evil-exchange
+      :demand t
+      :general
+      (mars-map
+	:prefix "g"
+	"x" 'evil-exchange
+	"X" 'evil-exchange-cancel))
 
-  (use-package things
-    :straight (:host github :repo "noctuid/things.el")
-    :demand t)
+    (use-package things
+      :straight (:host github :repo "noctuid/things.el")
+      :demand t)
 
-  ;; Needed for js2-refactor
-  (use-package multiple-cursors)
+    ;; Needed for js2-refactor
+    (use-package multiple-cursors)
 
-  (use-package evil-mc
-    :straight (:host github :repo "gabesoft/evil-mc")
-    :demand t
-    :config (global-evil-mc-mode)
+    (use-package evil-mc
+      :straight (:host github :repo "gabesoft/evil-mc")
+      :demand t
+      :config (global-evil-mc-mode)
 
-    :general
-    (mars-map
-      :states 'visual
-      "I" 'evil-mc-make-cursor-in-visual-selection-beg
-      "A" 'evil-mc-make-cursor-in-visual-selection-end))
+      :general
+      (mars-map
+	:states 'visual
+	"I" 'evil-mc-make-cursor-in-visual-selection-beg
+	"A" 'evil-mc-make-cursor-in-visual-selection-end))
 
-  (use-package evil-goggles
-    :demand t
-    :config (add-hook 'prog-mode-hook #'evil-goggles-mode))))
-
-(use-package smerge-mode
-  :after magit
-  :init
-  (defhydra unpackaged/smerge-hydra
-    (:color pink :hint nil :post (smerge-auto-leave))
-    "
-^Move^       ^Keep^               ^Diff^                 ^Other^
-^^-----------^^-------------------^^---------------------^^-------
-_n_ext       _b_ase               _<_: upper/base        _C_ombine
-_p_rev       _u_pper              _=_: upper/lower       _r_esolve
-^^           _l_ower              _>_: base/lower        _k_ill current
-^^           _a_ll                _R_efine
-^^           _RET_: current       _E_diff
-"
-    ("n" smerge-next)
-    ("p" smerge-prev)
-    ("b" smerge-keep-base)
-    ("u" smerge-keep-upper)
-    ("l" smerge-keep-lower)
-    ("a" smerge-keep-all)
-    ("RET" smerge-keep-current)
-    ("\C-m" smerge-keep-current)
-    ("<" smerge-diff-base-upper)
-    ("=" smerge-diff-upper-lower)
-    (">" smerge-diff-base-lower)
-    ("R" smerge-refine)
-    ("E" smerge-ediff)
-    ("C" smerge-combine-with-next)
-    ("r" smerge-resolve)
-    ("k" smerge-kill-current)
-    ("q" nil "cancel" :color blue))
-  :hook (magit-diff-visit-file . (lambda ()
-                                   (when smerge-mode
-                                     (unpackaged/smerge-hydra/body)))))
+    (use-package evil-goggles
+      :demand t
+      :config (add-hook 'prog-mode-hook #'evil-goggles-mode))))
 
 (use-package undo-tree
   :demand t
@@ -969,13 +952,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-feature feature/subword
   :init
   (global-subword-mode 1))
-
-(use-feature feature/autorevert
-  :defer 2
-  :config
-  (setq auto-revert-interval 1
-	revert-without-query '(".*"))
-  (global-auto-revert-mode 1))
 
 ;; Surround things.
 (use-package evil-surround
