@@ -1056,7 +1056,8 @@ Lisp function does not specify a special indentation."
 					    root))))
 	(when (and eslint (file-executable-p eslint))
 	  (setq-local flycheck-javascript-eslint-executable eslint)
-	  (setq-local eslintd-fix-executable eslint))))
+	  ;; (setq-local eslintd-fix-executable eslint)
+	  )))
 
     (mars/set-pretty-symbols rjsx-mode
 			     ("() =>" . "λ")
