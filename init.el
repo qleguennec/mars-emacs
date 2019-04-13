@@ -486,10 +486,15 @@ If point is on a src block, runs org-indent"
     :init
     (setq ivy-rich-path-style 'abbrev
 	  ivy-virtual-abbreviate 'full
+
 	  ivy-format-function #'ivy-format-function-line)
 
+
+
     :config
+
     (setq ivy-format-function #'ivy-format-function-line)
+
 
     (defun ivy-rich-switch-buffer-icon (candidate)
       (with-current-buffer
@@ -576,63 +581,65 @@ If point is on a src block, runs org-indent"
   :init (advice-add 'helpful-update :after #'elisp-demos-advice-helpful-update))
 
 ;; VC
-(use-package magit
-  :config
-  (global-magit-file-mode 1)
-  ;; Auto commits in wip refs
-  (magit-wip-mode 1)
-  (setq
-   magit-display-buffer-function 'magit-display-buffer-same-window-except-diff-v1
-   ;; Always save everything before opening a magit buffer
-   magit-save-repository-buffers 'dontask
-   ;; Cursor on Unstaged Changes by default
-   magit-status-initial-section '(2)
-   magit-section-initial-visibility-alist '((stashes . hide)
-					    (untracked . hide))
-   magit-log-section-commit-count 20
-   magit-commit-ask-to-stage nil
-   magit-no-confirm
-   '((const reverse)
-     (const discard)
-     (const rename)
-     (const resurrect)
-     (const untrack)
-     (const trash)
-     (const delete)
-     (const abort-rebase)
-     (const abort-merge)
-     (const merge-dirty)
-     (const drop-stashes)
-     (const reset-bisect)
-     (const kill-process)
-     (const delete-unmerged-branch)
-     (const delete-pr-branch)
-     (const remove-modules)
-     (const stage-all-changes)
-     (const unstage-all-changes)
-     (const safe-with-wip)))
+(use-feature feature/git
+  :init
+  (use-package magit
+    :config
+    (global-magit-file-mode 1)
+    ;; Auto commits in wip refs
+    (magit-wip-mode 1)
+    (setq
+     magit-display-buffer-function 'magit-display-buffer-same-window-except-diff-v1
+     ;; Always save everything before opening a magit buffer
+     magit-save-repository-buffers 'dontask
+     ;; Cursor on Unstaged Changes by default
+     magit-status-initial-section '(2)
+     magit-section-initial-visibility-alist '((stashes . hide)
+					      (untracked . hide))
+     magit-log-section-commit-count 20
+     magit-commit-ask-to-stage nil
+     magit-no-confirm
+     '(reverse
+       rename
+       resurrect
+       untrack
+       trash
+       delete
+       abort-rebase
+       abort-merge
+       merge-dirty
+       drop-stashes
+       reset-bisect
+       kill-process
+       delete-unmerged-branch
+       delete-pr-branch
+       remove-modules
+       stage-all-changes
+       const unstage-all-changes
+       safe-with-wip)
+     magit-status-show-hashes-in-headers t)
 
-  ;; Refresh after a save.
-  (add-hook 'after-save-hook #'magit-refresh)
+    ;; Refresh after a save.
+    (add-hook 'after-save-hook #'magit-refresh)
 
-  :general
-  (mars-map/applications
-    "g" 'magit-status)
+    :general
+    (mars-map/applications
+      "g" 'magit-status)
 
-  (:keymaps 'magit-mode-map
-   :states 'normal
-   "<escape>" nil
-   "q" 'magit-mode-bury-buffer))
+    (:keymaps 'magit-mode-map
+     :states 'normal
+     "<escape>" nil
+     "q" 'magit-mode-bury-buffer))
 
-;; git forges
-(use-package forge
-  :disabled
-  :after magit)
+  ;; git forges
+  (use-package forge
+    :disabled
+    :after magit)
 
-;; Create URLs for files and commits in GitHub/Bitbucket/GitLab/... repositories
-(use-package git-link)
+  ;; Create URLs for files and commits in GitHub/Bitbucket/GitLab/... repositories
+  (use-package git-link)
 
-(use-package git-auto-commit-mode)
+  (use-package git-auto-commit-mode))
 
 ;; Disable built in emacs vc as we have magit for that
 (use-feature feature/vc-hooks
