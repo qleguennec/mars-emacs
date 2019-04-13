@@ -482,13 +482,11 @@ If point is on a src block, runs org-indent"
      "j" 'org-agenda-next-line
      "k" 'org-agenda-previous-line))
 
-
   (use-package org-trello)
 
   ;; Prettier org
   (use-package org-bullets
     :init (add-hook 'org-mode-hook #'org-bullets-mode)))
-
 
 (use-package restart-emacs)
 
@@ -1021,7 +1019,11 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (add-hook 'prog-mode-hook #'electric-pair-mode)
   (add-hook 'prog-mode-hook #'electric-indent-mode)
   (add-hook 'prog-mode-hook #'electric-layout-mode)
-  (add-hook 'prog-mode-hook #'electric-quote-mode))
+  (add-hook 'prog-mode-hook #'electric-quote-mode)
+
+  (use-package aggressive-indent
+    :commands 'aggressive-indent-mode
+    :config (add-hook 'prog-mode-hook #'agressive-indent-mode)))
 
 (use-package electric-operator
   :commands electric-operator-mode
@@ -1247,8 +1249,8 @@ Lisp function does not specify a special indentation."
     "Reformat javascript on save. Runs prettier + eslint"
     nil nil nil
     (if mars/before-save-rjsx-mode
-	(add-hook 'before-save-hook #'mars/before-save-rjsx)
-      (remove-hook 'before-save-hook #'mars/before-save-rjsx)))
+	(remove-hook 'before-save-hook #'mars/before-save-rjsx)
+      (add-hook 'before-save-hook #'mars/before-save-rjsx)))
 
   (add-hook 'rjsx-mode-hook #'mars/before-save-rjsx-mode)
 
@@ -1378,6 +1380,14 @@ Lisp function does not specify a special indentation."
   (purpose-compile-user-configuration)
   (purpose-x-popwin-update-conf))
 
+(use-package highlight-indent-guides
+  :demand t
+  :config
+  (setq highlight-indent-guides-method 'character)
+  (add-hook 'prog-mode-hook #'highlight-indent-guides-mode))
+
+(use-package color-identifiers-mode)
+
 ;; Font
 (use-package font-size
   :straight (:host github :repo "nabeix/emacs-font-size")
@@ -1477,7 +1487,7 @@ Lisp function does not specify a special indentation."
 ;; Highlight current line
 (global-hl-line-mode 1)
 
-(setq show-paren-style 'expression
+(setq show-paren-style 'parenthesis
       show-paren-when-point-inside-paren t
       show-paren-when-point-in-periphery t)
 
@@ -1487,13 +1497,7 @@ Lisp function does not specify a special indentation."
 
 (use-package dracula-theme)
 
-(use-package darktooth-theme
-  :demand t
-  :init (setq size mars-font-height
-	      default-size mars-font-height)
-  :config
-  (load-theme 'darktooth 'confirm)
-  (set-face-attribute 'internal-border nil :background "#66999D"))
+(use-package darktooth-theme)
 
 (use-package solarized-theme)
 
@@ -1501,7 +1505,13 @@ Lisp function does not specify a special indentation."
 
 (use-package zenburn-theme)
 
-(use-package creamsody-theme)
+(use-package creamsody-theme
+  :demand t
+  :init (setq size mars-font-height
+	      default-size mars-font-height)
+  :config
+  (load-theme 'creamsody 'confirm)
+  (set-face-attribute 'internal-border nil :background "#66999D"))
 
 (use-package nimbus-theme)
 
