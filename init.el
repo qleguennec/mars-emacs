@@ -1462,7 +1462,10 @@ T - tag prefix
   :general
   (mars-map
     :keymaps 'dired-mode-map
-    "." 'hydra-dired/body))
+    "." 'hydra-dired/body)
+
+  (mars-map/applications
+    "d" 'dired))
 
 ;; Shell
 (use-feature feature/comint
