@@ -1253,7 +1253,17 @@ Lisp function does not specify a special indentation."
   (add-hook 'rjsx-mode-hook #'mars/before-save-rjsx-mode)
 
   (mars/counsel-M-x-initial-input rjsx-mode
-				  (concat "^" (regexp-opt '("rjsx" "js2" "lsp")) " ")))
+				  (concat "^" (regexp-opt '("rjsx" "js2" "lsp")) " "))
+
+  (mars/defhook mars/fold-imports|rjsx-mode ()
+
+    rjsx-mode-hook
+    "When origami-mode is enabled, fold all import statements."
+    (when origami-mode
+      (save-excursion
+	(beginning-of-buffer)
+	(while (re-search-forward "^import")
+	  (call-interactively #'origami-close-node))))))
 
 (use-feature feature/python
   :init
@@ -1285,7 +1295,7 @@ Lisp function does not specify a special indentation."
     :commands 'lsp
     :init
     (mars/defhook mars/enable|lsp-mode ()
-	prog-mode-hook
+      prog-mode-hook
       "Enable lsp-mode for most programming modes."
       (unless (derived-mode-p #'emacs-lisp-mode)
 	(lsp)))
@@ -1385,6 +1395,11 @@ Lisp function does not specify a special indentation."
   :disabled
   :demand t
   :straight (:host github :repo "ekaschalk/notate"))
+
+;; Fold parts of code
+(use-package origami
+  :commands 'origami-mode
+  :init (add-hook 'prog-mode-hook #'origami-mode))
 
 ;; Frames
 (mars/add-to-list default-frame-alist
@@ -1624,6 +1639,13 @@ T - tag prefix
 
   (mars-map/applications
     "d" 'dired))
+
+;; Browsers
+(use-package atomic-chrome
+  :demand t
+  :config
+  (atomic-chrome-start-server)
+  (setq atomic-chrome-default-major-mode 'markdown-mode))
 
 ;; Shell
 (use-feature feature/comint
