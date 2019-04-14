@@ -1584,7 +1584,15 @@ Lisp function does not specify a special indentation."
   (add-hook 'magit-mode-hook #'hide-mode-line-mode)
   (add-hook 'helpful-mode-hook #'hide-mode-line-mode))
 
-;; Applications
+(use-feature feature/compilation
+  :init
+  (setq compilation-always-kill t
+	compilation-scroll-output 'first-error)
+
+  (mars/defhook mars/set-buffer-name|compilation-mode (process)
+    compilation-start-hook
+    "Set the name of the compilation buffer according to the command being ran."
+    (rename-buffer (concat "*compilation " (string-join (process-command process) " ") "*") t)))
 
 ;; Dired
 (use-feature feature/dired
