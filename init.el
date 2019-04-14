@@ -510,7 +510,9 @@ If point is on a src block, runs org-indent"
      "$" 'ivy-toggle-calling
      "^" 'ivy-occur
      "#" 'ivy-posframe-read-action
-     "%" 'ivy-posframe-avy)
+     "%" 'ivy-posframe-avy
+     "C-<up>" 'ivy-previous-history-element
+     "C-<down>" 'ivy-next-history-element)
 
     (mars-map
       "'" 'ivy-resume
