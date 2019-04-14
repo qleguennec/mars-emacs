@@ -506,9 +506,21 @@ If point is on a src block, runs org-indent"
 
     (setq ivy-height 20)
 
+    (define-minor-mode mars/ivy-calling-mode
+      "When t, C-n and C-p in ivy behave like C-M-n and C-M-p.
+That is, call the action immediately on the candidate."
+      nil nil nil
+      (if mars/ivy-calling-mode
+	  (general-define-key :keymaps 'ivy-minibuffer-map
+	    [remap ivy-next-line] 'ivy-next-line-and-call
+	    [remap ivy-previous-line] 'ivy-previous-line-and-call)
+	(general-define-key :keymaps 'ivy-minibuffer-map
+	    [remap ivy-next-line-and-call] 'ivy-next-line
+	    [remap ivy-previous-line-and-call] 'ivy-previous-line)))
+
     :general
     (:keymaps 'ivy-minibuffer-map
-     "$" 'ivy-toggle-calling
+     "$" 'mars/ivy-calling-mode
      "^" 'ivy-occur
      "#" 'ivy-posframe-read-action
      "%" 'ivy-posframe-avy)
