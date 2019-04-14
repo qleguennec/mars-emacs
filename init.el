@@ -146,6 +146,7 @@ than having to call `add-to-list' multiple times."
 
 (defmacro mars/set-pretty-symbols (mode &rest symbols)
   "Set symbols SYMBOLS for mode MODE."
+  (declare (indent defun))
   (let ((alist (mapcar (lambda (symbol)
 			 `(,(car symbol) . ,(string-to-char (cdr symbol))))
 		       symbols))
@@ -158,6 +159,7 @@ than having to call `add-to-list' multiple times."
 
 (defmacro mars/counsel-M-x-initial-input (mode input)
   "Defines a M-x command for MODE with initial INPUT"
+  (declare (indent defun))
   (let ((fun-name (intern (concat "mars/counsel-M-x|" (symbol-name mode))))
 	(keymap-name (intern (concat (symbol-name mode) "-map"))))
     `(progn
@@ -174,12 +176,12 @@ than having to call `add-to-list' multiple times."
 
 ;; Symbols for all modes
 (mars/set-pretty-symbols prog-mode
-			 (">=" . "≥")
-			 ("<=" . "≤")
-			 ("&&" . "⋀")
-			 ("||" . "⋁")
-			 ("[]" . "∅")
-			 ("{}" . "⦱"))
+  (">=" . "≥")
+  ("<=" . "≤")
+  ("&&" . "⋀")
+  ("||" . "⋁")
+  ("[]" . "∅")
+  ("{}" . "⦱"))
 
 (use-package exwm
   :disabled
@@ -1054,17 +1056,17 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-feature feature/lisp
   :init
   (mars/set-pretty-symbols emacs-lisp-mode
-			   ("defun" . "ƒ")
-			   ("defmacro" . "ɱ📦")
-			   ("nil" . "◯")
-			   ("t" . "●")
-			   ("()" . "∅")
-			   ;; Waiting for https://github.com/ekaschalk/notate release
-			   ;; ("setq" . "⟾")
-			   )
+    ("defun" . "ƒ")
+    ("defmacro" . "ɱ📦")
+    ("nil" . "◯")
+    ("t" . "●")
+    ("()" . "∅")
+    ;; Waiting for https://github.com/ekaschalk/notate release
+    ;; ("setq" . "⟾")
+    )
 
   (mars/counsel-M-x-initial-input emacs-lisp-mode
-				  "emacs-lisp ")
+    "emacs-lisp ")
 
   (use-package lispy
     :hook ((emacs-lisp-mode clojure-mode cider-mode) . lispy-mode)
@@ -1188,10 +1190,10 @@ Lisp function does not specify a special indentation."
   (use-package rjsx-mode
     :init
     (mars/set-pretty-symbols rjsx-mode
-			     ("() =>" . "λ")
-			     ("===" . "⩶")
-			     ("import" . "⟼")
-			     ("export" . "⟻"))
+      ("() =>" . "λ")
+      ("===" . "⩶")
+      ("import" . "⟼")
+      ("export" . "⟻"))
 
     (mars/defhook mars/eslint-locate|rjsx-mode ()
       rjsx-mode-hook
@@ -1251,7 +1253,7 @@ Lisp function does not specify a special indentation."
   (add-hook 'before-save-hook #'mars/reformat|rjsx-mode)
 
   (mars/counsel-M-x-initial-input rjsx-mode
-				  (concat "^" (regexp-opt '("rjsx" "js2" "lsp")) " "))
+    (concat "^" (regexp-opt '("rjsx" "js2" "lsp")) " "))
 
   (mars/defhook mars/fold-imports|rjsx-mode ()
     rjsx-mode-hook
