@@ -1529,11 +1529,22 @@ Lisp function does not specify a special indentation."
 	window-divider-default-bottom-width 0)
   (window-divider-mode)
   (fringe-mode)
-  (set-face-attribute 'internal-border nil :background "#66999D")
-
-  (creamsody-modeline-one))
+  (set-face-attribute 'internal-border nil :background "#66999D"))
 
 (use-package nimbus-theme)
+
+(use-package dimmer
+  :init (dimmer-mode))
+
+(use-package rainbow-mode
+  :hook (prog-mode . rainbow-mode))
+
+(use-package highlight-parentheses
+  :hook (prog-mode . highlight-parentheses-mode)
+  :config (setq hl-paren-colors '("#d75f5f" "#a787af" "#87d7ff" "#0087af")))
+
+(use-package highlight-thing
+  :hook (prog-mode . highlight-thing-mode))
 
 (use-package highlight-numbers
   :commands highlight-numbers-mode
