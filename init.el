@@ -1241,33 +1241,25 @@ Lisp function does not specify a special indentation."
 			     "--use-tabs" "false")
 	  prettier-js-show-errors nil))
 
-  (defun mars/before-save-rjsx ()
+  (defun mars/reformat|rjsx-mode ()
     "Reformat javascript on save. Runs prettier + eslint"
     (interactive)
     (when (eq major-mode 'rjsx-mode)
       (prettier-js)
       (eslintd-fix)))
 
-  (define-minor-mode mars/before-save-rjsx-mode
-    "Reformat javascript on save. Runs prettier + eslint"
-    nil nil nil
-    (if mars/before-save-rjsx-mode
-	(remove-hook 'before-save-hook #'mars/before-save-rjsx)
-      (add-hook 'before-save-hook #'mars/before-save-rjsx)))
-
-  (add-hook 'rjsx-mode-hook #'mars/before-save-rjsx-mode)
+  (add-hook 'before-save-hook #'mars/reformat|rjsx-mode)
 
   (mars/counsel-M-x-initial-input rjsx-mode
 				  (concat "^" (regexp-opt '("rjsx" "js2" "lsp")) " "))
 
   (mars/defhook mars/fold-imports|rjsx-mode ()
-
     rjsx-mode-hook
     "When origami-mode is enabled, fold all import statements."
     (when origami-mode
       (save-excursion
 	(beginning-of-buffer)
-	(while (re-search-forward "^import")
+	(while (re-search-forward "^import" nil t)
 	  (call-interactively #'origami-close-node))))))
 
 (use-feature feature/python
