@@ -527,7 +527,17 @@ If point is on a src block, runs org-indent"
       "y" 'counsel-yank-pop
       "c" 'counsel-command-history
       "o" 'counsel-mark-ring
-      "s" 'counsel-shell-history))
+      "s" 'counsel-shell-history)
+
+    ;; Merge these histories into one
+    (dolist (history '(counsel-grep-history
+		       counsel-git-grep-history
+		       swiper-history
+		       grep-regexp-history
+		       ivy-history
+		       counsel-M-x-history
+		       counsel-describe-symbol-history))
+      (defvaralias history 'regexp-search-ring)))
 
   (use-package ivy-hydra)
 
