@@ -988,14 +988,13 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
     :general
     (mars/map
       :states 'insert
-      "TAB" 'company-complete)
+      "<tab>" 'company-complete)
 
     (:keymaps 'company-active-map
      "RET" 'company-complete-selection
      "<tab>" 'complete-symbol))
 
   (use-package company-box
-    :disabled
     :hook (company-mode . company-box-mode))
 
   (use-package company-prescient
@@ -1070,7 +1069,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (mars/set-pretty-symbols emacs-lisp-mode
     ("defun" . "ƒ")
     ("defmacro" . "ɱ📦")
-    ("nil" . "◯")
+    ("nil" . "○")
     ("t" . "●")
     ("()" . "∅")
     ;; Waiting for https://github.com/ekaschalk/notate release
@@ -1092,12 +1091,11 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
       (lispyville-set-key-theme '(slurp/barf-lispy
 				  text-objects
 				  lispyville-prettify
-				  escape))
-      :general
-      (:keymaps 'lispyville-mode-map
-       :states 'normal
-       "(" 'lispyville-backward-up-list
-       ")" 'lispyville-up-list))
+				  escape
+				  additional-movement
+				  commentary
+				  arrows
+				  mark-toggle)))
 
     :init/el-patch
     ;; From https://github.com/raxod502/radian/blob/dc22d0524481b45dd3097bf5d9d4f2cd7ad3bad9/radian-emacs/radian-elisp.el#L21-L116
@@ -1402,8 +1400,8 @@ Lisp function does not specify a special indentation."
   :straight (:host github :repo "nabeix/emacs-font-size")
   :demand t
   :init
-  (setq mars-font "Fira Mono"
-	mars-font-height 9)
+  (setq mars-font "InconsolataGo Nerd Font"
+	mars-font-height 12)
   (set-face-attribute 'default nil
 		      :family mars-font)
   :config
@@ -1488,7 +1486,7 @@ Lisp function does not specify a special indentation."
     "k" 'delete-frame))
 
 ;; Use ediff on the same window
-(setq ediff-window-setup-function 'ediff-setup-windows-plain)
+(setq ediff-window-setup-function 'ediff-setup-windows-plain)e
 
 ;; Highlight lisp expressions
 (show-paren-mode 1)
@@ -1520,7 +1518,13 @@ Lisp function does not specify a special indentation."
 	      default-size mars-font-height)
   :config
   (load-theme 'creamsody 'confirm)
-  (set-face-attribute 'internal-border nil :background "#66999D"))
+  (setq window-divider-default-right-width 4
+	window-divider-default-bottom-width 0)
+  (window-divider-mode)
+  (fringe-mode)
+  (set-face-attribute 'internal-border nil :background "#66999D")
+
+  (creamsody-modeline-one))
 
 (use-package nimbus-theme)
 
