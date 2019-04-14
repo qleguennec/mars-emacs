@@ -1602,7 +1602,7 @@ Lisp function does not specify a special indentation."
   (mars/defhook mars/set-buffer-name|compilation-mode (process)
     compilation-start-hook
     "Set the name of the compilation buffer according to the command being ran."
-    (rename-buffer (concat "*compilation " (string-join (process-command process) " ") "*") t)))
+    (rename-buffer (concat "*compilation " (string-join (process-command process) " ") "*"))))
 
 ;; Dired
 (use-feature feature/dired
