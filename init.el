@@ -111,7 +111,7 @@ function. DOCSTRING and BODY are as in `defun'."
        ,@body)
      (add-hook ',hook ',name)))
 
-(defmacro mars-defadvice (name arglist where place docstring &rest body)
+(defmacro mars/defadvice (name arglist where place docstring &rest body)
   "Define an advice called NAME and add it to a function.
 ARGLIST is as in `defun'. WHERE is a keyword as passed to
 `advice-add', and PLACE is the function to which to add the
@@ -120,7 +120,7 @@ advice, like in `advice-add'. DOCSTRING and BODY are as in
   (declare (indent 2)
            (doc-string 5))
   (unless (stringp docstring)
-    (error "mars-defadvice: no docstring provided"))
+    (error "mars/defadvice: no docstring provided"))
   `(progn
      (defun ,name ,arglist
        ,(let ((article (if (string-match-p "^:[aeiou]" (symbol-name where))
@@ -140,6 +140,7 @@ advice, like in `advice-add'. DOCSTRING and BODY are as in
   "Adds multiple items to LIST.
 Allows for adding a sequence of items to the same list, rather
 than having to call `add-to-list' multiple times."
+  (declare (indent defun))
   (dolist (item args)
     (add-to-list list item))
   list)
@@ -725,8 +726,16 @@ If point is on a src block, runs org-indent"
     :demand t
 
     :config
-    (setq projectile-globally-ignored-directories
-	  (append projectile-globally-unignored-directories '("straight" "node_modules")))
+    (mars/add-to-list projectile-globally-ignored-directories
+      "straight"
+      "node_modules")
+
+    (mars/defadvice mars/advice-compile|counsel-projectile (orig-fun &rest args)
+      :around counsel-compile
+      "Set projectile root when possible."
+      (if (projectile-project-p)
+	  (apply orig-fun (projectile-project-root) args)
+	(apply orig-fun args)))
 
     (defun mars/projectile-refresh-projects ()
       "Clear projectile known projects and add to known projects directories in mars-workspace
@@ -1218,8 +1227,8 @@ Lisp function does not specify a special indentation."
 
     :config
     (mars/add-to-list auto-mode-alist
-		      ("\\.jsx\\'" . rjsx-mode)
-		      ("\\.js\\'" . rjsx-mode))
+      ("\\.jsx\\'" . rjsx-mode)
+      ("\\.js\\'" . rjsx-mode))
 
     (flycheck-add-mode 'javascript-eslint 'rjsx-mode))
 
@@ -1312,7 +1321,7 @@ Lisp function does not specify a special indentation."
 
   (use-package lsp-ui
     :config
-    (mars-defadvice mars/advice-apply-single-fix|lsp-ui (orig-fun &rest args)
+    (mars/defadvice mars/advice-apply-single-fix|lsp-ui (orig-fun &rest args)
       :around lsp-ui-sideline-apply-code-actions
       "Apply code fix immediately if only one is possible."
       (cl-letf* ((orig-completing-read (symbol-function #'completing-read))
@@ -1366,17 +1375,17 @@ Lisp function does not specify a special indentation."
   (purpose-x-popwin-setup)
 
   (mars/add-to-list purpose-user-mode-purposes
-		    (prog-mode . code)
-		    (inferior-python-mode . repl))
+    (prog-mode . code)
+    (inferior-python-mode . repl))
 
   (mars/add-to-list purpose-x-popwin-major-modes
-		    help-mode
-		    helpful-mode
-		    shell-mode
-		    eshell-mode)
+    help-mode
+    helpful-mode
+    shell-mode
+    eshell-mode)
 
   (mars/add-to-list purpose-special-action-sequences
-		    (repl purpose-display-reuse-window-purpose))
+    (repl purpose-display-reuse-window-purpose))
 
 
   (setq purpose-x-popwin-width 0.3
@@ -1418,8 +1427,8 @@ Lisp function does not specify a special indentation."
 
 ;; Frames
 (mars/add-to-list default-frame-alist
-		  (width . 1600)
-		  (height . 900))
+  (width . 1600)
+  (height . 900))
 
 ;e; desktop-save-mode
 (use-feature feature/desktop-save-mode
@@ -1555,10 +1564,10 @@ Lisp function does not specify a special indentation."
   :custom (all-the-icons-ivy-buffer-commands '(ivy-switch-buffer-other-window))
   :config
   (mars/add-to-list all-the-icons-ivy-file-commands
-		    counsel-projectile-find-file
-		    counsel-find-file
-		    counsel-projectile
-		    counsel-dired-jump)
+    counsel-projectile-find-file
+    counsel-find-file
+    counsel-projectile
+    counsel-dired-jump)
   (mars/add-to-list all-the-icons-ivy-buffer-commands counsel-projectile-switch-to-buffer)
   (all-the-icons-ivy-setup))
 
