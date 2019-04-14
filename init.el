@@ -503,24 +503,11 @@ If point is on a src block, runs org-indent"
   (use-package ivy
     :config
     (ivy-mode 1)
-
     (setq ivy-height 20)
-
-    (define-minor-mode mars/ivy-calling-mode
-      "When t, C-n and C-p in ivy behave like C-M-n and C-M-p.
-That is, call the action immediately on the candidate."
-      nil nil nil
-      (if mars/ivy-calling-mode
-	  (general-define-key :keymaps 'ivy-minibuffer-map
-	    [remap ivy-next-line] 'ivy-next-line-and-call
-	    [remap ivy-previous-line] 'ivy-previous-line-and-call)
-	(general-define-key :keymaps 'ivy-minibuffer-map
-	    [remap ivy-next-line-and-call] 'ivy-next-line
-	    [remap ivy-previous-line-and-call] 'ivy-previous-line)))
 
     :general
     (:keymaps 'ivy-minibuffer-map
-     "$" 'mars/ivy-calling-mode
+     "$" 'ivy-toggle-calling
      "^" 'ivy-occur
      "#" 'ivy-posframe-read-action
      "%" 'ivy-posframe-avy)
@@ -1094,7 +1081,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 				  escape
 				  additional-movement
 				  commentary
-				  arrows
 				  mark-toggle)))
 
     :init/el-patch
@@ -1486,7 +1472,7 @@ Lisp function does not specify a special indentation."
     "k" 'delete-frame))
 
 ;; Use ediff on the same window
-(setq ediff-window-setup-function 'ediff-setup-windows-plain)e
+(setq ediff-window-setup-function 'ediff-setup-windows-plain)
 
 ;; Highlight lisp expressions
 (show-paren-mode 1)
