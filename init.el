@@ -1594,8 +1594,8 @@ Lisp function does not specify a special indentation."
 
 (use-package centered-cursor-mode
   :demand t
-  :config
-  (global-centered-cursor-mode 1))
+  :init
+  (add-hook 'prog-mode-hook #'centered-cursor-mode))
 
 (use-package solaire-mode
   :demand t
@@ -1628,8 +1628,6 @@ Lisp function does not specify a special indentation."
   :init
   (setq compilation-always-kill t
 	compilation-scroll-output 'first-error)
-
-  (add-hook 'compilation-mode-hook (lambda () (setq-local centered-cursor-mode nil)))
 
   (mars/defhook mars/set-buffer-name|compilation-mode (process)
     compilation-start-hook
