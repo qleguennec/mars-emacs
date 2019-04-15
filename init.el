@@ -662,7 +662,7 @@ If point is on a src block, runs org-indent"
      ;; Always save everything before opening a magit buffer
      magit-save-repository-buffers 'dontask
      ;; Cursor on Unstaged Changes by default
-     magit-status-initial-section '(2)
+     magit-status-initial-section '(1 2)
      magit-section-initial-visibility-alist '((stashes . hide)
 					      (untracked . hide))
      magit-log-section-commit-count 20
@@ -730,9 +730,18 @@ If point is on a src block, runs org-indent"
       "straight"
       "node_modules")
 
+    (mars/defhook mars/colorize-buffer|compilation-mode ()
+      compilation-filter-hook
+      "Colorize compilation buffer."
+      (toggle-read-only)
+      (ansi-color-apply-on-region compilation-filter-start (point))
+      (toggle-read-only))
+
     (mars/defadvice mars/advice-compile|counsel-projectile (orig-fun &rest args)
       :around counsel-compile
       "Set projectile root when possible."
+      (when (projectile-project-p)
+	(cd (projectile-project-root)))
       (if (projectile-project-p)
 	  (apply orig-fun (projectile-project-root) args)
 	(apply orig-fun args)))
@@ -812,7 +821,8 @@ newline."
     :init
     ;; Required for ollection
     (setq evil-want-integration t
-	  evil-want-keybinding nil)
+	  evil-want-keybinding nil
+	  evil-symbol-word-search t)
 
     :config
     (evil-mode 1)
@@ -1618,6 +1628,8 @@ Lisp function does not specify a special indentation."
   :init
   (setq compilation-always-kill t
 	compilation-scroll-output 'first-error)
+
+  (add-hook 'compilation-mode-hook (lambda () (setq-local centered-cursor-mode nil)))
 
   (mars/defhook mars/set-buffer-name|compilation-mode (process)
     compilation-start-hook
