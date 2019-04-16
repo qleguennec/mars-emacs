@@ -737,15 +737,6 @@ If point is on a src block, runs org-indent"
       (ansi-color-apply-on-region compilation-filter-start (point))
       (toggle-read-only))
 
-    (mars/defadvice mars/advice-compile|counsel-projectile (orig-fun &rest args)
-      :around counsel-compile
-      "Set projectile root when possible."
-      (when (projectile-project-p)
-	(cd (projectile-project-root)))
-      (if (projectile-project-p)
-	  (apply orig-fun (projectile-project-root) args)
-	(apply orig-fun args)))
-
     (defun mars/projectile-refresh-projects ()
       "Clear projectile known projects and add to known projects directories in mars-workspace
 (even if they are not under vcs), any vcs directory in HOME, and straight repos"
@@ -1629,10 +1620,29 @@ Lisp function does not specify a special indentation."
   (setq compilation-always-kill t
 	compilation-scroll-output 'first-error)
 
+  (mars/defadvice mars/advice-projectile|counsel-compile (orig-fun &rest args)
+    :around counsel-compile
+    "Set projectile root when possible."
+    (if (not (projectile-project-p))
+	(apply orig-fun args)
+      (cd (projectile-project-root))
+      (apply orig-fun (projectile-project-root) args)))
+
+  (mars/defadvice mars/advice-remove-history|counsel-compile (&rest args)
+    :after counsel-compile
+    "Remove counsel-compile history after selecting a compilation string"
+    (setq counsel-compile-history nil))
+
   (mars/defhook mars/set-buffer-name|compilation-mode (process)
     compilation-start-hook
     "Set the name of the compilation buffer according to the command being ran."
-    (rename-buffer (concat "*compilation " (string-join (process-command process) " ") "*"))))
+    (let ((buffer-name (concat "*compilation "
+			       (string-join (process-command process) " ")
+			       "*")))
+      (when-let ((old-buffer (get-buffer buffer-name)))
+	(kill-process (get-buffer-process old-buffer))
+	(kill-buffer old-buffer))
+      (rename-buffer buffer-name))))
 
 ;; Dired
 (use-feature feature/dired
