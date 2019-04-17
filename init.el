@@ -330,7 +330,7 @@ mars-map/ function")
 
   (general-create-definer mars/map
     :keymaps 'override
-    :states '(normal motion emacs))
+    :states '(normal motion emacs visual))
 
   (mars/map
     "C-s" 'save-buffer)
@@ -851,7 +851,7 @@ newline."
       ;; Window manipulation
       "v" (lambda () (interactive) (evil-window-vsplit) (other-window 1))
       "s" (lambda () (interactive) (evil-window-split) (other-window 1))
-      "q" 'delete-window))
+      "q" 'delete-window)
 
   (use-package evil-collection
     :demand t
@@ -890,7 +890,7 @@ newline."
 
   (use-package evil-goggles
     :demand t
-    :config (add-hook 'prog-mode-hook #'evil-goggles-mode)))
+    :config (add-hook 'prog-mode-hook #'evil-goggles-mode))))
 
 (use-package smerge-mode
   :after magit
@@ -1037,7 +1037,23 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (evil-snipe-override-mode 1)
   (evil-snipe-mode 1)
   (setq evil-snipe-scope 'buffer)
-  (setq evil-snipe-repeat-scope 'buffer))
+  (setq evil-snipe-repeat-scope 'buffer)
+
+  :general
+  (mars/map
+    ;; Jump on things
+    "(" (lambda nil (interactive)
+  	  (evil-snipe-F nil "("))
+    ")" (lambda nil (interactive)
+    	  (evil-snipe-f nil "("))
+    "{" (lambda nil (interactive)
+  	  (evil-snipe-F nil "{"))
+    "}" (lambda nil (interactive)
+  	  (evil-snipe-f nil "{"))
+    "[" (lambda nil (interactive)
+  	  (evil-snipe-F nil "["))
+    "]" (lambda nil (interactive)
+  	  (evil-snipe-f nil "["))))
 
 (use-feature feature/electric-mode
   :init
@@ -1048,22 +1064,22 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
   (use-package aggressive-indent
     :commands 'aggressive-indent-mode
-    :config (add-hook 'prog-mode-hook #'agressive-indent-mode)))
+    :config (add-hook 'prog-mode-hook #'agressive-indent-mode))
 
-(use-package electric-operator
-  :commands electric-operator-mode
-  :demand t
-  :config
-  (add-hook 'prog-mode-hook #'electric-operator-mode)
-  (electric-operator-add-rules-for-mode 'prog-mode
-					(cons ">=" " >= ")
-					(cons "<=" " <= ")
-					(cons "=" " = ")
-					(cons "=>" " => "))
-  (electric-operator-add-rules-for-mode 'emacs-lisp-mode
-					(cons "-" nil))
-  (electric-operator-add-rules-for-mode 'rjsx-mode
-					(cons "==" " === ")))
+  (use-package electric-operator
+    :commands electric-operator-mode
+    :demand t
+    :config
+    (add-hook 'prog-mode-hook #'electric-operator-mode)
+    (electric-operator-add-rules-for-mode 'prog-mode
+					  (cons ">=" " >= ")
+					  (cons "<=" " <= ")
+					  (cons "=" " = ")
+					  (cons "=>" " => "))
+    (electric-operator-add-rules-for-mode 'emacs-lisp-mode
+					  (cons "-" nil))
+    (electric-operator-add-rules-for-mode 'rjsx-mode
+					  (cons "==" " === "))))
 
 (use-package hungry-delete
   :demand t
