@@ -760,9 +760,13 @@ If point is on a src block, runs org-indent"
     (mars-map
       "SPC SPC" 'counsel-projectile
       "?" 'counsel-projectile-git-grep)
+
     (mars-map/projects
       "p" 'counsel-projectile-switch-project
-      "b" 'counsel-projectile-switch-to-buffer)))
+      "b" 'counsel-projectile-switch-to-buffer)
+
+    (mars-map/applications
+      "s" 'projectile-run-eshell)))
 
 (use-package buffer-expose
   :straight (:host github :repo "clemera/buffer-expose")
@@ -1289,14 +1293,15 @@ Lisp function does not specify a special indentation."
   (mars/counsel-M-x-initial-input rjsx-mode
     (concat "^" (regexp-opt '("rjsx" "js2" "lsp")) " "))
 
-  (mars/defhook mars/fold-imports|rjsx-mode ()
-    rjsx-mode-hook
-    "When origami-mode is enabled, fold all import statements."
-    (when origami-mode
-      (save-excursion
-	(beginning-of-buffer)
-	(while (re-search-forward "^import" nil t)
-	  (call-interactively #'origami-close-node))))))
+  ;; (mars/defhook mars/fold-imports|rjsx-mode ()
+  ;;   rjsx-mode-hook
+  ;;   "When origami-mode is enabled, fold all import statements."
+  ;;   (when origami-mode
+  ;;     (save-excursion
+  ;; 	(beginning-of-buffer)
+  ;; 	(while (re-search-forward "^import" nil t)
+  ;; 	  (call-interactively #'origami-close-node)))))
+  )
 
 (use-feature feature/python
   :init
@@ -1765,13 +1770,6 @@ T - tag prefix
   :general
   (mars-map/applications
     "e" 'mars-eshell-new-buffer))
-
-(use-feature feature/shell
-  :init
-  (push (cons "\\*shell.*\\*" display-buffer--same-window-action) display-buffer-alist)
-  (use-package shell-here)
-  :general
-  (mars-map/applications "s" 'shell-here))
 
 ;; Mail reader
 (use-package mu4e
