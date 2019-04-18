@@ -1527,7 +1527,6 @@ Lisp function does not specify a special indentation."
   (load-theme 'creamsody 'confirm)
   (setq window-divider-default-right-width 4
 	window-divider-default-bottom-width 0)
-  (window-divider-mode)
   (fringe-mode)
   (set-face-attribute 'internal-border nil :background "#66999D"))
 
