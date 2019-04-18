@@ -717,17 +717,8 @@ If point is on a src block, runs org-indent"
 
   (use-package git-auto-commit-mode)
 
-  (use-package git-gutter
-    :hook (prog-mode . git-gutter-mode)
-    :config
-    (evil-define-text-object evil-inner-hunk (count &optional _beg _end _type)
-      (let ((hunk (git-gutter:search-here-diffinfo git-gutter:diffinfos)))
-	(list (git-gutter:line-point (git-gutter-hunk-start-line hunk))
-	      (git-gutter:line-point (1+ (git-gutter-hunk-end-line hunk))))))
-    :general
-    (general-define-key
-     :keymaps 'evil-inner-text-objects-map
-     "h" 'evil-inner-hunk)))
+  (use-package diff-hl
+    :hook (prog-mode . diff-hl-mode)))
 
 ;; Disable built in emacs vc as we have magit for that
 (use-feature feature/vc-hooks
