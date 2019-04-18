@@ -314,7 +314,8 @@ mars-map/ function")
 	  ("i" . "ivy")
 	  ("o" . "org")
 	  ("a" . "applications")
-	  ("f" . "frames")))
+	  ("f" . "frames")
+	  ("g" . "magit")))
 
   ;; Defines general definers for each prefix in mars-general-prefixes.
   (eval `(progn
@@ -694,6 +695,8 @@ If point is on a src block, runs org-indent"
     (setq auto-revert-interval 1
 	  revert-without-query '(".*"))
 
+    ;; Enable magit-file-mode
+    (add-hook 'prog-mode-hook #'magit-file-mode)
 
     ;; Refresh after a save.
     (add-hook 'after-save-hook #'magit-refresh)
@@ -701,6 +704,11 @@ If point is on a src block, runs org-indent"
     :general
     (mars-map/applications
       "g" 'magit-status)
+
+    (mars-map/magit
+      "s" 'magit-stage
+      "u" 'magit-unstage
+      "c" 'magit-commit)
 
     (:keymaps 'magit-mode-map
      :states 'normal
@@ -718,7 +726,9 @@ If point is on a src block, runs org-indent"
   (use-package git-auto-commit-mode)
 
   (use-package diff-hl
-    :hook (prog-mode . diff-hl-mode)))
+    :hook (prog-mode . diff-hl-mode)
+    :config
+    (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)))
 
 ;; Disable built in emacs vc as we have magit for that
 (use-feature feature/vc-hooks
