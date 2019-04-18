@@ -772,7 +772,8 @@ If point is on a src block, runs org-indent"
 
     (mars-map/projects
       "p" 'counsel-projectile-switch-project
-      "b" 'counsel-projectile-switch-to-buffer)
+      "b" 'counsel-projectile-switch-to-buffer
+      "k" 'projectile-kill-buffers)
 
     (mars-map/applications
       "s" 'projectile-run-eshell)))
