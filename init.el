@@ -1065,7 +1065,9 @@ newline."
 
 (use-package hungry-delete
   :demand t
-  :config (global-hungry-delete-mode))
+  :config (global-hungry-delete-mode)
+  :general
+  (general-define-key "<backspace>" 'hungry-delete-backward))
 
 ;; Prettier code
 (global-prettify-symbols-mode 1)
