@@ -884,7 +884,9 @@ newline."
 
     (use-package evil-magit
       :after magit
-      :demand t)
+      :demand t
+      :config
+      (setq evil-magit-use-z-for-folds t))
 
     (use-package evil-exchange
       :demand t
