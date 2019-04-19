@@ -885,10 +885,12 @@ newline."
     (defun count-lines-non-empty (move-line-function)
       (interactive)
       (let ((lines 0))
+	(beginning-of-line)
 	(funcall move-line-function)
 	(save-excursion
     	  (while (looking-at "[[:space:]]*$")
 	    (setq lines (1+ lines))
+	    (beginning-of-line)
     	    (funcall move-line-function)))
 	lines))
 
@@ -1084,8 +1086,8 @@ newline."
   (add-hook 'prog-mode-hook #'electric-quote-mode)
 
   (use-package aggressive-indent
-    :commands 'aggressive-indent-mode
-    :config (add-hook 'prog-mode-hook #'agressive-indent-mode))
+    :demand t
+    :hook (prog-mode . aggressive-indent-mode))
 
   (use-package electric-operator
     :commands electric-operator-mode
