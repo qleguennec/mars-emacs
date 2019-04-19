@@ -708,7 +708,8 @@ If point is on a src block, runs org-indent"
     (mars-map/magit
       "s" 'magit-stage
       "u" 'magit-unstage
-      "c" 'magit-commit)
+      "c" 'magit-commit
+      "p" 'magit-push)
 
     (:keymaps 'magit-mode-map
      :states 'normal
