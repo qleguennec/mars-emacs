@@ -705,7 +705,8 @@ If point is on a src block, runs org-indent"
     (mars-map/applications
       "g" 'magit-status)
 
-    (mars-map/magit
+    (mars/map
+      :prefix "-"
       "s" 'magit-stage
       "u" 'magit-unstage
       "c" 'magit-commit
