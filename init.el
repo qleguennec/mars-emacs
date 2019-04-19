@@ -709,7 +709,10 @@ If point is on a src block, runs org-indent"
       "s" 'magit-stage
       "u" 'magit-unstage
       "c" 'magit-commit
-      "p" 'magit-push)
+      "p" 'magit-push
+      "b" 'magit-checkout
+      "f" 'magit-fetch
+      "F" 'magit-pull)
 
     (:keymaps 'magit-mode-map
      :states 'normal
@@ -1269,6 +1272,9 @@ Lisp function does not specify a special indentation."
     (interactive)
     (when (eq major-mode 'rjsx-mode)
       (prettier-js)
+      ;; TODO better solution
+      (cd (projectile-project-root))
+      (cd "front")
       (eslintd-fix)))
 
   (add-hook 'before-save-hook #'mars/reformat|rjsx-mode)
@@ -1372,6 +1378,7 @@ Lisp function does not specify a special indentation."
 ;; UI
 (use-package window-purpose
   :straight (:host github :repo "bmag/emacs-purpose")
+  :disabled
   :demand t
   :config
   (purpose-mode)
