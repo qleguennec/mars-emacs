@@ -1351,6 +1351,13 @@ Lisp function does not specify a special indentation."
 
   (add-hook 'after-save-hook #'mars/python-reload))
 
+(use-feature feature/debug
+  :init
+  (use-package dap-mode
+    :hook (java-mode . dap-mode)
+    :config
+    (add-hook 'dap-mode-hook #'dap-ui-mode)))
+
 (use-feature feature/lsp
   :init
   (use-package lsp-mode
