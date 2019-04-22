@@ -630,7 +630,12 @@ If point is on a src block, runs org-indent"
 	  ivy-posframe-border-width 1)
     (ivy-posframe-enable))
 
-  (use-package wgrep))
+  (use-package wgrep)
+
+  (use-package ivy-yasnippet
+    :general
+    (mars-map/ivy
+      "a" 'ivy-yasnippet)))
 
 ;; Displays helpful documentation
 (use-package helpful
