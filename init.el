@@ -1003,6 +1003,9 @@ newline."
    "v" 'er/expand-region
    "V" 'er/contract-region))
 
+(use-package multi-line
+  :demand t)
+
 ;; Completion
 (use-feature feature/completion
   :init
