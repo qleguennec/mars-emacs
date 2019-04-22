@@ -1452,12 +1452,9 @@ Lisp function does not specify a special indentation."
   (purpose-compile-user-configuration)
   (purpose-x-popwin-update-conf))
 
-(use-package highlight-indent-guides
-  :disabled
+(use-package indent-guide
   :demand t
-  :config
-  (setq highlight-indent-guides-method 'character)
-  (add-hook 'prog-mode-hook #'highlight-indent-guides-mode))
+  :config (indent-guide-global-mode))
 
 (use-package color-identifiers-mode)
 
