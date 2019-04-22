@@ -1018,6 +1018,17 @@ newline."
     ;; above the cursor if necessary.
     (setq company-tooltip-minimum company-tooltip-limit)
     (global-company-mode 1)
+
+    ;; Use helpful in company elisp help buffers
+    (mars/defadvice mars/elips-use-helpful|company
+	(func &rest args)
+      :around elisp--company-doc-buffer
+      "Cause `company' to use Helpful to show Elisp documentation."
+      (cl-letf (((symbol-function #'describe-function) #'helpful-function)
+		((symbol-function #'describe-variable) #'helpful-variable)
+		((symbol-function #'help-buffer) #'current-buffer))
+	(apply func args)))
+
     :general
     (mars/map
       :states 'insert
