@@ -1373,6 +1373,9 @@ Lisp function does not specify a special indentation."
     :config
     (require 'lsp-clients))
 
+  (use-package lsp-java
+    :demand t)
+
   (use-package lsp-ui
     :config
     (mars/defadvice mars/advice-apply-single-fix|lsp-ui (orig-fun &rest args)
