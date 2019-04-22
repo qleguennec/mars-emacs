@@ -529,7 +529,7 @@ If point is on a src block, runs org-indent"
       "y" 'counsel-yank-pop
       "c" 'counsel-command-history
       "o" 'counsel-mark-ring
-      "s" 'counsel-shell-history
+      "s" 'counsel-esh-history
       "i" 'counsel-imenu)
 
     ;; Merge these histories into one
