@@ -558,15 +558,10 @@ If point is on a src block, runs org-indent"
     :init
     (setq ivy-rich-path-style 'abbrev
 	  ivy-virtual-abbreviate 'full
-
 	  ivy-format-function #'ivy-format-function-line)
 
-
-
     :config
-
     (setq ivy-format-function #'ivy-format-function-line)
-
 
     (defun ivy-rich-switch-buffer-icon (candidate)
       (with-current-buffer
