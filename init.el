@@ -863,7 +863,7 @@ newline."
 
     (mars-map
       ;; Remaps evil-search-forward to swiper
-      [remap evil-search-forward] 'swiper)
+      [remap evil-search-forward] 'swiper-all)
 
     (mars-map
       ;; Window resizing
