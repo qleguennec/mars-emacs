@@ -1695,12 +1695,6 @@ Lisp function does not specify a special indentation."
 
 (use-package transpose-frame)
 
-(use-package hide-mode-line
-  :init
-  (add-hook 'org-mode-hook #'hide-mode-line-mode)
-  (add-hook 'magit-mode-hook #'hide-mode-line-mode)
-  (add-hook 'helpful-mode-hook #'hide-mode-line-mode))
-
 (use-feature feature/compilation
   :init
   (setq compilation-always-kill t
