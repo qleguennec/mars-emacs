@@ -1471,7 +1471,24 @@ Lisp function does not specify a special indentation."
   :demand t
   :config (indent-guide-global-mode))
 
-(use-package color-identifiers-mode)
+(use-package perfect-margin
+  :demand t
+  :config
+  (defun mars/activate-single-window-mode ()
+    (when (eq 1 (count-windows)))
+    (perfect-margin-mode))
+
+  (define-minor-mode mars/single-window-mode
+    "When activated, activate perfect-margin-mode."
+    nil nil nil
+    (if mars/single-window-mode
+	(add-hook 'window-configuration-change-hook
+		  #'mars/activate-single-window-mode)
+      (remove-hook 'window-configuration-change-hook
+		   #'mars/activate-single-window-mode)
+      (perfect-margin-mode nil)))
+
+  (mars/single-window-mode))
 
 ;; Font
 (use-package font-size
@@ -1852,10 +1869,6 @@ T - tag prefix
   (:keymaps 'mu4e-headers-mode-map
    :states 'normal
    "g r" 'mu4e-update-mail-and-index))
-
-(use-package olivetti
-  :hook (org-mode-hook . olivetti-mode)
-  :config (olivetti-set-width 120))
 
 ;; Starts emacs server
 (server-start)
