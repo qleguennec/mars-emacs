@@ -689,7 +689,8 @@ If point is on a src block, runs org-indent"
        stage-all-changes
        const unstage-all-changes
        safe-with-wip)
-     magit-status-show-hashes-in-headers t)
+     magit-status-show-hashes-in-headers t
+     magit-list-refs-sortby "-creatordate")
 
     ;; Auto revert buffers
     (magit-auto-revert-mode 1)
