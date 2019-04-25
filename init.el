@@ -591,6 +591,12 @@ If point is on a src block, runs org-indent"
     (mars-map/ivy
       "a" 'ivy-yasnippet)))
 
+(use-package transient
+  :after magit
+  :general
+  (:keymaps 'transient-map
+   "<escape>" 'transient-quit-one))
+
 ;; Displays helpful documentation
 (use-package helpful
   :init
