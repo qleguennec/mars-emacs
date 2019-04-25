@@ -184,52 +184,6 @@ than having to call `add-to-list' multiple times."
   ("[]" . "∅")
   ("{}" . "⦱"))
 
-(use-package exwm
-  :disabled
-  :demand t
-  :config
-  (require 'exwm-config)
-  (exwm-config-default)
-
-  ;; xrandr configuration
-  (require 'exwm-randr)
-  (setq exwm-randr-workspace-output-plist '(1 "HDMI1" 0 "eDP1"))
-  (add-hook 'exwm-randr-screen-change-hook
-	    (lambda ()
-	      (start-process-shell-command "xrandr" nil "~/.screenlayout/dual.sh")))
-  (exwm-randr-enable)
-
-  (setq exwm-input-prefix-keys (number-sequence 1 127))
-
-  (defun exwm-input-line-mode ()
-    "Set exwm window to line-mode and show mode line"
-    (call-interactively #'exwm-input-grab-keyboard)
-    (exwm-layout-show-mode-line))
-
-  (defun exwm-input-char-mode ()
-    "Set exwm window to char-mode and hide mode line"
-    (call-interactively #'exwm-input-release-keyboard)
-    (exwm-layout-hide-mode-line))
-
-  (defun exwm-input-toggle-mode ()
-    "Toggle between line- and char-mode"
-    (with-current-buffer (window-buffer-height)
-      (when (eq major-mode 'exwm-mode)
-	(if (equal (second (second mode-line-process)) "line")
-	    (exwm-input-char-mode)
-	  (exwm-input-line-mode)))))
-
-  (exwm-input-set-key (kbd "C-o")
-                      (lambda () (interactive)
-			(exwm-input-toggle-mode)))
-
-  (exwm-input-set-key (kbd "M-X") #'counsel-M-x)
-
-  :general
-  (:keymaps 'exwm-mode-map
-   "M-x" 'counsel-M-x
-   "C-g" 'keyboard-quit))
-
 ;; Provies better defaults for emacs cache files
 (use-package no-littering :demand t)
 
