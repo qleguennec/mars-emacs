@@ -670,6 +670,7 @@ If point is on a src block, runs org-indent"
 
     (mars/map
       :prefix "-"
+      "-" 'magit-dispatch
       "s" 'magit-stage
       "u" 'magit-unstage
       "c" 'magit-commit
@@ -683,12 +684,7 @@ If point is on a src block, runs org-indent"
       "z" 'magit-stash
       "r" 'magit-revert
       "u" 'magit-unstage
-      "x" 'magit-discard)
-
-    (:keymaps 'magit-mode-map
-     :states 'normal
-     "<escape>" nil
-     "q" 'magit-mode-bury-buffer))
+      "x" 'magit-discard))
 
   ;; git forges
   (use-package forge
