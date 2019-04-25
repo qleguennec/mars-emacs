@@ -819,7 +819,7 @@ newline."
 
     (mars-map
       ;; Remaps evil-search-forward to swiper
-      [remap evil-search-forward] 'swiper-all)
+      [remap evil-search-forward] 'swiper)
 
     (mars-map
       ;; Window resizing
@@ -1428,6 +1428,7 @@ Lisp function does not specify a special indentation."
   :config (indent-guide-global-mode))
 
 (use-package perfect-margin
+  :disabled
   :demand t
   :config
   (defun mars/activate-single-window-mode ()
