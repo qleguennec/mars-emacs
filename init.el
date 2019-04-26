@@ -1550,30 +1550,28 @@ Lisp function does not specify a special indentation."
       show-paren-when-point-inside-paren t
       show-paren-when-point-in-periphery t)
 
-(use-package doom-modeline
-  :demand t
-  :config (doom-modeline-init))
-
 (use-package dracula-theme)
 
 (use-package darktooth-theme)
 
-(use-package solarized-theme)
+(use-package solarized-theme
+  :demand t
+  :init (setq
+	 size mars-font-height
+	 default-size mars-font-height)
+  :config
+  (load-theme 'solarized-light 'confirm)
+  (setq window-divider-default-right-width 4
+	window-divider-default-bottom-width 0)
+  (setq-default mode-line-format nil)
+  (fringe-mode)
+  (set-face-attribute 'internal-border nil :background "#66999D"))
 
 (use-package material-theme)
 
 (use-package zenburn-theme)
 
-(use-package creamsody-theme
-  :demand t
-  :init (setq size mars-font-height
-	      default-size mars-font-height)
-  :config
-  (load-theme 'creamsody 'confirm)
-  (setq window-divider-default-right-width 4
-	window-divider-default-bottom-width 0)
-  (fringe-mode)
-  (set-face-attribute 'internal-border nil :background "#66999D"))
+(use-package creamsody-theme)
 
 (use-package nimbus-theme)
 
