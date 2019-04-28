@@ -998,9 +998,6 @@ newline."
      "RET" 'company-complete-selection
      "<tab>" 'complete-symbol))
 
-  (use-package company-box
-    :hook (company-mode . company-box-mode))
-
   (use-package company-prescient
     :demand t
     :after company
