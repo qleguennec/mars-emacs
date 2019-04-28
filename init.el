@@ -1561,7 +1561,6 @@ Lisp function does not specify a special indentation."
   (setq window-divider-default-right-width 4
 	window-divider-default-bottom-width 0)
   (setq-default mode-line-format nil)
-  (fringe-mode)
   (set-face-attribute 'internal-border nil :background "#66999D"))
 
 (use-package material-theme)
