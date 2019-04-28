@@ -1091,9 +1091,6 @@ newline."
   (mars/set-pretty-symbols emacs-lisp-mode
     ("defun" . "ƒ")
     ("defmacro" . "ɱ📦")
-    ("nil" . "○")
-    ("t" . "●")
-    ("()" . "∅")
     ;; Waiting for https://github.com/ekaschalk/notate release
     ;; ("setq" . "⟾")
     )
@@ -1221,7 +1218,6 @@ Lisp function does not specify a special indentation."
   (use-package rjsx-mode
     :init
     (mars/set-pretty-symbols rjsx-mode
-      ("() =>" . "λ")
       ("===" . "⩶")
       ("import" . "⟼")
       ("export" . "⟻"))
