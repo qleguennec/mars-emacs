@@ -1552,6 +1552,7 @@ Lisp function does not specify a special indentation."
 
 (use-package solarized-theme
   :demand t
+  :straight (:host github :repo "bbatsov/solarized-emacs" :fork (:host github :repo "qleguennec/solarized-emacs"))
   :init (setq
 	 size mars-font-height
 	 default-size mars-font-height)
