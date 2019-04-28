@@ -1652,6 +1652,8 @@ Lisp function does not specify a special indentation."
 
 (use-package transpose-frame)
 
+(use-package rotate)
+
 (use-feature feature/compilation
   :init
   (setq compilation-always-kill t
