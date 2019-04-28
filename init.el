@@ -1574,9 +1574,6 @@ Lisp function does not specify a special indentation."
   :hook (prog-mode . highlight-parentheses-mode)
   :config (setq hl-paren-colors '("#d75f5f" "#a787af" "#87d7ff" "#0087af")))
 
-(use-package highlight-thing
-  :hook (prog-mode . highlight-thing-mode))
-
 (use-package highlight-numbers
   :commands highlight-numbers-mode
   :hook (prog-mode . highlight-numbers-mode))
