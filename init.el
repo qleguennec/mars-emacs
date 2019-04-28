@@ -1628,9 +1628,15 @@ Lisp function does not specify a special indentation."
 (use-package solaire-mode
   :demand t
   :config
-  (add-hook 'ivy-mode-hook #'solaire-mode)
-  (add-hook 'minibuffer-setup-hook #'solaire-mode-in-minibuffer)
-  (add-hook 'magit-mode-hook #'solaire-mode))
+  (defun mars/alternate-solaire-mode (&rest args)
+    (interactive)
+    (let ((solaire-mode-toggle nil)
+	  (windows (winner-sorted-window-list)))
+      (dolist (win windows)
+	(with-current-buffer (window-buffer win)
+	  (solaire-mode (if solaire-mode-toggle 1 -1)))
+	(setq solaire-mode-toggle (not solaire-mode-toggle)))))
+  (add-hook 'window-configuration-change-hook #'mars/alternate-solaire-mode))
 
 (use-package ace-window
   :config
