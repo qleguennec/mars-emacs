@@ -1419,10 +1419,6 @@ Lisp function does not specify a special indentation."
   (purpose-compile-user-configuration)
   (purpose-x-popwin-update-conf))
 
-(use-package indent-guide
-  :demand t
-  :config (indent-guide-global-mode))
-
 (use-package perfect-margin
   :disabled
   :demand t
