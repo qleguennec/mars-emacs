@@ -704,16 +704,23 @@ If point is on a src block, runs org-indent"
       "c" 'magit-commit
       "p" 'magit-push
       "f" 'magit-fetch
-      "b" 'magit-branch-checkout
+      "b" 'magit-branch-or-checkout
       "F" 'magit-pull
       "r" 'magit-rebase
       "O" 'magit-reset
-      "l" 'magit-log
+      "L" 'magit-log
+      "l" 'magit-log-current
       "z" 'magit-stash
-      "r" 'magit-revert
       "u" 'magit-unstage
       "x" 'magit-discard
-      "d" 'magit-diff-buffer-file))
+      "d" 'magit-diff-buffer-file
+      "m" 'magit-merge
+      "y" 'magit-show-refs)
+
+    (:keymaps 'magit-mode-map
+     :states 'normal
+     "<escape>" nil
+     "q" 'magit-mode-bury-buffer))
 
   ;; git forges
   (use-package forge
@@ -1320,9 +1327,8 @@ Lisp function does not specify a special indentation."
     (when (eq major-mode 'rjsx-mode)
       (prettier-js)
       ;; TODO better solution
-      (cd (projectile-project-root))
-      (cd "front")
-      (eslintd-fix)))
+      (let ((default-directory (projectile-project-root)))
+	(eslintd-fix))))
 
   (add-hook 'before-save-hook #'mars/reformat|rjsx-mode)
 
