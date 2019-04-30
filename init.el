@@ -1464,7 +1464,25 @@ Lisp function does not specify a special indentation."
   (width . 1600)
   (height . 900))
 
-;e; desktop-save-mode
+;; Frame title
+(defun mars/get-frame-title ()
+  "If inside a git repo return a string containing git repo, branch and file state else
+return default frame title"
+  (let* ((file (buffer-file-name))
+         (git-directory (when file
+                          (locate-dominating-file (file-truename default-directory) ".git"))))
+    (if git-directory
+        (concat (projectile-project-name)
+		" / "
+		(file-name-nondirectory (buffer-file-name))
+                " [" (car (vc-git-branches)) "] " )
+      (concat invocation-name "@" system-name))))
+
+(setq-default
+ frame-title-format
+ '(:eval (mars/get-frame-title)))
+
+;; desktop-save-mode
 (use-feature feature/desktop-save-mode
   :init
   (desktop-save-mode)
