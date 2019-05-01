@@ -1331,7 +1331,8 @@ Lisp function does not specify a special indentation."
     (mars/defhook mars/enable|lsp-mode ()
       prog-mode-hook
       "Enable lsp-mode for most programming modes."
-      (unless (derived-mode-p #'emacs-lisp-mode)
+      (unless (derived-mode-p #'emacs-lisp-mode
+			      #'java-mode)
 	(lsp)))
 
     :config
