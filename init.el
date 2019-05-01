@@ -184,6 +184,34 @@ than having to call `add-to-list' multiple times."
   ("[]" . "∅")
   ("{}" . "⦱"))
 
+(setq sentence-end-double-space nil)
+
+;; don't ask; follow symlinks to file under version control
+(setq find-file-visit-truename t
+      vc-follow-symlinks t)
+
+;; put path before buffer name when uniquifying a buffer (instead of after)
+(setq uniquify-buffer-name-style 'forward)
+
+;; use system trash for file deletion (includes dired and backups)
+(setq delete-by-moving-to-trash t)
+
+;; quickly display current incomplete keystrokes in echo area
+(setq echo-keystrokes 0.1)
+
+;; save clipboard to kill ring before replacing
+(setq save-interprogram-paste-before-kill t)
+
+;; a lot of unix tools expect this; it's required for the crontab, for example
+(setq require-final-newline t)
+
+;; new in emacs 26; kill running processes without confirmation on Emacs exit
+(setq confirm-kill-processes nil)
+
+;; I don't use bidirectional text; improves speed for long lines (even when no
+;; bidirectional text)
+(setq-default bidi-display-reordering nil)
+
 ;; Provies better defaults for emacs cache files
 (use-package no-littering :demand t)
 
@@ -808,7 +836,8 @@ newline."
     ;; Required for ollection
     (setq evil-want-integration t
 	  evil-want-keybinding nil
-	  evil-symbol-word-search t)
+	  evil-symbol-word-search t
+	  evil-move-cursor-back nil)
 
     :config
     (evil-mode 1)
@@ -1336,6 +1365,7 @@ Lisp function does not specify a special indentation."
 	(lsp)))
 
     :config
+    (setq lsp-prefer-flymake nil)
     (require 'lsp-clients))
 
   (use-package lsp-java
