@@ -1003,8 +1003,27 @@ newline."
     :config
     ;; Always display the entire suggestion list onscreen, placing it
     ;; above the cursor if necessary.
-    (setq company-tooltip-minimum company-tooltip-limit)
+    (setq company-tooltip-minimum company-tooltip-limit
+	  company-idle-delay 0.2
+	  company-tooltip-limit 15
+	  company-minimum-prefix-length 2)
+
     (global-company-mode 1)
+
+
+    (defun mars/company-backend-with-yas (backends)
+      "Add :with company-yasnippet to company BACKENDS.
+Taken from https://github.com/syl20bnr/spacemacs/pull/179."
+      (if (and (listp backends) (memq 'company-yasnippet backends))
+	  backends
+	(append (if (consp backends)
+		    backends
+		  (list backends))
+		'(:with company-yasnippet))))
+
+    ;; add yasnippet to all backends
+    (setq company-backends
+          (mapcar #'mars/company-backend-with-yas company-backends))
 
     ;; Use helpful in company elisp help buffers
     (mars/defadvice mars/elips-use-helpful|company
@@ -1391,7 +1410,10 @@ Lisp function does not specify a special indentation."
       :keymaps 'lsp-ui-mode-map
       "f" 'lsp-ui-sideline-apply-code-actions))
 
-  (use-package company-lsp))
+  (use-package company-lsp
+    :after company
+    :init
+    (add-to-list 'company-backends '(company-lsp :with company-yasnippet))))
 
 (use-feature feature/clojure
   :disabled
