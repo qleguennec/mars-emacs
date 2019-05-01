@@ -822,8 +822,6 @@ newline."
 (mars/before-save-global-mode 1)
 
 (setq
- ;; Don't break lines
- truncate-lines t
  ;; Don't ask for confirmation for .dir-locals
  enable-local-variables :all)
 
@@ -1446,6 +1444,10 @@ Lisp function does not specify a special indentation."
 
   (purpose-compile-user-configuration)
   (purpose-x-popwin-update-conf))
+
+(use-package adaptive-wrap
+  :demand t
+  :config (adaptive-wrap-prefix-mode))
 
 (use-package perfect-margin
   :disabled
