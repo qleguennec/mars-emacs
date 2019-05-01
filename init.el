@@ -1632,7 +1632,12 @@ return default frame title"
 (use-package centered-cursor-mode
   :demand t
   :init
-  (add-hook 'prog-mode-hook #'centered-cursor-mode))
+  (mars/defhook mars/enable|centered-cursor-mode ()
+    prog-mode-hook
+    "Enable centered-cursor-mode for most programming modes."
+    (unless (derived-mode-p #'shell-mode
+			    #'eshell-mode)
+      (centered-cursor-mode))))
 
 (use-package solaire-mode
   :demand t
