@@ -1443,7 +1443,7 @@ Lisp function does not specify a special indentation."
   :demand t
   :init
   (setq mars-font "Overpass Mono"
-	mars-font-height 11)
+	mars-font-height 10)
   (set-face-attribute 'default nil
 		      :family mars-font)
   :config
@@ -1562,19 +1562,18 @@ return default frame title"
 
 (use-package darktooth-theme)
 
-(use-package solarized-theme
+(use-package solarized-theme)
+
+(use-package doom-themes
   :demand t
-  :straight (:host github :repo "bbatsov/solarized-emacs" :fork (:host github :repo "qleguennec/solarized-emacs"))
-  :init (setq
-	 size mars-font-height
-	 default-size mars-font-height)
+  :init (setq size mars-font-height
+	      default-size mars-font-height)
   :config
-  (load-theme 'solarized-light 'confirm)
-  (setq window-divider-default-right-width 4
-	window-divider-default-bottom-width 0)
+  (load-theme 'doom-nord-light 'confirm)
+  (setq window-divider-default-right-width 2
+	window-divider-default-bottom-width 2)
   (setq-default mode-line-format nil)
-  (fringe-mode '(2 . 0))
-  (set-face-attribute 'internal-border nil :background "#66999D"))
+  (fringe-mode '(2 . 2)))
 
 (use-package material-theme)
 
