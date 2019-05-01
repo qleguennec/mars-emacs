@@ -1671,7 +1671,7 @@ return default frame title"
 (use-package zoom
   :demand t
   :config
-  (setq zoom-size '(0.618 . 0.618))
+  (setq zoom-size '(0.66 . 0.618))
   (zoom-mode))
 
 (use-feature feature/compilation
