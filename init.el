@@ -1631,6 +1631,11 @@ return default frame title"
   :commands highlight-quoted-mode
   :hook ((clojure-mode cider-mode emacs-lisp-mode) . highlight-quoted-mode))
 
+(use-package highlight-stages
+  :hook ((clojure-mode cider-mode emacs-lisp-mode) . highlight-quoted-mode)
+  :config
+  (setq highlight-stages-highlight-real-quote nil))
+
 (use-package highlight-defined
   :commands highlight-defined-mode
   :hook (emacs-lisp-mode . highlight-defined-mode))
