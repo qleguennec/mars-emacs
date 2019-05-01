@@ -846,7 +846,7 @@ newline."
 
     (mars-map
       ;; Remaps evil-search-forward to swiper
-      [remap evil-search-forward] 'swiper)
+      [remap evil-search-forward] 'counsel-grep-or-swiper)
 
     (mars-map
       ;; Window resizing
