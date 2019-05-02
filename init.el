@@ -47,6 +47,8 @@ even if it does not countain a vcs subdir.")
       use-package-verbose t
       straight-default-vc 'git)
 
+(testing)
+
 ;; Enable checking for system packages
 (use-package use-package-ensure-system-package
   :demand t)
