@@ -713,7 +713,8 @@ If point is on a src block, runs org-indent"
       "r" 'magit-revert
       "u" 'magit-unstage
       "x" 'magit-discard
-      "d" 'magit-diff-buffer-file))
+      "d" 'magit-diff-buffer-file
+      "m" 'magit-merge))
 
   ;; git forges
   (use-package forge
