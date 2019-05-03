@@ -606,10 +606,14 @@ If point is on a src block, runs org-indent"
   (use-package ivy-posframe
     :demand t
     :config
-    (setq ivy-display-function #'ivy-posframe-display-at-frame-center
-	  ivy-posframe-height 20
-	  ivy-posframe-width 150
-	  ivy-posframe-border-width 1)
+    (push '(complete-symbol . ivy-posframe-display-at-point) ivy-display-functions-alist)
+    (push '(swiper . ivy-posframe-display-at-point) ivy-display-functions-alist)
+    (push '(t . ivy-posframe-display-at-frame-center) ivy-display-functions-alist)
+
+    (setq
+     ivy-posframe-height 20
+     ivy-posframe-width 120
+     ivy-posframe-border-width 1)
     (ivy-posframe-enable))
 
   (use-package wgrep)
@@ -1415,7 +1419,7 @@ Lisp function does not specify a special indentation."
   (use-package company-lsp
     :after company
     :init
-    (add-to-list 'company-backends '(company-lsp :with company-yasnippet))))
+    (push '(company-lsp :with company-yasnippet) company-backends)))
 
 (use-feature feature/clojure
   :disabled
