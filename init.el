@@ -1633,7 +1633,7 @@ return default frame title"
   (setq window-divider-default-right-width 2
 	window-divider-default-bottom-width 2)
   (setq-default mode-line-format nil)
-  (fringe-mode '(2 . 2)))
+  (fringe-mode '(4 . 4)))
 
 (use-package material-theme)
 
