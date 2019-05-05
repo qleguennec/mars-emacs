@@ -868,32 +868,10 @@ newline."
       "!" 'universal-argument
 
       ;; Replaces j,k by non-blank versions
-      "j" 'evil-next-line-first-non-blank
-      "k" 'evil-previous-line-first-non-blank)
+      "j" 'evil-next-line
+      "k" 'evil-previous-line)
 
     (define-key universal-argument-map "!" 'universal-argument-more)
-
-    (defun count-lines-non-empty (move-line-function)
-      (interactive)
-      (let ((lines 0))
-	(beginning-of-line)
-	(funcall move-line-function)
-	(save-excursion
-    	  (while (looking-at "[[:space:]]*$")
-	    (setq lines (1+ lines))
-	    (beginning-of-line)
-    	    (funcall move-line-function)))
-	lines))
-
-    (mars/defadvice mars/evil-next-non-empty-line (&rest args)
-      :filter-args evil-next-line-first-non-blank
-      "Jump on the next empty line, using evil-next-line-first-non-blank"
-      (list (count-lines-non-empty #'next-line)))
-
-    (mars/defadvice mars/evil-previous-non-empty-line (&rest args)
-      :filter-args evil-previous-line-first-non-blank
-      "Jump on the previous empty line, using evil-previous-line-first-non-blank"
-      (list (count-lines-non-empty #'previous-line)))
 
     (mars-map/windows
       ;; Window motion
@@ -1126,7 +1104,8 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
     (electric-operator-add-rules-for-mode 'emacs-lisp-mode
 					  (cons "-" nil))
     (electric-operator-add-rules-for-mode 'rjsx-mode
-					  (cons "==" " === "))))
+					  (cons "==" " === ")
+					  (cons "!=" " !== "))))
 
 (use-package hungry-delete
   :demand t
