@@ -1421,7 +1421,7 @@ Lisp function does not specify a special indentation."
 
   (use-package company-lsp
     :after company
-    :init
+    :config
     (push '(company-lsp :with company-yasnippet) company-backends)))
 
 (use-feature feature/clojure
