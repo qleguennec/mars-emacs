@@ -606,10 +606,14 @@ If point is on a src block, runs org-indent"
   (use-package ivy-posframe
     :demand t
     :config
-    (setq ivy-display-function #'ivy-posframe-display-at-frame-center
-	  ivy-posframe-height 20
-	  ivy-posframe-width 150
-	  ivy-posframe-border-width 1)
+    (push '(complete-symbol . ivy-posframe-display-at-point) ivy-display-functions-alist)
+    (push '(swiper . ivy-posframe-display-at-point) ivy-display-functions-alist)
+    (push '(t . ivy-posframe-display-at-frame-center) ivy-display-functions-alist)
+
+    (setq
+     ivy-posframe-height 20
+     ivy-posframe-width 120
+     ivy-posframe-border-width 1)
     (ivy-posframe-enable))
 
   (use-package wgrep)
@@ -713,19 +717,12 @@ If point is on a src block, runs org-indent"
       "z" 'magit-stash
       "u" 'magit-unstage
       "x" 'magit-discard
-      "d" 'magit-diff-buffer-file
-      "m" 'magit-merge
-      "y" 'magit-show-refs)
+      "d" 'magit-diff-buffer-file))
 
-    (:keymaps 'magit-mode-map
-     :states 'normal
-     "<escape>" nil
-     "q" 'magit-mode-bury-buffer))
-
-  ;; git forges
-  (use-package forge
-    :disabled
-    :after magit)
+;; git forges
+(use-package forge
+  :disabled
+  :after magit)
 
   ;; Create URLs for files and commits in GitHub/Bitbucket/GitLab/... repositories
   (use-package git-link)
@@ -870,32 +867,10 @@ newline."
       "!" 'universal-argument
 
       ;; Replaces j,k by non-blank versions
-      "j" 'evil-next-line-first-non-blank
-      "k" 'evil-previous-line-first-non-blank)
+      "j" 'evil-next-line
+      "k" 'evil-previous-line)
 
     (define-key universal-argument-map "!" 'universal-argument-more)
-
-    (defun count-lines-non-empty (move-line-function)
-      (interactive)
-      (let ((lines 0))
-	(beginning-of-line)
-	(funcall move-line-function)
-	(save-excursion
-    	  (while (looking-at "[[:space:]]*$")
-	    (setq lines (1+ lines))
-	    (beginning-of-line)
-    	    (funcall move-line-function)))
-	lines))
-
-    (mars/defadvice mars/evil-next-non-empty-line (&rest args)
-      :filter-args evil-next-line-first-non-blank
-      "Jump on the next empty line, using evil-next-line-first-non-blank"
-      (list (count-lines-non-empty #'next-line)))
-
-    (mars/defadvice mars/evil-previous-non-empty-line (&rest args)
-      :filter-args evil-previous-line-first-non-blank
-      "Jump on the previous empty line, using evil-previous-line-first-non-blank"
-      (list (count-lines-non-empty #'previous-line)))
 
     (mars-map/windows
       ;; Window motion
@@ -1110,7 +1085,10 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
 
   (use-package aggressive-indent
     :demand t
-    :hook (prog-mode . aggressive-indent-mode))
+    :hook (prog-mode . aggressive-indent-mode)
+    :config
+    (mars/add-to-list aggressive-indent-excluded-modes
+      rjsx-mode))
 
   (use-package electric-operator
     :commands electric-operator-mode
@@ -1125,7 +1103,8 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
     (electric-operator-add-rules-for-mode 'emacs-lisp-mode
 					  (cons "-" nil))
     (electric-operator-add-rules-for-mode 'rjsx-mode
-					  (cons "==" " === "))))
+					  (cons "==" " === ")
+					  (cons "!=" " !== "))))
 
 (use-package hungry-delete
   :demand t
@@ -1419,8 +1398,8 @@ Lisp function does not specify a special indentation."
 
   (use-package company-lsp
     :after company
-    :init
-    (add-to-list 'company-backends '(company-lsp :with company-yasnippet))))
+    :config
+    (push '(company-lsp :with company-yasnippet) company-backends)))
 
 (use-feature feature/clojure
   :disabled
@@ -1634,7 +1613,7 @@ return default frame title"
   (setq window-divider-default-right-width 2
 	window-divider-default-bottom-width 2)
   (setq-default mode-line-format nil)
-  (fringe-mode '(2 . 2)))
+  (fringe-mode '(4 . 4)))
 
 (use-package material-theme)
 
