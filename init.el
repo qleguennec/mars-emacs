@@ -693,6 +693,18 @@ If point is on a src block, runs org-indent"
 	  magit-auto-revert-immediately t
 	  revert-without-query '(".*"))
 
+    (mars/defhook mars/git-commit-setup ()
+      git-commit-mode-hook
+      "Insert diminished current branch name between [], at the start of the commit message"
+      (-some--> (vc-git-branches)
+		(car it)
+		(s-split-words it)
+		(when (>= (length it) 2)
+		  (-take 2 it))
+		(mapcar #'s-upcase it)
+		(apply 'format "[%s-%s] " it)
+		(insert it)))
+
     ;; Enable magit-file-mode
     (add-hook 'prog-mode-hook #'magit-file-mode)
 
