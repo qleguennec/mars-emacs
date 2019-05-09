@@ -466,7 +466,10 @@ If point is on a src block, runs org-indent"
      :states '(normal visual emacs)
      "RET" 'org-agenda-switch-to
      "j" 'org-agenda-next-line
-     "k" 'org-agenda-previous-line))
+     "k" 'org-agenda-previous-line)
+
+    (mars-map/ivy
+      "t" 'counsel-org-tag))
 
   (use-package org-trello)
 
