@@ -180,9 +180,7 @@ than having to call `add-to-list' multiple times."
   (">=" . "≥")
   ("<=" . "≤")
   ("&&" . "⋀")
-  ("||" . "⋁")
-  ("[]" . "∅")
-  ("{}" . "⦱"))
+  ("||" . "⋁"))
 
 (setq sentence-end-double-space nil)
 
