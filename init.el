@@ -1117,6 +1117,11 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
     (electric-operator-add-rules-for-mode 'emacs-lisp-mode
 					  (cons "-" nil))
     (electric-operator-add-rules-for-mode 'rjsx-mode
+					  (cons "," " , ")
+					  (cons ">=" " >= ")
+					  (cons "<=" " <= ")
+					  (cons "=>" " => ")
+					  (cons "=" " = ")
 					  (cons "==" " === ")
 					  (cons "!=" " !== "))))
 
