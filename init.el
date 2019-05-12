@@ -609,6 +609,7 @@ If point is on a src block, runs org-indent"
     :config
     (push '(complete-symbol . ivy-posframe-display-at-point) ivy-display-functions-alist)
     (push '(swiper . ivy-posframe-display-at-point) ivy-display-functions-alist)
+    (push '(ivy-yasnippet . ivy-posframe-display-at-window-bottom-left) ivy-display-functions-alist)
     (push '(t . ivy-posframe-display-at-frame-center) ivy-display-functions-alist)
 
     (setq
@@ -1009,7 +1010,6 @@ newline."
 	  company-minimum-prefix-length 2)
 
     (global-company-mode 1)
-
 
     (defun mars/company-backend-with-yas (backends)
       "Add :with company-yasnippet to company BACKENDS.
