@@ -686,7 +686,8 @@ If point is on a src block, runs org-indent"
      magit-list-refs-sortby "-creatordate")
 
     ;; Auto revert buffers
-    (magit-auto-revert-mode 1)
+    (magit-auto-revert-mode)
+    (global-auto-revert-mode)
     (setq auto-revert-interval 1
 	  magit-auto-revert-immediately t
 	  revert-without-query '(".*"))
