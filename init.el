@@ -933,7 +933,14 @@ newline."
 
     (use-package evil-goggles
       :demand t
-      :config (add-hook 'prog-mode-hook #'evil-goggles-mode))))
+      :config (add-hook 'prog-mode-hook #'evil-goggles-mode))
+
+    (use-package evil-args
+      :demand t
+      :config
+      ;; bind evil-args text objects
+      (define-key evil-inner-text-objects-map "a" 'evil-inner-arg)
+      (define-key evil-outer-text-objects-map "a" 'evil-outer-arg))))
 
 (use-package undo-tree
   :demand t
@@ -1259,7 +1266,6 @@ Lisp function does not specify a special indentation."
 (use-feature feature/javascript
   :init
   (setq js-indent-level 2)
-
   (use-package rjsx-mode
     :init
     (mars/set-pretty-symbols rjsx-mode
@@ -1283,7 +1289,8 @@ Lisp function does not specify a special indentation."
     :config
     (mars/add-to-list auto-mode-alist
       ("\\.jsx\\'" . rjsx-mode)
-      ("\\.js\\'" . rjsx-mode))
+      ("\\.js\\'" . rjsx-mode)
+      ("\\.json\\'" . rjsx-mode))
 
     (flycheck-add-mode 'javascript-eslint 'rjsx-mode))
 
@@ -1383,14 +1390,13 @@ Lisp function does not specify a special indentation."
 	(lsp)))
 
     :config
-    (setq lsp-prefer-flymake nil)
+    (setq lsp-prefer-flymake nil
+	  lsp-response-timeout 1)
     (require 'lsp-clients))
 
-  (use-package lsp-java
-    :demand t)
+  (use-package lsp-java)
 
   (use-package lsp-ui
-    :disabled
     :config
     (mars/defadvice mars/advice-apply-single-fix|lsp-ui (orig-fun &rest args)
       :around lsp-ui-sideline-apply-code-actions
@@ -1625,7 +1631,7 @@ return default frame title"
   :init (setq size mars-font-height
 	      default-size mars-font-height)
   :config
-  (load-theme 'doom-nord-light 'confirm)
+  (load-theme 'doom-opera 'confirm)
   (setq window-divider-default-right-width 2
 	window-divider-default-bottom-width 2)
   (setq-default mode-line-format nil)
