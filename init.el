@@ -917,10 +917,6 @@ newline."
 	"x" 'evil-exchange
 	"X" 'evil-exchange-cancel))
 
-    (use-package things
-      :straight (:host github :repo "noctuid/things.el")
-      :demand t)
-
     ;; Needed for js2-refactor
     (use-package multiple-cursors)
 
