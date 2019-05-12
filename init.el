@@ -1389,6 +1389,7 @@ Lisp function does not specify a special indentation."
     :demand t)
 
   (use-package lsp-ui
+    :disabled
     :config
     (mars/defadvice mars/advice-apply-single-fix|lsp-ui (orig-fun &rest args)
       :around lsp-ui-sideline-apply-code-actions
