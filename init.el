@@ -733,10 +733,10 @@ If point is on a src block, runs org-indent"
       "x" 'magit-discard
       "d" 'magit-diff-buffer-file))
 
-;; git forges
-(use-package forge
-  :disabled
-  :after magit)
+  ;; git forges
+  (use-package forge
+    :disabled
+    :after magit)
 
   ;; Create URLs for files and commits in GitHub/Bitbucket/GitLab/... repositories
   (use-package git-link)
@@ -1052,7 +1052,10 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
   (use-package yasnippet
     :init (yas-global-mode 1))
 
-  (use-package yasnippet-snippets))
+  (use-package yasnippet-snippets
+    :demand t
+    :straight (:host github :repo "qleguennec/yasnippet-snippets"
+	       :files ("*"))))
 
 (use-feature feature/text
   :init
@@ -1631,7 +1634,7 @@ return default frame title"
   :init (setq size mars-font-height
 	      default-size mars-font-height)
   :config
-  (load-theme 'doom-opera 'confirm)
+  (load-theme 'doom-sourcerer 'confirm)
   (setq window-divider-default-right-width 2
 	window-divider-default-bottom-width 2)
   (setq-default mode-line-format nil)
