@@ -717,6 +717,7 @@ If point is on a src block, runs org-indent"
 
     (mars/map
       :prefix "-"
+      "m" 'magit-merge
       "-" 'magit-dispatch
       "s" 'magit-stage
       "u" 'magit-unstage
