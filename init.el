@@ -1106,10 +1106,10 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
 
   (use-package aggressive-indent
     :demand t
-    :hook (prog-mode . aggressive-indent-mode)
     :config
+    (global-aggressive-indent-mode)
     (mars/add-to-list aggressive-indent-excluded-modes
-      rjsx-mode))
+      rjsx-mode java-mode))
 
   (use-package electric-operator
     :commands electric-operator-mode
