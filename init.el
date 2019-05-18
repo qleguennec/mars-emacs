@@ -1642,7 +1642,7 @@ return default frame title"
   :init (setq size mars-font-height
 	      default-size mars-font-height)
   :config
-  (load-theme 'doom-sourcerer 'confirm)
+  (load-theme 'doom-dracula 'confirm)
   (setq window-divider-default-right-width 2
 	window-divider-default-bottom-width 2)
   (setq-default mode-line-format nil)
