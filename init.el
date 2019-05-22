@@ -1630,22 +1630,26 @@ return default frame title"
 
 (use-package solarized-theme)
 
-(use-package doom-themes
-  :demand t
-  :init (setq size mars-font-height
-	      default-size mars-font-height)
-  :config
-  (load-theme 'doom-dracula 'confirm)
-  (setq window-divider-default-right-width 2
-	window-divider-default-bottom-width 2)
-  (setq-default mode-line-format nil)
-  (fringe-mode '(4 . 4)))
+(use-package doom-themes)
 
 (use-package material-theme)
 
 (use-package zenburn-theme)
 
-(use-package creamsody-theme)
+(use-package creamsody-theme
+  :demand t
+  :init (setq size mars-font-height
+	      default-size mars-font-height)
+  :config
+  (load-theme 'creamsody 'confirm)
+  (setq window-divider-default-right-width 2
+	window-divider-default-bottom-width 2)
+  (setq-default mode-line-format nil)
+  (fringe-mode '(4 . 4)))
+
+(use-package doom-modeline
+  :demand t
+  :config (doom-modeline-mode))
 
 (use-package nimbus-theme)
 
