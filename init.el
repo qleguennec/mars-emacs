@@ -1449,13 +1449,6 @@ Lisp function does not specify a special indentation."
     (setq cljr-auto-sort-project-dependencies t)))
 
 ;; UI
-(use-package awesome-tray
-  :demand t
-  :straight (:host github :repo "manateelazycat/awesome-tray")
-  :config
-  (setq awesome-tray-active-modules '("git" "parent-dir" "location" "mode-name"))
-  (awesome-tray-mode))
-
 (use-package window-purpose
   :straight (:host github :repo "bmag/emacs-purpose")
   :disabled
