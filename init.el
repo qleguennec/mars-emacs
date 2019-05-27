@@ -1330,10 +1330,9 @@ Lisp function does not specify a special indentation."
     "Reformat javascript on save. Runs prettier + eslint"
     (interactive)
     (when (eq major-mode 'rjsx-mode)
-      (prettier-js)
       ;; TODO better solution
-      (let ((default-directory (projectile-project-root)))
-	(eslintd-fix))))
+      (prettier-js)
+      (eslintd-fix)))
 
   (add-hook 'before-save-hook #'mars/reformat|rjsx-mode)
 
@@ -1879,6 +1878,34 @@ T - tag prefix
 	(setq eshell-buffer-name
 	      (format "*eshell-%d*" eshell-buffers-count))))
     (eshell))
+
+  ;; From https://github.com/jorgenschaefer/comint-scroll-to-bottom
+  (defun comint-add-scroll-to-bottom ()
+    "Activate `comint-scroll-to-bottom'.
+This should be put in `comint-mode-hook' or any derived mode."
+    (add-hook 'window-scroll-functions 'comint-scroll-to-bottom nil t))
+
+  (defun comint-scroll-to-bottom (window display-start)
+    "Recenter WINDOW so that point is on the last line.
+This is added to `window-scroll-functions' by
+`comint-add-scroll-to-bottom'.
+The code is shamelessly taken (but adapted) from ERC."
+    (let ((proc (get-buffer-process (current-buffer))))
+      (when (and proc
+		 window
+		 (window-live-p window))
+	(let ((resize-mini-windows nil))
+          (save-selected-window
+            (select-window window)
+            (save-restriction
+              (widen)
+              (when (>= (point) (process-mark proc))
+		(save-excursion
+                  (goto-char (point-max))
+                  (recenter -1)
+		  (sit-for 0)))))))))
+
+  (add-hook 'comint-mode-hook #'comint-scroll-to-bottom)
 
   :general
   (mars-map/applications
