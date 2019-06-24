@@ -1351,29 +1351,7 @@ Lisp function does not specify a special indentation."
   ;; 	  (call-interactively #'origami-close-node)))))
   )
 
-(use-feature feature/python
-  :init
-  (defun mars/python-reload ()
-    (interactive)
-    (when (and (eq major-mode 'python-mode)
-	       python-main-file)
-
-      (when-let* ((python-file (expand-file-name python-main-file (projectile-project-root)))
-		  (exists (file-exists-p python-file))
-		  (buffer-to-eval (or (find-buffer-visiting python-file)
-				      (find-file python-file))))
-	(save-excursion
-	  (with-current-buffer buffer-to-eval
-	    (when (python-shell-get-process)
-	      (set-process-query-on-exit-flag (python-shell-get-process) nil)
-	      (kill-process (python-shell-get-process))
-	      (sleep-for 0.5))
-
-	    (run-python nil t nil)
-	    (python-shell-send-file python-file)
-	    (other-window 1))))))
-
-  (add-hook 'after-save-hook #'mars/python-reload))
+(use-feature feature/python)
 
 (use-feature feature/debug
   :init
