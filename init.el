@@ -604,19 +604,6 @@ If point is on a src block, runs org-indent"
 
     (ivy-rich-mode))
 
-  (use-package ivy-posframe
-    :demand t
-    :config
-    (push '(complete-symbol . ivy-posframe-display-at-point) ivy-display-functions-alist)
-    (push '(swiper . ivy-posframe-display-at-point) ivy-display-functions-alist)
-    (push '(ivy-yasnippet . ivy-posframe-display-at-window-bottom-left) ivy-display-functions-alist)
-    (push '(t . ivy-posframe-display-at-frame-center) ivy-display-functions-alist)
-
-    (setq
-     ivy-posframe-height 20
-     ivy-posframe-width 120
-     ivy-posframe-border-width 1)
-    (ivy-posframe-enable))
 
   (use-package wgrep)
 
