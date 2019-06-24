@@ -1338,7 +1338,11 @@ Lisp function does not specify a special indentation."
   ;; 	  (call-interactively #'origami-close-node)))))
   )
 
-(use-feature feature/python)
+(use-feature feature/python
+  :init
+  (use-package elpy
+    :init
+    (advice-add 'python-mode :before 'elpy-enable)))
 
 (use-feature feature/debug
   :init
