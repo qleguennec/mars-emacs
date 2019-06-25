@@ -6,7 +6,7 @@
 ;; before package and UI initialization happens.
 
 ;; Defer garbage collection further back in the startup process
-(setq gc-cons-threshold 1073741824)
+(setq gc-cons-threshold 536870912)
 
 ;; Package initialize occurs automatically, before `user-init-file' is
 ;; loaded, but after `early-init-file'. Doom handles package
