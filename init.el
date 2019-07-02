@@ -1357,6 +1357,7 @@ Lisp function does not specify a special indentation."
     (add-hook 'dap-mode-hook #'dap-ui-mode)))
 
 (use-feature feature/lsp
+  :disabled
   :init
   (use-package lsp-mode
     :commands 'lsp
