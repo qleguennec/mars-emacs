@@ -1096,7 +1096,7 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
     :config
     (global-aggressive-indent-mode)
     (mars/add-to-list aggressive-indent-excluded-modes
-      rjsx-mode java-mode))
+      rjsx-mode java-mode scala-mode))
 
   (use-package electric-operator
     :commands electric-operator-mode
@@ -1341,6 +1341,25 @@ Lisp function does not specify a special indentation."
   (use-package elpy
     :init
     (advice-add 'python-mode :before 'elpy-enable)))
+(use-feature feature/scala
+  :init
+  (use-package ensime
+    :init
+    (setq ensime-startup-notification nil))
+
+  (use-package scala-mode
+    :interpreter
+    ("scala" . scala-mode))
+
+  (use-package sbt-mode
+    :commands sbt-start sbt-command
+    :config
+    ;; WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31
+    ;; allows using SPACE when in the minibuffer
+    (substitute-key-definition
+     'minibuffer-complete-word
+     'self-insert-command
+     minibuffer-local-completion-map)))
 
 (use-feature feature/debug
   :init
