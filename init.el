@@ -1103,9 +1103,7 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
 
 (use-package hungry-delete
   :demand t
-  :config (global-hungry-delete-mode)
-  :general
-  (general-define-key "<backspace>" 'hungry-delete-backward))
+  :config (global-hungry-delete-mode))
 
 ;; Prettier code
 (global-prettify-symbols-mode 1)
