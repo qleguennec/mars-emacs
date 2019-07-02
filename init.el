@@ -811,24 +811,6 @@ If point is on a src block, runs org-indent"
    ")" 'buffer-expose-next-page))
 
 ;; Editor features
-(define-minor-mode mars/before-save-mode
-  "Minor mode to automatically fix whitespace on save.
-If enabled, then saving the buffer deletes all trailing
-whitespace and ensures that the file ends with exactly one
-newline."
-  nil nil nil
-  (if mars/before-save-mode
-      (progn
-        (setq require-final-newline t)
-        (add-hook 'before-save-hook #'delete-trailing-whitespace nil 'local))
-    (setq require-final-newline nil)
-    (remove-hook 'before-save-hook #'delete-trailing-whitespace 'local)))
-
-(define-globalized-minor-mode mars/before-save-global-mode
-  mars/before-save-mode mars/before-save-mode)
-
-(mars/before-save-global-mode 1)
-
 (setq
  ;; Don't ask for confirmation for .dir-locals
  enable-local-variables :all)
