@@ -1320,9 +1320,17 @@ Lisp function does not specify a special indentation."
 
 (use-feature feature/python
   :init
+  (setq python-indent-offset 4
+	flycheck-python-flake8-executable "~/.local/bin/flake8")
   (use-package elpy
     :init
-    (advice-add 'python-mode :before 'elpy-enable)))
+    (advice-add 'python-mode :before 'elpy-enable)
+
+    :general
+    (mars-leader-map
+      :keymaps 'elpy-mode-map
+      "m" 'elpy-shell-send-region-or-buffer)))
+
 (use-feature feature/scala
   :init
   (use-package ensime
