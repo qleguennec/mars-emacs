@@ -1485,7 +1485,7 @@ Lisp function does not specify a special indentation."
   :demand t
   :init
   (setq mars-font "Overpass Mono"
-	mars-font-height 10)
+	mars-font-height 12)
   (set-face-attribute 'default nil
 		      :family mars-font)
   :config
@@ -1606,22 +1606,23 @@ return default frame title"
 
 (use-package solarized-theme)
 
-(use-package doom-themes)
+(use-package doom-themes
+  :demand t
+  :init (setq size mars-font-height
+	      default-size mars-font-height)
+  :config
+  (load-theme 'doom-palenight 'confirm)
+  (setq window-divider-default-right-width 2
+	window-divider-default-bottom-width 2)
+  (setq-default mode-line-format nil)
+  (fringe-mode '(4 . 4)))
 
 (use-package material-theme)
 
 (use-package zenburn-theme)
 
 (use-package creamsody-theme
-  :demand t
-  :init (setq size mars-font-height
-	      default-size mars-font-height)
-  :config
-  (load-theme 'creamsody 'confirm)
-  (setq window-divider-default-right-width 2
-	window-divider-default-bottom-width 2)
-  (setq-default mode-line-format nil)
-  (fringe-mode '(4 . 4)))
+  :demand t)
 
 (use-package doom-modeline
   :demand t
