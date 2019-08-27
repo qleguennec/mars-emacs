@@ -480,6 +480,9 @@ If point is on a src block, runs org-indent"
 ;; Edit root file
 (use-package sudo-edit)
 
+(use-package string-inflection
+  :demand t)
+
 ;; Candidate selection
 
 ;; Select things in the minibuffer
