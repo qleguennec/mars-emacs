@@ -1800,6 +1800,8 @@ T - tag prefix
   (setq
    ;; Send inpupt to suprocesses
    eshell-send-direct-to-subprocesses nil
+   ;; Always scroll to bottom
+   comint-scroll-to-bottom-on-output t
    eshell-buffer-maximum-lines 5000)
 
   (defun mars-eshell-new-buffer ()
