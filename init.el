@@ -1252,15 +1252,16 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
     (push '(company-lsp :with company-yasnippet) company-backends)))
 
 ;; UI
-(use-feature feature/buffer-display
+(use-feature feature/display-buffer
   :init
   (setq
-   display-buffer-alist
-   `(("\\*.*\\*"
-      (display-buffer-reuse-mode-window
-       display-buffer-pop-up-window)
-      (inhibit-same-window . t)
-      (window-width . ,(/ 1.0 3.0))))))
+   side-window-rule `((display-buffer-reuse-mode-window
+		       display-buffer-pop-up-window)
+		      (inhibit-same-window . t)
+		      (window-width . ,(/ 1.0 3.0)))
+
+   display-buffer-alist `(("\\*.*\\*" ,@side-window-rule)
+			  ("magit:.*" ,@side-window-rule))))
 
 ;; Font
 (use-package font-size
