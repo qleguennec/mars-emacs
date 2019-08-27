@@ -1296,6 +1296,9 @@ return default frame title"
   
   (desktop-save-mode)
 
+  (add-hook 'kill-emacs-hook
+	    #'desktop-save-in-desktop-dir)
+
   (when (file-exists-p (expand-file-name desktop-base-file-name desktop-dirname))
     (desktop-read desktop-dirname))
 
