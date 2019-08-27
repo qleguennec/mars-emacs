@@ -1083,7 +1083,7 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
     :config
     (global-aggressive-indent-mode)
     (mars/add-to-list aggressive-indent-excluded-modes
-      rjsx-mode java-mode scala-mode))
+      js-jsx-mode java-mode))
 
   (use-package electric-operator
     :commands electric-operator-mode
@@ -1097,7 +1097,7 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
 					  (cons "=>" " => "))
     (electric-operator-add-rules-for-mode 'emacs-lisp-mode
 					  (cons "-" nil))
-    (electric-operator-add-rules-for-mode 'rjsx-mode
+    (electric-operator-add-rules-for-mode 'js-jsx-mode
 					  (cons "," " , ")
 					  (cons ">=" " >= ")
 					  (cons "<=" " <= ")
@@ -1241,54 +1241,25 @@ Lisp function does not specify a special indentation."
 
 (use-feature feature/javascript
   :init
-  (setq js-indent-level 2)
-  (use-package rjsx-mode
-    :init
-    (mars/set-pretty-symbols rjsx-mode
-      ("===" . "⩶")
-      ("import" . "⟼")
-      ("export" . "⟻"))
+  (setq js-indent-level 2
+	flycheck-javascript-eslint-executable "eslint_d"
+	flycheck-javascript-standard-executable "eslint_d")
 
-    (mars/defhook mars/eslint-locate|rjsx-mode ()
-      rjsx-mode-hook
-      "Locate eslint in current directory."
-      (interactive)
-      (let* ((root (locate-dominating-file
-		    (or (buffer-file-name) default-directory)
-		    "node_modules"))
-	     (eslint (and root
-			  (expand-file-name "node_modules/eslint/bin/eslint.js"
-					    root))))
-	(when (and eslint (file-executable-p eslint))
-	  (setq-local flycheck-javascript-eslint-executable eslint))))
-
-    :config
-    (mars/add-to-list auto-mode-alist
-      ("\\.jsx\\'" . rjsx-mode)
-      ("\\.js\\'" . rjsx-mode)
-      ("\\.json\\'" . rjsx-mode))
-
-    (flycheck-add-mode 'javascript-eslint 'rjsx-mode))
+  (add-to-list 'auto-mode-alist '("\\.jsx\\'" . js-jsx-mode))
 
   (use-package js-import
     :general
     (mars-leader-map
-      :keymaps 'rjsx-mode-map
+      :keymaps 'js-jsx-mode-map
       "i" 'js-import))
 
   (use-package js2r-refactor
-    :after rjsx-mode
     :commands 'js2-refactor-mode
     :straight (:host github :repo "magnars/js2-refactor.el")
-    :init (add-hook 'rjsx-mode-hook #'js2-refactor-mode))
-
-  (use-package eslintd-fix
-    :commands 'eslintd-fix
-    :after rjsx-mode)
+    :init (add-hook 'js-mode #'js2-refactor-mode))
 
   (use-package prettier-js
     :commands 'prettier-js
-    :after rjsx-mode
     :init
     (setq prettier-js-command "prettier_d"
 	  prettier-js-args '("--trailing-comma" "es5"
@@ -1296,30 +1267,12 @@ Lisp function does not specify a special indentation."
 			     "--single-quote" "true"
 			     "--tab-width" "2"
 			     "--use-tabs" "false")
-	  prettier-js-show-errors nil))
+	  prettier-js-show-errors nil)
 
-  (defun mars/reformat|rjsx-mode ()
-    "Reformat javascript on save. Runs prettier + eslint"
-    (interactive)
-    (when (eq major-mode 'rjsx-mode)
-      ;; TODO better solution
-      (prettier-js)
-      (eslintd-fix)))
-
-  (add-hook 'before-save-hook #'mars/reformat|rjsx-mode)
-
-  (mars/counsel-M-x-initial-input rjsx-mode
-    (concat "^" (regexp-opt '("rjsx" "js2" "lsp")) " "))
-
-  ;; (mars/defhook mars/fold-imports|rjsx-mode ()
-  ;;   rjsx-mode-hook
-  ;;   "When origami-mode is enabled, fold all import statements."
-  ;;   (when origami-mode
-  ;;     (save-excursion
-  ;; 	(beginning-of-buffer)
-  ;; 	(while (re-search-forward "^import" nil t)
-  ;; 	  (call-interactively #'origami-close-node)))))
-  )
+    :general
+    (mars-leader-map
+      :keymaps 'js-mode-map
+      "f" 'prettier-js)))
 
 (use-feature feature/python
   :init
