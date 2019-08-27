@@ -244,18 +244,7 @@ than having to call `add-to-list' multiple times."
  ;; Disable scratch buffer message
  initial-scratch-message nil)
 
-;; el-patch
-
-;; Package `el-patch' provides a way to override the definition of an
-;; internal function from another package by providing an s-expression
-;; based diff which can later be validated to ensure that the upstream
-;; definition has not changed.
-(use-package el-patch
-  :straight (:host github :repo "raxod502/el-patch" :branch "develop")
-  :demand t)
-
 ;; Keybindings
-
 ;; Set-up general early so we can later use it in use-package.
 (use-package general
   :demand t
