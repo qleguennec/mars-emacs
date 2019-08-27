@@ -1300,8 +1300,23 @@ return default frame title"
 ;; desktop-save-mode
 (use-feature feature/desktop-save-mode
   :init
+  (setq
+   desktop-save t
+   desktop-dirname "~/.emacs.d/var/desktop"
+   desktop-load-locked-desktop t)
+  
   (desktop-save-mode)
-  (setq desktop-save-mode t))
+
+  (when (file-exists-p (expand-file-name desktop-base-file-name desktop-dirname))
+    (desktop-read desktop-dirname))
+
+  ;; Add a hook when emacs is closed to we reset the desktop
+  ;; modification time (in this way the user does not get a warning
+  ;; message about desktop modifications)
+  (add-hook 'kill-emacs-hook
+            (lambda ()
+              ;; Reset desktop modification time so the user is not bothered
+              (setq desktop-file-modtime (nth 5 (file-attributes (desktop-full-file-name)))))))
 
 ;; Use ediff on the same window
 (setq ediff-window-setup-function 'ediff-setup-windows-plain)
@@ -1608,3 +1623,4 @@ The code is shamelessly taken (but adapted) from ERC."
 
 ;; Starts emacs server
 (server-start)
+(put 'dired-find-alternate-file 'disabled nil)
