@@ -321,7 +321,7 @@ mars-map/ function")
     "p" 'previous-buffer
     "n" 'next-buffer
     "k" 'kill-buffer
-    "b" 'ivy-switch-buffer
+    "b" 'counsel-switch-buffer
     "e" (lambda ()
 	  (interactive)
 	  (switch-to-buffer "*el scratch*")
