@@ -828,7 +828,9 @@ If point is on a src block, runs org-indent"
     (setq evil-want-integration t
 	  evil-want-keybinding nil
 	  evil-symbol-word-search t
-	  evil-move-cursor-back nil)
+	  evil-move-cursor-back nil
+	  evil-echo-state nil
+	  evil-want-minibuffer nil)
 
     :config
     (evil-mode 1)
