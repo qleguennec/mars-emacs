@@ -1427,7 +1427,13 @@ return default frame title"
   (setq centaur-tabs-style "wave"
 	centaur-tabs-height 60
 	centaur-tabs-set-icons t
-	centaur-tabs-set-bar 'left))
+	centaur-tabs-set-bar 'left)
+  :general
+  (mars-map
+    "C-l" 'centaur-tabs-forward
+    "C-h" 'centaur-tabs-backward)
+  (mars-map/ivy
+    "g" 'centaur-tabs-counsel-switch-group))
 
 (use-feature feature/compilation
   :init
