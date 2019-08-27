@@ -817,12 +817,6 @@ If point is on a src block, runs org-indent"
       [remap evil-search-forward] 'counsel-grep-or-swiper)
 
     (mars-map
-      ;; Window resizing
-      "C-h" 'shrink-window-horizontally
-      "C-l" 'enlarge-window-horizontally
-      "C-j" 'shrink-window
-      "C-k" 'enlarge-window
-
       ;; Visual
       "_" 'evil-visual-block
 
@@ -1423,6 +1417,17 @@ return default frame title"
 (use-package transpose-frame)
 
 (use-package rotate)
+
+(use-package centaur-tabs
+  :demand t
+  :config
+  (centaur-tabs-mode)
+  (centaur-tabs-headline-match)
+  (centaur-tabs-group-by-projectile-project)
+  (setq centaur-tabs-style "wave"
+	centaur-tabs-height 60
+	centaur-tabs-set-icons t
+	centaur-tabs-set-bar 'left))
 
 (use-feature feature/compilation
   :init
