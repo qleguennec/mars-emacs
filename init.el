@@ -1272,8 +1272,12 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
   (set-face-attribute 'default nil
 		      :family mars-font)
   :config
-  (font-size-init mars-font-height))
+  (font-size-init mars-font-height)
 
+  :general
+  (mars-map
+    "zi" 'font-size-increase
+    "zo" 'font-size-decrease))
 
 ;; Frames
 (mars/add-to-list default-frame-alist
