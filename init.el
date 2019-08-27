@@ -1442,7 +1442,7 @@ Lisp function does not specify a special indentation."
   :straight (:host github :repo "nabeix/emacs-font-size")
   :demand t
   :init
-  (setq mars-font "Overpass Mono"
+  (setq mars-font "Inconsolata"
 	mars-font-height 12)
   (set-face-attribute 'default nil
 		      :family mars-font)
