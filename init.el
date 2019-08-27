@@ -175,15 +175,6 @@ than having to call `add-to-list' multiple times."
 	 :keymaps ',keymap-name
 	 "M-x" ',fun-name))))
 
-;; Symbols for all modes
-(mars/set-pretty-symbols prog-mode
-  (">=" . "≥")
-  ("<=" . "≤")
-  ("&&" . "⋀")
-  ("||" . "⋁"))
-
-(setq sentence-end-double-space nil)
-
 ;; don't ask; follow symlinks to file under version control
 (setq find-file-visit-truename t
       vc-follow-symlinks t)
@@ -469,8 +460,6 @@ If point is on a src block, runs org-indent"
     (mars-map/ivy
       "t" 'counsel-org-tag))
 
-  (use-package org-trello)
-
   ;; Prettier org
   (use-package org-bullets
     :init (add-hook 'org-mode-hook #'org-bullets-mode)))
@@ -480,8 +469,7 @@ If point is on a src block, runs org-indent"
 ;; Edit root file
 (use-package sudo-edit)
 
-(use-package string-inflection
-  :demand t)
+(use-package string-inflection)
 
 ;; Candidate selection
 
@@ -798,21 +786,6 @@ If point is on a src block, runs org-indent"
     (mars-map/applications
       "s" 'projectile-run-eshell)))
 
-(use-package buffer-expose
-  :straight (:host github :repo "clemera/buffer-expose")
-  :demand t
-  :config
-  (buffer-expose-mode 1)
-
-  :general
-  (:keymaps 'buffer-expose-grid-map
-   "h" 'buffer-expose-left-window
-   "j" 'buffer-expose-down-window
-   "k" 'buffer-expose-up-window
-   "l" 'buffer-expose-right-window
-   "(" 'buffer-expose-prev-page
-   ")" 'buffer-expose-next-page))
-
 ;; Editor features
 (setq
  ;; Don't ask for confirmation for .dir-locals
@@ -968,9 +941,6 @@ If point is on a src block, runs org-indent"
    "v" 'er/expand-region
    "V" 'er/contract-region))
 
-(use-package multi-line
-  :demand t)
-
 ;; Completion
 (use-feature feature/completion
   :init
@@ -982,7 +952,9 @@ If point is on a src block, runs org-indent"
     (setq company-tooltip-minimum company-tooltip-limit
 	  company-idle-delay 0.2
 	  company-tooltip-limit 15
-	  company-minimum-prefix-length 2)
+	  company-minimum-prefix-length 2
+	  company-tooltip-align-annotations t
+	  company-minimum-prefix-length 1)
 
     (global-company-mode 1)
 
@@ -1032,10 +1004,6 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
     :straight (:host github :repo "qleguennec/yasnippet-snippets"
 	       :files ("*"))))
 
-(use-feature feature/text
-  :init
-  (use-feature feature/abbrev))
-
 ;; Jump on things
 (use-package avy
   :config (avy-setup-default)
@@ -1053,23 +1021,7 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
   (evil-snipe-override-mode 1)
   (evil-snipe-mode 1)
   (setq evil-snipe-scope 'buffer)
-  (setq evil-snipe-repeat-scope 'buffer)
-
-  :general
-  (mars/map
-    ;; Jump on things
-    "(" (lambda nil (interactive)
-  	  (evil-snipe-F nil "("))
-    ")" (lambda nil (interactive)
-    	  (evil-snipe-f nil "("))
-    "{" (lambda nil (interactive)
-  	  (evil-snipe-F nil "{"))
-    "}" (lambda nil (interactive)
-  	  (evil-snipe-f nil "{"))
-    "[" (lambda nil (interactive)
-  	  (evil-snipe-F nil "["))
-    "]" (lambda nil (interactive)
-  	  (evil-snipe-f nil "["))))
+  (setq evil-snipe-repeat-scope 'buffer))
 
 (use-feature feature/electric-mode
   :init
@@ -1082,6 +1034,15 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
     :demand t
     :config
     (global-aggressive-indent-mode)
+
+    (defun mars/disable-aggressive-indent ()
+      "Disable aggressive indent mode in current buffer."
+      (interactive)
+      (aggressive-indent-mode -1))
+
+    ;; aggressive-indent-mode breaks interaction with lsp-server
+    (add-hook 'lsp-mode-hook #'my-disable-aggressive-indent)
+
     (mars/add-to-list aggressive-indent-excluded-modes
       js-jsx-mode java-mode))
 
@@ -1105,10 +1066,6 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
 					  (cons "=" " = ")
 					  (cons "==" " === ")
 					  (cons "!=" " !== "))))
-
-(use-package hungry-delete
-  :demand t
-  :config (global-hungry-delete-mode))
 
 ;; Prettier code
 (global-prettify-symbols-mode 1)
@@ -1141,103 +1098,23 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
 				  escape
 				  additional-movement
 				  commentary
-				  mark-toggle)))
-
-    :init/el-patch
-    ;; From https://github.com/raxod502/radian/blob/dc22d0524481b45dd3097bf5d9d4f2cd7ad3bad9/radian-emacs/radian-elisp.el#L21-L116
-    ;; Fix the indentation of keyword lists in Emacs Lisp. See [1] and [2].
-    ;;
-    ;; Before:
-    ;;  (:foo bar
-    ;;        :baz quux)
-    ;;
-    ;; After:
-    ;;  (:foo bar
-    ;;   :bar quux)
-    ;;
-    ;; [1]: https://github.com/Fuco1/.emacs.d/blob/af82072196564fa57726bdbabf97f1d35c43b7f7/site-lisp/redef.el#L12-L94
-    ;; [2]: http://emacs.stackexchange.com/q/10230/12534
-    (defun lisp-indent-function (indent-point state)
-      "This function is the normal value of the variable `lisp-indent-function'.
-The function `calculate-lisp-indent' calls this to determine
-if the arguments of a Lisp function call should be indented specially.
-INDENT-POINT is the position at which the line being indented begins.
-Point is located at the point to indent under (for default indentation);
-STATE is the `parse-partial-sexp' state for that position.
-If the current line is in a call to a Lisp function that has a non-nil
-property `lisp-indent-function' (or the deprecated `lisp-indent-hook'),
-it specifies how to indent.  The property value can be:
-* `defun', meaning indent `defun'-style
-  (this is also the case if there is no property and the function
-  has a name that begins with \"def\", and three or more arguments);
-* an integer N, meaning indent the first N arguments specially
-  (like ordinary function arguments), and then indent any further
-  arguments like a body;
-* a function to call that returns the indentation (or nil).
-  `lisp-indent-function' calls this function with the same two arguments
-  that it itself received.
-This function returns either the indentation to use, or nil if the
-Lisp function does not specify a special indentation."
-      (el-patch-let (($cond (and (elt state 2)
-				 (el-patch-wrap 1 1
-				   (or (not (looking-at "\\sw\\|\\s_"))
-				       (looking-at ":")))))
-		     ($then (progn
-			      (if (not (> (save-excursion (forward-line 1) (point))
-					  calculate-lisp-indent-last-sexp))
-				  (progn (goto-char calculate-lisp-indent-last-sexp)
-					 (beginning-of-line)
-					 (parse-partial-sexp (point)
-							     calculate-lisp-indent-last-sexp 0 t)))
-			      ;; Indent under the list or under the first sexp on the same
-			      ;; line as calculate-lisp-indent-last-sexp.  Note that first
-			      ;; thing on that line has to be complete sexp since we are
-			      ;; inside the innermost containing sexp.
-			      (backward-prefix-chars)
-			      (current-column)))
-		     ($else (let ((function (buffer-substring (point)
-							      (progn (forward-sexp 1) (point))))
-				  method)
-			      (setq method (or (function-get (intern-soft function)
-							     'lisp-indent-function)
-					       (get (intern-soft function) 'lisp-indent-hook)))
-			      (cond ((or (eq method 'defun)
-					 (and (null method)
-					      (> (length function) 3)
-					      (string-match "\\`def" function)))
-				     (lisp-indent-defform state indent-point))
-				    ((integerp method)
-				     (lisp-indent-specform method state
-							   indent-point normal-indent))
-				    (method
-				     (funcall method indent-point state))))))
-	(let ((normal-indent (current-column))
-	      (el-patch-add
-		(orig-point (point))))
-	  (goto-char (1+ (elt state 1)))
-	  (parse-partial-sexp (point) calculate-lisp-indent-last-sexp 0 t)
-	  (el-patch-swap
-	    (if $cond
-		;; car of form doesn't seem to be a symbol
-		$then
-	      $else)
-	    (cond
-	     ;; car of form doesn't seem to be a symbol, or is a keyword
-	     ($cond $then)
-	     ((and (save-excursion
-		     (goto-char indent-point)
-		     (skip-syntax-forward " ")
-		     (not (looking-at ":")))
-		   (save-excursion
-		     (goto-char orig-point)
-		     (looking-at ":")))
-	      (save-excursion
-		(goto-char (+ 2 (elt state 1)))
-		(current-column)))
-	     (t $else))))))))
+				  mark-toggle)))))
 
 (use-package yaml-mode
   :config (setq yaml-indent-offset 4))
+
+(use-feature feature/rust
+  :init
+  (use-package toml-mode)
+  
+  (use-package rust-mode)
+  
+  ;; Add keybindings for interacting with Cargo
+  (use-package cargo
+    :hook (rust-mode . cargo-minor-mode))
+
+  (use-package flycheck-rust
+    :config (add-hook 'flycheck-mode-hook #'flycheck-rust-setup)))
 
 (use-feature feature/javascript
   :init
@@ -1287,6 +1164,27 @@ Lisp function does not specify a special indentation."
       :keymaps 'elpy-mode-map
       "m" 'elpy-shell-send-region-or-buffer)))
 
+(use-feature feature/clojure
+  :disabled
+  :init
+  (use-package cider
+    :config
+    (setq clojure-indent-style :align-arguments)
+
+    :general
+    (:keymaps 'cider-repl-mode-map
+     :states '(normal insert)
+     "RET" 'cider-repl-return
+     "<up>" 'cider-repl-backward-input
+     "<down>" 'cider-repl-forward-input))
+
+  (use-package clj-refactor
+    :hook (clojure-mode-hook . clj-refactor-mode)
+
+    :config
+    ;; Automatically sort project dependencies after changing them.
+    (setq cljr-auto-sort-project-dependencies t)))
+
 (use-feature feature/scala
   :init
   (use-package ensime
@@ -1307,15 +1205,7 @@ Lisp function does not specify a special indentation."
      'self-insert-command
      minibuffer-local-completion-map)))
 
-(use-feature feature/debug
-  :init
-  (use-package dap-mode
-    :hook (java-mode . dap-mode)
-    :config
-    (add-hook 'dap-mode-hook #'dap-ui-mode)))
-
 (use-feature feature/lsp
-  :disabled
   :init
   (use-package lsp-mode
     :commands 'lsp
@@ -1361,81 +1251,16 @@ Lisp function does not specify a special indentation."
     :config
     (push '(company-lsp :with company-yasnippet) company-backends)))
 
-(use-feature feature/clojure
-  :disabled
-  :init
-  (use-package cider
-    :config
-    (setq clojure-indent-style :align-arguments)
-
-    :general
-    (:keymaps 'cider-repl-mode-map
-     :states '(normal insert)
-     "RET" 'cider-repl-return
-     "<up>" 'cider-repl-backward-input
-     "<down>" 'cider-repl-forward-input))
-
-  (use-package clj-refactor
-    :hook (clojure-mode-hook . clj-refactor-mode)
-
-    :config
-    ;; Automatically sort project dependencies after changing them.
-    (setq cljr-auto-sort-project-dependencies t)))
-
 ;; UI
-(use-package window-purpose
-  :straight (:host github :repo "bmag/emacs-purpose")
-  :disabled
-  :demand t
-  :config
-  (purpose-mode)
-  (require 'window-purpose-x)
-
-  (purpose-x-popwin-setup)
-
-  (mars/add-to-list purpose-user-mode-purposes
-    (prog-mode . code)
-    (inferior-python-mode . repl))
-
-  (mars/add-to-list purpose-x-popwin-major-modes
-    help-mode
-    helpful-mode
-    shell-mode
-    eshell-mode)
-
-  (mars/add-to-list purpose-special-action-sequences
-    (repl purpose-display-reuse-window-purpose))
-
-
-  (setq purpose-x-popwin-width 0.3
-	purpose-x-popwin-position 'right)
-
-  (purpose-compile-user-configuration)
-  (purpose-x-popwin-update-conf))
-
-(use-package adaptive-wrap
-  :demand t
-  :config (adaptive-wrap-prefix-mode))
-
-(use-package perfect-margin
-  :disabled
-  :demand t
-  :config
-  (defun mars/activate-single-window-mode ()
-    (when (eq 1 (count-windows)))
-    (perfect-margin-mode))
-
-  (define-minor-mode mars/single-window-mode
-    "When activated, activate perfect-margin-mode."
-    nil nil nil
-    (if mars/single-window-mode
-	(add-hook 'window-configuration-change-hook
-		  #'mars/activate-single-window-mode)
-      (remove-hook 'window-configuration-change-hook
-		   #'mars/activate-single-window-mode)
-      (perfect-margin-mode nil)))
-
-  (mars/single-window-mode))
+(use-feature feature/buffer-display
+  :init
+  (setq
+   display-buffer-alist
+   `(("\\*.*\\*"
+      (display-buffer-reuse-mode-window
+       display-buffer-pop-up-window)
+      (inhibit-same-window . t)
+      (window-width . ,(/ 1.0 3.0))))))
 
 ;; Font
 (use-package font-size
@@ -1443,22 +1268,12 @@ Lisp function does not specify a special indentation."
   :demand t
   :init
   (setq mars-font "Inconsolata"
-	mars-font-height 12)
+	mars-font-height 18)
   (set-face-attribute 'default nil
 		      :family mars-font)
   :config
   (font-size-init mars-font-height))
 
-;; Symbols
-(use-package notate
-  :disabled
-  :demand t
-  :straight (:host github :repo "ekaschalk/notate"))
-
-;; Fold parts of code
-(use-package origami
-  :commands 'origami-mode
-  :init (add-hook 'prog-mode-hook #'origami-mode))
 
 ;; Frames
 (mars/add-to-list default-frame-alist
@@ -1479,7 +1294,7 @@ return default frame title"
                 " [" (car (vc-git-branches)) "] " )
       (concat invocation-name "@" system-name))))
 
-(setq-default
+(setq-default 
  frame-title-format
  '(:eval (mars/get-frame-title)))
 
@@ -1488,62 +1303,6 @@ return default frame title"
   :init
   (desktop-save-mode)
   (setq desktop-save-mode t))
-
-(use-package framegroups
-  :straight (:host github :repo "noctuid/framegroups.el")
-  :demand t
-  :config
-  (setq fg-hide-with-xdotool nil)
-
-  (setq mars/magit-frame-prefix "magit: "
-	mars/core-frame-prefix "core: ")
-
-  (defun mars/get-core-projectile-frame (&optional project-root)
-    (interactive)
-    (concat mars/core-frame-prefix
-	    (funcall projectile-project-name-function
-		     (or project-root (projectile-project-root)))))
-
-  (defun mars/projectile-switch-project-action (project-root)
-    (interactive)
-    (fg-create-frame (mars/get-core-projectile-frame (funcall projectile-project-name-function
-							      project-root))))
-
-  ;; (setq counsel-projectile-switch-project-action #'mars/projectile-switch-project-action)
-
-  (defun mars/after-frame-switch-hook (frame-name &optional new)
-    (interactive)
-    (message frame-name)
-    (when-let* ((split (s-split ": " frame-name))
-		(prefix (nth 0 split))
-		(project-root (nth 1 split)))
-      (setq-local projectile-project-root project-root)
-      (pcase prefix
-	("magit"
-	 (cd project-root)
-	 (magit-status))
-
-	("core"
-	 (when new
-	   (cd project-root)
-	   (counsel-projectile-find-file))))))
-
-  ;; (add-hook 'fg-create-hook (lambda (frame-name) (mars/after-frame-switch-hook frame-name 't)))
-  ;; (add-hook 'fg-after-switch-hook #'mars/after-frame-switch-hook)
-
-  ;; (defun mars/magit-frame ()
-  ;;   (interactive)
-  ;;   (let ((frame-name (concat mars/magit-frame-prefix (projectile-project-root))))
-  ;;     (fg-switch-to-frame frame-name)))
-
-  :general
-  ;; (mars-map/applications
-  ;;   "g" 'mars/magit-frame)
-
-  (mars-map/frames
-    "s" 'fg-switch-to-frame
-    "f" 'fg-switch-to-last-frame
-    "k" 'delete-frame))
 
 ;; Use ediff on the same window
 (setq ediff-window-setup-function 'ediff-setup-windows-plain)
@@ -1558,12 +1317,6 @@ return default frame title"
       show-paren-when-point-inside-paren t
       show-paren-when-point-in-periphery t)
 
-(use-package dracula-theme)
-
-(use-package darktooth-theme)
-
-(use-package solarized-theme)
-
 (use-package doom-themes
   :demand t
   :init (setq size mars-font-height
@@ -1575,21 +1328,9 @@ return default frame title"
   (setq-default mode-line-format nil)
   (fringe-mode '(4 . 4)))
 
-(use-package material-theme)
-
-(use-package zenburn-theme)
-
-(use-package creamsody-theme
-  :demand t)
-
 (use-package doom-modeline
   :demand t
   :config (doom-modeline-mode))
-
-(use-package nimbus-theme)
-
-(use-package dimmer
-  :init (dimmer-mode))
 
 (use-package rainbow-mode
   :hook (prog-mode . rainbow-mode))
@@ -1677,12 +1418,6 @@ return default frame title"
 (use-package transpose-frame)
 
 (use-package rotate)
-
-(use-package zoom
-  :demand t
-  :config
-  (setq zoom-size '(0.66 . 0.618))
-  (zoom-mode))
 
 (use-feature feature/compilation
   :init
@@ -1778,14 +1513,19 @@ T - tag prefix
   (mars-map/applications
     "d" 'dired))
 
-;; Browsers
-(use-package atomic-chrome
-  :demand t
-  :config
-  (atomic-chrome-start-server)
-  (setq atomic-chrome-default-major-mode 'markdown-mode))
-
 ;; Shell
+(use-feature feature/vterm
+  :init
+  (setq libvterm-root "~/bld/emacs-libvterm")
+  (if (and module-file-suffix (file-exists-p libvterm-root))
+      (progn
+	(add-to-list 'load-path libvterm-root)
+	(require 'vterm)
+
+	(use-package multi-vterm
+	  :straight (:host github :repo "suonlight/multi-libvterm")))
+    (message "feature/vterm not supported, skipping")))
+
 (use-feature feature/comint
   :general
   (:keymaps 'comint-mode-map
@@ -1793,30 +1533,10 @@ T - tag prefix
    "C-j" nil
    "C-k" nil
    "<up>" 'comint-previous-input
-   "<down>" 'comint-next-input))
+   "<down>" 'comint-next-input)
 
-(use-feature feature/eshell
   :config
-  (setq
-   ;; Send inpupt to suprocesses
-   eshell-send-direct-to-subprocesses nil
-   ;; Always scroll to bottom
-   comint-scroll-to-bottom-on-output t
-   eshell-buffer-maximum-lines 5000)
-
-  (defun mars-eshell-new-buffer ()
-    "Open a new eshell buffer if one already exists"
-    (interactive)
-    (let ((eshell-buffers-count
-	   (thread-last (buffer-list)
-	     (seq-filter (lambda (buffer) (string-match ".*\\*eshell.*\\*"
-						   (buffer-name buffer))))
-	     (length))))
-      (unless (zerop eshell-buffers-count)
-	(setq eshell-buffer-name
-	      (format "*eshell-%d*" eshell-buffers-count))))
-    (eshell))
-
+  (setq comint-scroll-to-bottom-on-output t)
   ;; From https://github.com/jorgenschaefer/comint-scroll-to-bottom
   (defun comint-add-scroll-to-bottom ()
     "Activate `comint-scroll-to-bottom'.
@@ -1843,45 +1563,32 @@ The code is shamelessly taken (but adapted) from ERC."
                   (recenter -1)
 		  (sit-for 0)))))))))
 
-  (add-hook 'comint-mode-hook #'comint-scroll-to-bottom)
+  (add-hook 'comint-mode-hook #'comint-scroll-to-bottom))
+
+(use-feature feature/eshell
+  :config
+  (setq
+   ;; Send inpupt to suprocesses
+   eshell-send-direct-to-subprocesses nil
+   ;; Always scroll to bottom
+   eshell-buffer-maximum-lines 5000)
+
+  (defun mars-eshell-new-buffer ()
+    "Open a new eshell buffer if one already exists"
+    (interactive)
+    (let ((eshell-buffers-count
+	   (thread-last (buffer-list)
+	     (seq-filter (lambda (buffer) (string-match ".*\\*eshell.*\\*"
+						   (buffer-name buffer))))
+	     (length))))
+      (unless (zerop eshell-buffers-count)
+	(setq eshell-buffer-name
+	      (format "*eshell-%d*" eshell-buffers-count))))
+    (eshell))
 
   :general
   (mars-map/applications
     "e" 'mars-eshell-new-buffer))
-
-;; Mail reader
-(use-package mu4e
-  :ensure-system-package mu
-  :defer 5
-  :commands 'mu4e
-  :init (setq mail-user-agent 'mu4e-user-agent)
-  :config
-  (setq
-   mu4e-completing-read-function 'ivy-completing-read
-   mu4e-maildir "~/.mail"
-   mu4e-get-mail-command "mbsync -a"
-   mu4e-sent-messages-behavior 'delete
-   mu4e-contexts
-   `(,(make-mu4e-context
-       :name "Gmail"
-       :match-func (lambda (msg)
-		     (when msg
-		       (string-prefix-p "Gmail"
-					(mu4e-message-field msg :maildir))))
-       :vars '((mu4e-trash-folder . "/gmail/Trash")
-	       (mu4e-sent-folder . "/gmail/Sent")
-	       (mu4e-drafts-folder . "/gmail/Drafts")
-	       (user-mail-address . "quentin.leguennec1@gmail.com")
-	       (user-full-name . "Quentin Le Guennec")
-	       (smtpmail-smtp-user . "quentin.leguennec1")
-	       (smtpmail-default-smtp-server . "smtp.gmail.com")
-	       (smtpmail-smtp-server . "smtp.gmail.com")
-	       (smtpmail-smtp-service . 587)))))
-  :general
-  (mars-map/applications "m" 'mu4e)
-  (:keymaps 'mu4e-headers-mode-map
-   :states 'normal
-   "g r" 'mu4e-update-mail-and-index))
 
 ;; Starts emacs server
 (server-start)
