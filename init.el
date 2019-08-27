@@ -849,20 +849,6 @@ If point is on a src block, runs org-indent"
 	"x" 'evil-exchange
 	"X" 'evil-exchange-cancel))
 
-    ;; Needed for js2-refactor
-    (use-package multiple-cursors)
-
-    (use-package evil-mc
-      :straight (:host github :repo "gabesoft/evil-mc")
-      :demand t
-      :config (global-evil-mc-mode)
-
-      :general
-      (mars-map
-	:states 'visual
-	"I" 'evil-mc-make-cursor-in-visual-selection-beg
-	"A" 'evil-mc-make-cursor-in-visual-selection-end))
-
     (use-package evil-goggles
       :demand t
       :config (add-hook 'prog-mode-hook #'evil-goggles-mode))
