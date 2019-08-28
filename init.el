@@ -832,9 +832,12 @@ If point is on a src block, runs org-indent"
 
     (use-package evil-collection
       :demand t
+
+      :straight (:host github :repo "emacs-evil/evil-collection"
+		       :files ("*.el"))
       :config
       (evil-collection-init))
-
+    
     (use-package evil-magit
       :after magit
       :demand t
@@ -858,7 +861,11 @@ If point is on a src block, runs org-indent"
       :config
       ;; bind evil-args text objects
       (define-key evil-inner-text-objects-map "a" 'evil-inner-arg)
-      (define-key evil-outer-text-objects-map "a" 'evil-outer-arg))))
+      (define-key evil-outer-text-objects-map "a" 'evil-outer-arg)))
+
+  (use-package hungry-delete
+    :demand t
+    :config (global-hungry-delete-mode)))
 
 (use-package undo-tree
   :demand t
