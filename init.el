@@ -1433,7 +1433,7 @@ return default frame title"
   (centaur-tabs-headline-match)
   (centaur-tabs-group-by-projectile-project)
   (setq centaur-tabs-style "wave"
-	centaur-tabs-height 60
+	centaur-tabs-height (* 4 mars-font-height)
 	centaur-tabs-set-icons t
 	centaur-tabs-set-bar 'left)
   :general
