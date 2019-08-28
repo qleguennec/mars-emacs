@@ -820,10 +820,10 @@ If point is on a src block, runs org-indent"
 
     (mars-map/windows
       ;; Window motion
-      "h" 'evil-window-left
-      "l" 'evil-window-right
-      "j" 'evil-window-down
-      "k" 'evil-window-up
+      "h" 'windmove-left
+      "l" 'windmove-right
+      "j" 'windmove-down
+      "k" 'windmove-up
 
       ;; Window manipulation
       "v" (lambda () (interactive) (evil-window-vsplit) (other-window 1))
