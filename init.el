@@ -1325,6 +1325,7 @@ return default frame title"
   (setq window-divider-default-right-width 2
 	window-divider-default-bottom-width 2)
   (setq-default mode-line-format nil)
+  (doom-themes-treemacs-config)
   (fringe-mode '(4 . 4)))
 
 (use-package doom-modeline
@@ -1464,7 +1465,26 @@ return default frame title"
 	(kill-buffer old-buffer))
       (rename-buffer buffer-name))))
 
+(use-feature feature/treemacs
+  :init
+
+  (use-package treemacs
+    :demand t
+    :config
+    (setq treemacs-tag-follow-delay (/ 1.0 3.0)
+	  treemacs-git-mode 'extended
+	  treemacs-indentation 1))
+  
+  (use-package treemacs-projectile
+    :demand t)
+
+  (use-package treemacs-evil
+    :demand t)
+
+  (use-package treemacs-magit
+    :demand t))
 ;; Dired
+
 (use-feature feature/dired
   :init
   (defhydra hydra-dired (:hint nil :color pink)
@@ -1528,8 +1548,8 @@ T - tag prefix
 
   (mars-map/applications
     "d" 'dired))
-
 ;; Shell
+
 (use-feature feature/vterm
   :init
   (setq libvterm-root "~/bld/emacs-libvterm")
@@ -1545,11 +1565,11 @@ T - tag prefix
 (use-feature feature/comint
   :general
   (:keymaps 'comint-mode-map
-   :states '(normal insert)
-   "C-j" nil
-   "C-k" nil
-   "<up>" 'comint-previous-input
-   "<down>" 'comint-next-input)
+	    :states '(normal insert)
+	    "C-j" nil
+	    "C-k" nil
+	    "<up>" 'comint-previous-input
+	    "<down>" 'comint-next-input)
 
   :config
   (setq comint-scroll-to-bottom-on-output t)
