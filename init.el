@@ -803,7 +803,8 @@ If point is on a src block, runs org-indent"
 
     (mars-map
       ;; Remaps evil-search-forward to swiper
-      [remap evil-search-forward] 'counsel-grep-or-swiper)
+      [remap evil-search-forward] 'counsel-grep-or-swiper
+      [remap evil-search-word-forward] 'swiper-thing-at-point)
 
     (mars-map
       ;; Visual
