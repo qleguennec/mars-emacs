@@ -1496,13 +1496,31 @@ return default frame title"
 
 (use-feature feature/treemacs
   :init
-
   (use-package treemacs
     :demand t
     :config
     (setq treemacs-tag-follow-delay (/ 1.0 3.0)
+	  treemacs-file-follow-delay (/ 1.0 3.0)
+	  treemacs-file-event-delay (/ 1.0 3.0)
 	  treemacs-git-mode 'extended
-	  treemacs-indentation 1)
+	  treemacs-indentation 1
+	  treemacs-recenter-after-file-follow t
+	  treemacs-recenter-after-project-jump t)
+
+    (dolist (face '(treemacs-root-face
+                    treemacs-git-unmodified-face
+                    treemacs-git-modified-face
+                    treemacs-git-renamed-face
+                    treemacs-git-ignored-face
+                    treemacs-git-untracked-face
+                    treemacs-git-added-face
+                    treemacs-git-conflict-face
+                    treemacs-directory-face
+                    treemacs-directory-collapsed-face
+                    treemacs-file-face
+                    treemacs-tags-face))
+      (set-face-attribute face nil :family "Inconsolata" :height 100))
+
     (treemacs))
   
   (use-package treemacs-projectile
