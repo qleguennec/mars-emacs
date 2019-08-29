@@ -1297,39 +1297,15 @@ return default frame title"
  frame-title-format
  '(:eval (mars/get-frame-title)))
 
-;; desktop-save-mode
-(use-feature feature/desktop-save-mode
-  :init
-  (setq
-   desktop-save t
-   desktop-dirname "~/.emacs.d/var/desktop"
-   desktop-load-locked-desktop t)
-  
-  (desktop-save-mode)
-
-  (add-hook 'kill-emacs-hook
-	    #'desktop-save-in-desktop-dir)
-
-  (when (file-exists-p (expand-file-name desktop-base-file-name desktop-dirname))
-    (desktop-read desktop-dirname))
-
-  ;; Add a hook when emacs is closed to we reset the desktop
-  ;; modification time (in this way the user does not get a warning
-  ;; message about desktop modifications)
-  (add-hook 'kill-emacs-hook
-            (lambda ()
-              ;; Reset desktop modification time so the user is not bothered
-              (setq desktop-file-modtime (nth 5 (file-attributes (desktop-full-file-name)))))))
-
 ;; Use ediff on the same window
+
 (setq ediff-window-setup-function 'ediff-setup-windows-plain)
-
 ;; Highlight lisp expressions
+
 (show-paren-mode 1)
-
 ;; Highlight current line
-(global-hl-line-mode 1)
 
+(global-hl-line-mode 1)
 (setq show-paren-style 'parenthesis
       show-paren-when-point-inside-paren t
       show-paren-when-point-in-periphery t)
@@ -1598,8 +1574,8 @@ T - tag prefix
 
   (mars-map/applications
     "d" 'dired))
-;; Shell
 
+;; Shell
 (use-feature feature/vterm
   :init
   (setq libvterm-root "~/bld/emacs-libvterm")
@@ -1675,6 +1651,29 @@ The code is shamelessly taken (but adapted) from ERC."
   :general
   (mars-map/applications
     "e" 'mars-eshell-new-buffer))
+
+(use-feature feature/desktop-save-mode
+  :init
+  (setq
+   desktop-save t
+   desktop-dirname "~/.emacs.d/var/desktop"
+   desktop-load-locked-desktop t)
+  
+  (desktop-save-mode)
+
+  (add-hook 'kill-emacs-hook
+	    #'desktop-save-in-desktop-dir)
+
+  (when (file-exists-p (expand-file-name desktop-base-file-name desktop-dirname))
+    (desktop-read desktop-dirname))
+
+  ;; Add a hook when emacs is closed to we reset the desktop
+  ;; modification time (in this way the user does not get a warning
+  ;; message about desktop modifications)
+  (add-hook 'kill-emacs-hook
+            (lambda ()
+              ;; Reset desktop modification time so the user is not bothered
+              (setq desktop-file-modtime (nth 5 (file-attributes (desktop-full-file-name)))))))
 
 ;; Starts emacs server
 (server-start)
