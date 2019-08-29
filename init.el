@@ -1326,7 +1326,13 @@ return default frame title"
 	window-divider-default-bottom-width 2)
   (setq-default mode-line-format nil)
   (doom-themes-treemacs-config)
-  (fringe-mode '(4 . 4)))
+  (fringe-mode '(4 . 4))
+  
+  (setq doom-themes-treemacs-theme "doom-colors") ; use the colorful treemacs theme
+  (doom-themes-treemacs-config)
+
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config))
 
 (use-package doom-modeline
   :demand t
@@ -1473,7 +1479,8 @@ return default frame title"
     :config
     (setq treemacs-tag-follow-delay (/ 1.0 3.0)
 	  treemacs-git-mode 'extended
-	  treemacs-indentation 1))
+	  treemacs-indentation 1)
+    (treemacs))
   
   (use-package treemacs-projectile
     :demand t)
