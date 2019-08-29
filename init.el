@@ -752,7 +752,9 @@ If point is on a src block, runs org-indent"
       (let* ((project-file-buffers
 	      (projectile-buffers-with-file (projectile-project-buffers)))
 	     (extensions (cl-remove-duplicates
-			  (--map (file-name-extension (buffer-file-name it)) project-file-buffers)
+			  (-non-nil
+			   (--map (file-name-extension
+				   (buffer-file-name it)) project-file-buffers))
 			  :test #'string-equal))
 	     (wanted-extension
 	      (if (eq (length extensions) 1)
