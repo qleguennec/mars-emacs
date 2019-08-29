@@ -725,23 +725,8 @@ If point is on a src block, runs org-indent"
 ;; Project management
 (use-feature feature/projectile
   :init
-  (use-package projectile :config (projectile-mode 1))
-
-  (use-package counsel-projectile
-    :straight (:host github :repo "ericdanan/counsel-projectile")
-    :demand t
-
-    :config
-    (mars/add-to-list projectile-globally-ignored-directories
-      "straight"
-      "node_modules")
-
-    (mars/defhook mars/colorize-buffer|compilation-mode ()
-      compilation-filter-hook
-      "Colorize compilation buffer."
-      (toggle-read-only)
-      (ansi-color-apply-on-region compilation-filter-start (point))
-      (toggle-read-only))
+  (use-package projectile
+    :config (projectile-mode 1)
 
     (defun mars/projectile-refresh-projects ()
       "Clear projectile known projects and add to known projects directories in mars-workspace
@@ -762,6 +747,36 @@ If point is on a src block, runs org-indent"
 
     (unless projectile-known-projects (mars/projectile-refresh-projects))
 
+    (defun mars/projectile-close-all-with-ext (&optional arg)
+      (interactive "P")
+      (let* ((project-file-buffers
+	      (projectile-buffers-with-file (projectile-project-buffers)))
+	     (extensions (cl-remove-duplicates
+			  (--map (file-name-extension (buffer-file-name it)) project-file-buffers)
+			  :test #'string-equal))
+	     (wanted-extension
+	      (if (eq (length extensions) 1)
+		  (nth 0 extensions)
+		(completing-read "extension: " extensions)))
+	     (buffers-matching (--filter (and
+					  (or arg
+					      (not (eq (current-buffer) it)))
+					  (string-equal wanted-extension
+							(file-name-extension
+							 (buffer-file-name it))))
+					 project-file-buffers)))
+	(dolist (buffer buffers-matching)
+	  (kill-buffer buffer))))
+
+    (mars/add-to-list projectile-globally-ignored-directories
+      "straight"
+      "node_modules"))
+
+  (use-package counsel-projectile
+    :straight (:host github :repo "ericdanan/counsel-projectile")
+    :demand t
+
+    :config
     :general
     (mars-map
       "SPC SPC" 'counsel-projectile
@@ -1447,6 +1462,13 @@ return default frame title"
   :init
   (setq compilation-always-kill t
 	compilation-scroll-output 'first-error)
+
+  (mars/defhook mars/colorize-buffer|compilation-mode ()
+    compilation-filter-hook
+    "Colorize compilation buffer."
+    (toggle-read-only)
+    (ansi-color-apply-on-region compilation-filter-start (point))
+    (toggle-read-only))
 
   (mars/defadvice mars/advice-projectile|counsel-compile (orig-fun &rest args)
     :around counsel-compile
