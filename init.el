@@ -472,16 +472,16 @@ If point is on a src block, runs org-indent"
 
     :general
     (:keymaps 'ivy-minibuffer-map
-     "$" 'ivy-toggle-calling
-     "^" 'ivy-occur
-     "#" 'ivy-posframe-read-action
-     "%" 'ivy-posframe-avy
-     "C-<up>" 'ivy-previous-history-element
-     "C-<down>" 'ivy-next-history-element)
+	      "$" 'ivy-toggle-calling
+	      "^" 'ivy-occur
+	      "#" 'ivy-posframe-read-action
+	      "%" 'ivy-posframe-avy
+	      "C-<up>" 'ivy-previous-history-element
+	      "C-<down>" 'ivy-next-history-element)
 
     (mars-map
       "'" 'ivy-resume
-      "M-x" 'counsel-M-x)
+      "<f5>" 'counsel-M-x)
 
     (mars-map/help
       "f" 'counsel-describe-function
