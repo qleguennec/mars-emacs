@@ -1029,14 +1029,6 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
     :config
     (global-aggressive-indent-mode)
 
-    (defun mars/disable-aggressive-indent ()
-      "Disable aggressive indent mode in current buffer."
-      (interactive)
-      (aggressive-indent-mode -1))
-
-    ;; aggressive-indent-mode breaks interaction with lsp-server
-    (add-hook 'lsp-mode-hook #'my-disable-aggressive-indent)
-
     (mars/add-to-list aggressive-indent-excluded-modes
       js-jsx-mode java-mode))
 
