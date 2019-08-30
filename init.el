@@ -274,7 +274,6 @@ mars-map/ function")
 	  ("i" . "ivy")
 	  ("o" . "org")
 	  ("a" . "applications")
-	  ("f" . "frames")
 	  ("g" . "magit")))
 
   ;; Defines general definers for each prefix in mars-general-prefixes.
@@ -311,7 +310,10 @@ mars-map/ function")
     "b" 'eval-buffer
     "r" 'eval-region
     "f" 'eval-defun
-    "e" 'eval-expression))
+    "e" 'eval-expression)
+
+  (mars-map/files
+    "f" (lambda () (interactive) (find-file user-init-file))))
 
 ;; Org mode
 (use-feature feature/org
