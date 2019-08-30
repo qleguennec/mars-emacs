@@ -1485,20 +1485,20 @@ return default frame title"
                     treemacs-directory-collapsed-face
                     treemacs-file-face
                     treemacs-tags-face))
-      (set-face-attribute face nil :family "Inconsolata" :height 100))
-
-    (treemacs))
+      (set-face-attribute face nil :family "Liberation Mono" :height 130)))
   
   (use-package treemacs-projectile
     :demand t)
-
+  
   (use-package treemacs-evil
     :demand t)
-
+  
   (use-package treemacs-magit
-    :demand t))
-;; Dired
+    :demand t)
 
+  (treemacs))
+
+;; Dired
 (use-feature feature/dired
   :init
   (defhydra hydra-dired (:hint nil :color pink)
