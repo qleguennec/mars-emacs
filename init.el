@@ -1384,16 +1384,12 @@ return default frame title"
 
 (use-package solaire-mode
   :demand t
+  :hook
+  ((change-major-mode after-revert ediff-prepare-buffer) . turn-on-solaire-mode)
+  (minibuffer-setup . solaire-mode-in-minibuffer)
   :config
-  (defun mars/alternate-solaire-mode (&rest args)
-    (interactive)
-    (let ((solaire-mode-toggle nil)
-	  (windows (winner-sorted-window-list)))
-      (dolist (win windows)
-	(with-current-buffer (window-buffer win)
-	  (solaire-mode (if solaire-mode-toggle 1 -1)))
-	(setq solaire-mode-toggle (not solaire-mode-toggle)))))
-  (add-hook 'window-configuration-change-hook #'mars/alternate-solaire-mode))
+  (solaire-global-mode +1)
+  (solaire-mode-swap-bg))
 
 (use-package ace-window
   :config
