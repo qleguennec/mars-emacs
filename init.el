@@ -652,7 +652,9 @@ If point is on a src block, runs org-indent"
   (use-package diff-hl
     :hook (prog-mode . diff-hl-mode)
     :config
-    (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)))
+    (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh)
+    (add-hook 'diff-hl-mode-hook #'diff-hl-margin-mode)
+    (add-hook 'diff-hl-mode-hook #'diff-hl-flydiff-mode)))
 
 ;; Disable built in emacs vc as we have magit for that
 (use-feature feature/vc-hooks
@@ -1245,11 +1247,11 @@ return default frame title"
 	      default-size mars-font-height)
   :config
   (load-theme 'doom-palenight 'confirm)
-  (setq window-divider-default-right-width 2
-	window-divider-default-bottom-width 2)
+  (setq window-divider-default-right-width 4
+	window-divider-default-bottom-width 4)
   (setq-default mode-line-format nil)
   (doom-themes-treemacs-config)
-  (fringe-mode '(4 . 4))
+  (fringe-mode '(6 . 6))
   
   (setq doom-themes-treemacs-theme "doom-colors") ; use the colorful treemacs theme
   (doom-themes-treemacs-config)
