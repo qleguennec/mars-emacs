@@ -313,7 +313,8 @@ mars-map/ function")
     "e" 'eval-expression)
 
   (mars-map/files
-    "f" (lambda () (interactive) (find-file user-init-file))))
+    "f" #'counsel-find-file
+    "e" (lambda () (interactive) (find-file user-init-file))))
 
 ;; Org mode
 (use-feature feature/org
@@ -424,29 +425,29 @@ If point is on a src block, runs org-indent"
       "c" (lambda () (interactive) (org-todo "CANCELLED")))
 
     (:keymaps 'org-mode-map
-     :states '(normal visual)
-     "<up>" 'org-metaup
-     "<down>" 'org-metadown
-     "<left>" 'mars/org-left
-     "<right>" 'mars/org-right
+	      :states '(normal visual)
+	      "<up>" 'org-metaup
+	      "<down>" 'org-metadown
+	      "<left>" 'mars/org-left
+	      "<right>" 'mars/org-right
 
-     "C-j" nil
-     "C-k" nil
+	      "C-j" nil
+	      "C-k" nil
 
-     "?" 'counsel-org-goto
+	      "?" 'counsel-org-goto
 
-     [remap evil-shift-left] 'org-metaleft
-     [remap evil-shift-right] 'org-metaright)
+	      [remap evil-shift-left] 'org-metaleft
+	      [remap evil-shift-right] 'org-metaright)
 
     (:keymaps 'org-mode-map
-     :states '(normal visual insert)
-     "RET" 'mars/org-ret)
+	      :states '(normal visual insert)
+	      "RET" 'mars/org-ret)
 
     (:keymaps 'org-agenda-mode-map
-     :states '(normal visual emacs)
-     "RET" 'org-agenda-switch-to
-     "j" 'org-agenda-next-line
-     "k" 'org-agenda-previous-line)
+	      :states '(normal visual emacs)
+	      "RET" 'org-agenda-switch-to
+	      "j" 'org-agenda-next-line
+	      "k" 'org-agenda-previous-line)
 
     (mars-map/ivy
       "t" 'counsel-org-tag))
