@@ -1289,16 +1289,14 @@ return default frame title"
   :config (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
 
 (use-package all-the-icons-ivy
-  :disabled
   :demand t
-  :custom (all-the-icons-ivy-buffer-commands '(ivy-switch-buffer-other-window))
   :config
   (mars/add-to-list all-the-icons-ivy-file-commands
     counsel-projectile-find-file
     counsel-find-file
     counsel-projectile
     counsel-dired-jump)
-  (mars/add-to-list all-the-icons-ivy-buffer-commands counsel-projectile-switch-to-buffer)
+  (mars/add-to-list all-the-icons-ivy-buffer-commands counsel-projectile-switch-to-buffer counsel-switch-buffer)
   (all-the-icons-ivy-setup))
 
 (use-package centered-cursor-mode
