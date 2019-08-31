@@ -1212,7 +1212,7 @@ return default frame title"
 		" / "
 		(file-name-nondirectory (buffer-file-name))
                 " [" (car (vc-git-branches)) "] " )
-      (concat invocation-name "@" system-name))))
+      (concat invocation-name "@" (system-name)))))
 
 (setq-default 
  frame-title-format
