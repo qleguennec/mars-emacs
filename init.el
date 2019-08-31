@@ -304,7 +304,7 @@ mars-map/ function")
     "e" (lambda ()
 	  (interactive)
 	  (switch-to-buffer "*el scratch*")
-	  (emacs-lisp-mode 1)))
+	  (emacs-lisp-mode)))
 
   (mars-map/eval
     "b" 'eval-buffer
