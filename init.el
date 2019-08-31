@@ -1105,10 +1105,6 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
 
 (use-feature feature/scala
   :init
-  (use-package ensime
-    :init
-    (setq ensime-startup-notification nil))
-
   (use-package scala-mode
     :interpreter
     ("scala" . scala-mode))
