@@ -477,8 +477,6 @@ If point is on a src block, runs org-indent"
     (:keymaps 'ivy-minibuffer-map
 	      "$" 'ivy-toggle-calling
 	      "^" 'ivy-occur
-	      "#" 'ivy-posframe-read-action
-	      "%" 'ivy-posframe-avy
 	      "C-<up>" 'ivy-previous-history-element
 	      "C-<down>" 'ivy-next-history-element)
 
