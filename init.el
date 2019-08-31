@@ -1343,7 +1343,9 @@ return default frame title"
   (setq centaur-tabs-style "wave"
 	centaur-tabs-height (* 4 mars-font-height)
 	centaur-tabs-set-icons t
-	centaur-tabs-set-bar 'left)
+	centaur-tabs-set-bar 'left
+	centaur-tabs-set-modified-marker t)
+  
   :general
   (mars-map
     "C-l" 'centaur-tabs-forward
