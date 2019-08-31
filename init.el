@@ -1359,33 +1359,9 @@ return default frame title"
   (mars/defhook mars/colorize-buffer|compilation-mode ()
     compilation-filter-hook
     "Colorize compilation buffer."
-    (toggle-read-only)
+    (read-only-mode)
     (ansi-color-apply-on-region compilation-filter-start (point))
-    (toggle-read-only))
-
-  (mars/defadvice mars/advice-projectile|counsel-compile (orig-fun &rest args)
-    :around counsel-compile
-    "Set projectile root when possible."
-    (if (not (projectile-project-p))
-	(apply orig-fun args)
-      (cd (projectile-project-root))
-      (apply orig-fun (projectile-project-root) args)))
-
-  (mars/defadvice mars/advice-remove-history|counsel-compile (&rest args)
-    :after counsel-compile
-    "Remove counsel-compile history after selecting a compilation string"
-    (setq counsel-compile-history nil))
-
-  (mars/defhook mars/set-buffer-name|compilation-mode (process)
-    compilation-start-hook
-    "Set the name of the compilation buffer according to the command being ran."
-    (let ((buffer-name (concat "*compilation "
-			       (string-join (process-command process) " ")
-			       "*")))
-      (when-let ((old-buffer (get-buffer buffer-name)))
-	(kill-process (get-buffer-process old-buffer))
-	(kill-buffer old-buffer))
-      (rename-buffer buffer-name))))
+    (read-only-mode)))
 
 (use-feature feature/treemacs
   :init
@@ -1513,34 +1489,7 @@ T - tag prefix
 	    "<down>" 'comint-next-input)
 
   :config
-  (setq comint-scroll-to-bottom-on-output t)
-  ;; From https://github.com/jorgenschaefer/comint-scroll-to-bottom
-  (defun comint-add-scroll-to-bottom ()
-    "Activate `comint-scroll-to-bottom'.
-This should be put in `comint-mode-hook' or any derived mode."
-    (add-hook 'window-scroll-functions 'comint-scroll-to-bottom nil t))
-
-  (defun comint-scroll-to-bottom (window display-start)
-    "Recenter WINDOW so that point is on the last line.
-This is added to `window-scroll-functions' by
-`comint-add-scroll-to-bottom'.
-The code is shamelessly taken (but adapted) from ERC."
-    (let ((proc (get-buffer-process (current-buffer))))
-      (when (and proc
-		 window
-		 (window-live-p window))
-	(let ((resize-mini-windows nil))
-          (save-selected-window
-            (select-window window)
-            (save-restriction
-              (widen)
-              (when (>= (point) (process-mark proc))
-		(save-excursion
-                  (goto-char (point-max))
-                  (recenter -1)
-		  (sit-for 0)))))))))
-
-  (add-hook 'comint-mode-hook #'comint-scroll-to-bottom))
+  (setq comint-scroll-to-bottom-on-output t))
 
 (use-feature feature/eshell
   :config
