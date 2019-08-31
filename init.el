@@ -722,7 +722,7 @@ If point is on a src block, runs org-indent"
     :general
     (mars-map
       "SPC SPC" 'counsel-projectile
-      "?" 'counsel-projectile-git-grep)
+      "?" 'counsel-projectile-ag)
 
     (mars-map/projects
       "p" 'counsel-projectile-switch-project
@@ -840,15 +840,6 @@ If point is on a src block, runs org-indent"
   (global-flycheck-mode 1)
   :config
   (setq-default flycheck-disabled-checkers '(emacs-lisp emacs-lisp-checkdoc)))
-
-(use-package dumb-jump
-  :disabled
-  :config
-  (setq dumb-jump-selector 'ivy)
-  :general
-  (mars-map
-    "g d" 'dumb-jump-go
-    "g D" 'dumb-jump-go-other-window))
 
 (use-feature feature/save-place
   :init
