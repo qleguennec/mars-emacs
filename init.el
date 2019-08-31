@@ -1093,18 +1093,19 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
       "m" 'elpy-shell-send-region-or-buffer)))
 
 (use-feature feature/clojure
-  :disabled
   :init
+  (use-package clojure-mode)
+
   (use-package cider
     :config
     (setq clojure-indent-style :align-arguments)
 
     :general
     (:keymaps 'cider-repl-mode-map
-     :states '(normal insert)
-     "RET" 'cider-repl-return
-     "<up>" 'cider-repl-backward-input
-     "<down>" 'cider-repl-forward-input))
+	      :states '(normal insert)
+	      "RET" 'cider-repl-return
+	      "<up>" 'cider-repl-backward-input
+	      "<down>" 'cider-repl-forward-input))
 
   (use-package clj-refactor
     :hook (clojure-mode-hook . clj-refactor-mode)
@@ -1147,7 +1148,8 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
 
     :config
     (setq lsp-prefer-flymake nil
-	  lsp-response-timeout 1)
+	  lsp-response-timeout 1
+	  lsp-restart 'ignore)
     (require 'lsp-clients))
 
   (use-package lsp-java)
@@ -1167,8 +1169,8 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
 
     :general
     (:keymaps 'lsp-ui-mode-map
-     :states '(normal visual)
-     "g d" 'lsp-ui-peek-find-definitions)
+	      :states '(normal visual)
+	      "g d" 'lsp-ui-peek-find-definitions)
 
     (mars-leader-map
       :keymaps 'lsp-ui-mode-map
