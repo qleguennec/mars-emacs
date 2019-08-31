@@ -534,7 +534,7 @@ If point is on a src block, runs org-indent"
   :after magit
   :general
   (:keymaps 'transient-map
-   "<escape>" 'transient-quit-one))
+	    "<escape>" 'transient-quit-one))
 
 ;; Displays helpful documentation
 (use-package helpful
@@ -913,8 +913,8 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
       "<tab>" 'company-complete)
 
     (:keymaps 'company-active-map
-     "RET" 'company-complete-selection
-     "<tab>" 'complete-symbol))
+	      "RET" 'company-complete-selection
+	      "<tab>" 'complete-symbol))
 
   (use-package company-prescient
     :demand t
@@ -927,7 +927,7 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
   (use-package yasnippet-snippets
     :demand t
     :straight (:host github :repo "qleguennec/yasnippet-snippets"
-	       :files ("*"))))
+		     :files ("*"))))
 
 ;; Jump on things
 (use-package avy
