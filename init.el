@@ -299,7 +299,7 @@ mars-map/ function")
     "s" 'save-buffer
     "p" 'previous-buffer
     "n" 'next-buffer
-    "k" 'kill-buffer
+    "k" 'kill-current-buffer
     "b" 'counsel-switch-buffer
     "e" (lambda ()
 	  (interactive)
@@ -314,7 +314,8 @@ mars-map/ function")
 
   (mars-map/files
     "f" #'counsel-find-file
-    "e" (lambda () (interactive) (find-file user-init-file))))
+    "e" (lambda () (interactive) (find-file user-init-file))
+    "r" #'counsel-recentf))
 
 ;; Org mode
 (use-feature feature/org
@@ -439,10 +440,6 @@ If point is on a src block, runs org-indent"
 	      [remap evil-shift-left] 'org-metaleft
 	      [remap evil-shift-right] 'org-metaright)
 
-    (:keymaps 'org-mode-map
-	      :states '(normal visual insert)
-	      "RET" 'mars/org-ret)
-
     (:keymaps 'org-agenda-mode-map
 	      :states '(normal visual emacs)
 	      "RET" 'org-agenda-switch-to
@@ -455,6 +452,37 @@ If point is on a src block, runs org-indent"
   ;; Prettier org
   (use-package org-bullets
     :init (add-hook 'org-mode-hook #'org-bullets-mode)))
+
+(use-feature feature/write-mode
+  :init
+  (use-package writeroom-mode
+    :demand t
+    :config
+    (setq mars/writeroom-mode-width 100)
+
+    (defun mars/writeroom--enable ()
+      "Set writeroom-width according to fill-column"
+      (setq-default fill-column mars/writeroom-mode-width
+		    writeroom-width mars/writeroom-mode-width
+		    truncate-lines nil
+		    word-wrap t)
+
+      (auto-fill-mode)
+      (writeroom-mode 1)
+      (visual-line-mode 1))
+
+    (defun mars/writeroom--disable ()
+      "Set writeroom-width according to fill-column"
+      (auto-fill-mode 0)
+      (writeroom-mode 0)
+      (visual-mode-line 0))
+    
+    (define-minor-mode mars/writeroom-mode
+      "Minor mode for distraction-free writing."
+      :init-value nil :lighter nil :global nil
+      (if mars/writeroom-mode
+	  (mars/writeroom--enable)
+	(mars/writeroom--disable)))))
 
 (use-package restart-emacs)
 
@@ -469,20 +497,44 @@ If point is on a src block, runs org-indent"
 (use-feature feature/ivy
   :init
   (use-package ivy
+    :demand t
     :config
-    (ivy-mode 1)
+    (ivy-mode)
     (setq ivy-height 20)
+    (dolist (history '(counsel-grep-history
+		       counsel-git-grep-history
+		       swiper-history
+		       grep-regexp-history
+		       ivy-history
+		       counsel-M-x-history
+		       counsel-describe-symbol-history))
+      (defvaralias history 'regexp-search-ring))
 
     :general
-    (:keymaps 'ivy-minibuffer-map
-	      "$" 'ivy-toggle-calling
-	      "^" 'ivy-occur
-	      "C-<up>" 'ivy-previous-history-element
-	      "C-<down>" 'ivy-next-history-element)
+    (mars-map
+      "'" 'ivy-resume)
 
+    (:keymaps 'ivy-minibuffer-map
+	      "C-j" 'ivy-next-line
+	      "C-k" 'ivy-previous-line))
+
+  (use-package ivy-hydra)
+
+  (use-package counsel
+    :demand t
+    :init
+    (counsel-mode)
+
+    :config
+    (unless (string-match-p "-z --sort path" counsel-rg-base-command)
+      (setq counsel-rg-base-command
+            (concat counsel-rg-base-command " -z --sort path")))
+
+    :general
     (mars-map
       "'" 'ivy-resume
-      "<f5>" 'counsel-M-x)
+      "<f5>" 'counsel-M-x
+      "M-x" 'counsel-M-x)
 
     (mars-map/help
       "f" 'counsel-describe-function
@@ -494,27 +546,18 @@ If point is on a src block, runs org-indent"
       "c" 'counsel-command-history
       "o" 'counsel-mark-ring
       "s" 'counsel-esh-history
-      "i" 'counsel-imenu)
-
-    ;; Merge these histories into one
-    (dolist (history '(counsel-grep-history
-		       counsel-git-grep-history
-		       swiper-history
-		       grep-regexp-history
-		       ivy-history
-		       counsel-M-x-history
-		       counsel-describe-symbol-history))
-      (defvaralias history 'regexp-search-ring)))
-
-  (use-package ivy-hydra)
+      "i" 'counsel-imenu))
 
   ;; Provide statistics for sorting/filtering
   (use-package prescient
-    :config (prescient-persist-mode 1))
+    :config
+    (prescient-persist-mode))
 
   (use-package ivy-prescient
     :demand t
-    :config (ivy-prescient-mode 1))
+    :config
+    (require 'counsel)
+    (ivy-prescient-mode))
 
   (use-package ivy-rich
     :after (counsel ivy)
@@ -602,19 +645,22 @@ If point is on a src block, runs org-indent"
       git-commit-mode-hook
       "Insert diminished current branch name between [], at the start of the commit message"
       (-some--> (vc-git-branches)
-		(car it)
-		(s-split-words it)
-		(when (>= (length it) 2)
-		  (-take 2 it))
-		(mapcar #'s-upcase it)
-		(apply 'format "[%s-%s] " it)
-		(insert it)))
+	(car it)
+	(s-match (rx "(" (group (zero-or-more anything)) ")") it)
+	(cadr it)
+	(s-upcase it)
+	(format "[%s] " it)
+	(insert it)))
 
     ;; Enable magit-file-mode
     (add-hook 'prog-mode-hook #'magit-file-mode)
 
     ;; Refresh after a save.
-    (add-hook 'after-save-hook #'magit-refresh)
+    (mars/defhook mars/refresh-magit-after-save ()
+      after-save-hook
+      "Refresh magit buffers after current buffer is saved"
+      (when (vc-git-responsible-p (buffer-file-name))
+	(magit-refresh)))
 
     :general
     (mars-map/applications
@@ -640,17 +686,13 @@ If point is on a src block, runs org-indent"
       "x" 'magit-discard
       "d" 'magit-diff-buffer-file))
 
-  ;; git forges
-  (use-package forge
-    :disabled
-    :after magit)
-
   ;; Create URLs for files and commits in GitHub/Bitbucket/GitLab/... repositories
   (use-package git-link)
 
   (use-package git-auto-commit-mode)
 
   (use-package diff-hl
+    :disabled
     :hook (prog-mode . diff-hl-mode)
     :config
     (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh)
@@ -712,13 +754,15 @@ If point is on a src block, runs org-indent"
 
     (mars/add-to-list projectile-globally-ignored-directories
       "straight"
-      "node_modules"))
+      "node_modules"
+      ".metals"))
 
   (use-package counsel-projectile
     :straight (:host github :repo "ericdanan/counsel-projectile")
     :demand t
 
     :config
+    (setq projectile-indexing-method 'alien)
     :general
     (mars-map
       "SPC SPC" 'counsel-projectile
@@ -773,7 +817,7 @@ If point is on a src block, runs org-indent"
       ;; Replaces j,k by non-blank versions
       "j" 'evil-next-line
       "k" 'evil-previous-line)
-
+    
     (define-key universal-argument-map "!" 'universal-argument-more)
 
     (mars-map/windows
@@ -790,12 +834,10 @@ If point is on a src block, runs org-indent"
 
     (use-package evil-collection
       :demand t
-
-      :straight (:host github :repo "emacs-evil/evil-collection"
-		       :files ("*.el"))
+      :after evil
       :config
-      (evil-collection-init))
-    
+      (evil-collection-init (remove 'lispy evil-collection-mode-list)))
+
     (use-package evil-magit
       :after magit
       :demand t
@@ -918,16 +960,14 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
 
   (use-package company-prescient
     :demand t
-    :after company
+    :after '(company prescient)
     :config (company-prescient-mode 1))
 
   (use-package yasnippet
     :init (yas-global-mode 1))
 
   (use-package yasnippet-snippets
-    :demand t
-    :straight (:host github :repo "qleguennec/yasnippet-snippets"
-		     :files ("*"))))
+    :demand t))
 
 ;; Jump on things
 (use-package avy
@@ -961,28 +1001,7 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
     (global-aggressive-indent-mode)
 
     (mars/add-to-list aggressive-indent-excluded-modes
-      js-jsx-mode java-mode))
-
-  (use-package electric-operator
-    :commands electric-operator-mode
-    :demand t
-    :config
-    (add-hook 'prog-mode-hook #'electric-operator-mode)
-    (electric-operator-add-rules-for-mode 'prog-mode
-					  (cons ">=" " >= ")
-					  (cons "<=" " <= ")
-					  (cons "=" " = ")
-					  (cons "=>" " => "))
-    (electric-operator-add-rules-for-mode 'emacs-lisp-mode
-					  (cons "-" nil))
-    (electric-operator-add-rules-for-mode 'js-jsx-mode
-					  (cons "," " , ")
-					  (cons ">=" " >= ")
-					  (cons "<=" " <= ")
-					  (cons "=>" " => ")
-					  (cons "=" " = ")
-					  (cons "==" " === ")
-					  (cons "!=" " !== "))))
+      js-jsx-mode java-mode scala-mode js-mode)))
 
 ;; Prettier code
 (global-prettify-symbols-mode 1)
@@ -992,18 +1011,14 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
   :init
   (mars/set-pretty-symbols emacs-lisp-mode
     ("defun" . "ƒ")
-    ("defmacro" . "ɱ📦")
-    ;; Waiting for https://github.com/ekaschalk/notate release
-    ;; ("setq" . "⟾")
-    )
+    ("defmacro" . "ɱ📦"))
 
   (mars/counsel-M-x-initial-input emacs-lisp-mode
     "emacs-lisp ")
 
   (use-package lispy
-    :hook ((emacs-lisp-mode clojure-mode cider-mode) . lispy-mode)
+    :hook ((emacs-lisp-mode clojure-mode cider-repl-mode) . lispy-mode)
     :config
-
     (use-package lispyville
       :hook (lispy-mode . lispyville-mode)
       :config
@@ -1063,6 +1078,9 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
 			     "--use-tabs" "false")
 	  prettier-js-show-errors nil)
 
+    (add-hook 'after-save-hook (lambda () (when (eq major-mode 'js-mode)
+				       (prettier-js))))
+
     :general
     (mars-leader-map
       :keymaps 'js-mode-map
@@ -1085,6 +1103,106 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
   :init
   (use-package clojure-mode)
 
+  (mars/set-pretty-symbols clojure-mode
+    ("partial" . "∂")
+    ("defn" . "ƒ")
+    ("defmacro" . "ɱ📦"))
+
+  (mars/counsel-M-x-initial-input emacs-lisp-mode
+    "emacs-lisp ")
+
+  (use-package lispy
+    :hook ((emacs-lisp-mode clojure-mode cider-repl-mode) . lispy-mode)
+    :config
+    (use-package lispyville
+      :hook (lispy-mode . lispyville-mode)
+      :config
+      (setq lispyville-motions-put-into-special t
+	    lispyville-commands-put-into-special t)
+      (lispyville-set-key-theme '(slurp/barf-lispy
+				  text-objects
+				  lispyville-prettify
+				  escape
+				  additional-movement
+				  commentary
+				  mark-toggle)))))
+
+(use-package yaml-mode
+  :config (setq yaml-indent-offset 4))
+
+(use-feature feature/rust
+  :init
+  (use-package toml-mode)
+  
+  (use-package rust-mode)
+  
+  ;; Add keybindings for interacting with Cargo
+  (use-package cargo
+    :hook (rust-mode . cargo-minor-mode))
+
+  (use-package flycheck-rust
+    :config (add-hook 'flycheck-mode-hook #'flycheck-rust-setup)))
+
+(use-feature feature/javascript
+  :init
+  (setq js-indent-level 2
+	flycheck-javascript-eslint-executable "eslint_d"
+	flycheck-javascript-standard-executable "eslint_d")
+
+  (add-to-list 'auto-mode-alist '("\\.jsx\\'" . js-jsx-mode))
+
+  (use-package js-import
+    :general
+    (mars-leader-map
+      :keymaps 'js-jsx-mode-map
+      "i" 'js-import))
+
+  (use-package js2r-refactor
+    :commands 'js2-refactor-mode
+    :straight (:host github :repo "magnars/js2-refactor.el")
+    :init (add-hook 'js-mode #'js2-refactor-mode))
+
+  (use-package prettier-js
+    :commands 'prettier-js
+    :init
+    (setq prettier-js-command "prettier_d"
+	  prettier-js-args '("--trailing-comma" "es5"
+			     "--print-width" "120"
+			     "--single-quote" "true"
+			     "--tab-width" "2"
+			     "--use-tabs" "false")
+	  prettier-js-show-errors nil)
+
+    (add-hook 'after-save-hook (lambda () (when (eq major-mode 'js-mode)
+				       (prettier-js))))
+
+    :general
+    (mars-leader-map
+      :keymaps 'js-mode-map
+      "f" 'prettier-js)))
+
+(use-feature feature/python
+  :init
+  (setq python-indent-offset 4
+	flycheck-python-flake8-executable "~/.local/bin/flake8")
+  (use-package elpy
+    :init
+    (advice-add 'python-mode :before 'elpy-enable)
+
+    :general
+    (mars-leader-map
+      :keymaps 'elpy-mode-map
+      "m" 'elpy-shell-send-region-or-buffer)))
+
+(use-feature feature/clojure
+  :init
+  (use-package clojure-mode)
+
+  (mars/set-pretty-symbols clojure-mode
+    ("partial" . "∂")
+    ("defn" . "ƒ")
+    ("comp" . "●"))
+
   (use-package cider
     :config
     (setq clojure-indent-style :align-arguments)
@@ -1106,8 +1224,9 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
 (use-feature feature/scala
   :init
   (use-package scala-mode
-    :interpreter
-    ("scala" . scala-mode))
+    :mode "\\.s\\(cala\\|bt\\)$"
+    :config
+    (setq scala-indent:step 4))
 
   (use-package sbt-mode
     :commands sbt-start sbt-command
@@ -1127,8 +1246,7 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
     (mars/defhook mars/enable|lsp-mode ()
       prog-mode-hook
       "Enable lsp-mode for most programming modes."
-      (unless (derived-mode-p #'emacs-lisp-mode
-			      #'java-mode)
+      (unless (derived-mode-p #'emacs-lisp-mode #'clojure-mode)
 	(lsp)))
 
     :config
@@ -1137,7 +1255,10 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
 	  lsp-restart 'ignore)
     (require 'lsp-clients))
 
-  (use-package lsp-java)
+  (use-package lsp-java
+    :demand t
+    :config
+    (setq lsp-java-save-actions-organize-imports t))
 
   (use-package lsp-ui
     :config
@@ -1153,20 +1274,29 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
 	(apply orig-fun args)))
 
     :general
-    (:keymaps 'lsp-ui-mode-map
-	      :states '(normal visual)
-	      "g d" 'lsp-ui-peek-find-definitions)
+    (mars/map
+      :keymaps 'lsp-ui-mode-map
+      :states '(normal visual)
+      "g d" 'lsp-ui-peek-find-definitions
+      [(double-mouse-1)] 'lsp-ui-peek-find-definitions
+      [(down-mouse-3)] 'lsp-ui-peek-jump-backward)
 
     (mars-leader-map
       :keymaps 'lsp-ui-mode-map
       "f" 'lsp-ui-sideline-apply-code-actions))
 
   (use-package company-lsp
+    :demand t
     :after company
     :config
     (push '(company-lsp :with company-yasnippet) company-backends)))
 
 ;; UI
+(use-package smooth-scrolling
+  :demand t
+  :config
+  (smooth-scrolling-mode))
+
 (use-feature feature/display-buffer
   :init
   (setq
@@ -1183,8 +1313,8 @@ Taken from https://github.com/syl20bnr/spacemacs/pull/179."
   :straight (:host github :repo "nabeix/emacs-font-size")
   :demand t
   :init
-  (setq mars-font "Inconsolata"
-	mars-font-height 18)
+  (setq mars-font "Ubuntu Mono"
+	mars-font-height 12)
   (set-face-attribute 'default nil
 		      :family mars-font)
   :config
@@ -1236,7 +1366,7 @@ return default frame title"
   :init (setq size mars-font-height
 	      default-size mars-font-height)
   :config
-  (load-theme 'doom-palenight 'confirm)
+  (load-theme 'doom-one 'confirm)
   (setq window-divider-default-right-width 4
 	window-divider-default-bottom-width 4)
   (setq-default mode-line-format nil)
@@ -1259,23 +1389,6 @@ return default frame title"
 (use-package highlight-parentheses
   :hook (prog-mode . highlight-parentheses-mode)
   :config (setq hl-paren-colors '("#d75f5f" "#a787af" "#87d7ff" "#0087af")))
-
-(use-package highlight-numbers
-  :commands highlight-numbers-mode
-  :hook (prog-mode . highlight-numbers-mode))
-
-(use-package highlight-quoted
-  :commands highlight-quoted-mode
-  :hook ((clojure-mode cider-mode emacs-lisp-mode) . highlight-quoted-mode))
-
-(use-package highlight-stages
-  :hook ((clojure-mode cider-mode emacs-lisp-mode) . highlight-quoted-mode)
-  :config
-  (setq highlight-stages-highlight-real-quote nil))
-
-(use-package highlight-defined
-  :commands highlight-defined-mode
-  :hook (emacs-lisp-mode . highlight-defined-mode))
 
 (use-package rainbow-delimiters
   :commands rainbow-delimiters-mode
@@ -1302,6 +1415,10 @@ return default frame title"
 (use-package centered-cursor-mode
   :demand t
   :init
+  (setq scroll-preserve-screen-position t
+	scroll-conservatively 0
+	maximum-scroll-margin 0.5
+	scroll-margin 99999)
   (mars/defhook mars/enable|centered-cursor-mode ()
     prog-mode-hook
     "Enable centered-cursor-mode for most programming modes."
@@ -1390,7 +1507,9 @@ return default frame title"
                     treemacs-directory-collapsed-face
                     treemacs-file-face
                     treemacs-tags-face))
-      (set-face-attribute face nil :family "Liberation Mono" :height 130)))
+      (set-face-attribute face nil :family "Liberation Mono" :height 110))
+
+    (treemacs))
   
   (use-package treemacs-projectile
     :demand t)
@@ -1407,7 +1526,7 @@ return default frame title"
 (use-feature feature/dired
   :init
   (mars-map/applications
-    "d" 'dired))
+    "d" 'dired-jump))
 
 ;; Shell
 (use-feature feature/vterm
@@ -1434,36 +1553,23 @@ return default frame title"
   :config
   (setq comint-scroll-to-bottom-on-output t))
 
+(use-feature feature/network
+  :init
+  (use-package restclient))
+
 (use-feature feature/eshell
   :config
   (setq
    ;; Send inpupt to suprocesses
    eshell-send-direct-to-subprocesses nil
    ;; Always scroll to bottom
-   eshell-buffer-maximum-lines 5000)
-
-  (defun mars-eshell-new-buffer ()
-    "Open a new eshell buffer if one already exists"
-    (interactive)
-    (let ((eshell-buffers-count
-	   (thread-last (buffer-list)
-	     (seq-filter (lambda (buffer) (string-match ".*\\*eshell.*\\*"
-						   (buffer-name buffer))))
-	     (length))))
-      (unless (zerop eshell-buffers-count)
-	(setq eshell-buffer-name
-	      (format "*eshell-%d*" eshell-buffers-count))))
-    (eshell))
-
-  :general
-  (mars-map/applications
-    "e" 'mars-eshell-new-buffer))
+   eshell-buffer-maximum-lines 5000))
 
 (use-feature feature/desktop-save-mode
   :init
   (setq
    desktop-save t
-   desktop-dirname "~/.emacs.d/var/desktop"
+   desktop-dirname ".config/emacs/var/desktop"
    desktop-load-locked-desktop t)
   
   (desktop-save-mode)
